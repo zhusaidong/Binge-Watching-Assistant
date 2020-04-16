@@ -1,13 +1,16 @@
-var helper, init, store, tabs;
+let helper, init, store, tabs;
 
-var MainBookmarkFolder = "追剧助手";
-var bookmarkTabs = {};
+const MainBookmarkFolder = "追剧助手";
+let bookmarkTabs = {};
 
 helper =
     {
-        //获取追剧助手书签列表
+        /**
+         *获取追剧助手书签列表
+         * @returns {Promise<object>}
+         */
         getBookmarks: () => {
-            return new Promise(function (resolve, reject) {
+            return new Promise(function (resolve) {
                 helper.getBookmarkFolder().then(function (results) {
                     chrome.bookmarks.getChildren(results.id, function (results) {
                         resolve(results);
@@ -16,7 +19,7 @@ helper =
             });
         },
         getBookmark: (bookmarkId) => {
-            return new Promise(function (resolve, reject) {
+            return new Promise(function (resolve) {
                 chrome.bookmarks.get(bookmarkId.toString(), function (results) {
                     resolve(results);
                 });
@@ -43,7 +46,7 @@ helper =
             });
         },
         getBookmarkFolder: () => {
-            return new Promise(function (resolve, reject) {
+            return new Promise(function (resolve) {
                 chrome.bookmarks.search(MainBookmarkFolder, function (results) {
                     resolve(results[0]);
                 });
@@ -52,7 +55,7 @@ helper =
         //添加书签
         addBookmark: (object, callback) => {
             chrome.bookmarks.create(object, function (results) {
-                callback.call();
+                callback(results);
             });
         },
         //setBadgeText
@@ -72,7 +75,7 @@ helper =
                     url: tab.url,
                 }, function (results) {
                     if (callback !== undefined) {
-                        callback.call();
+                        callback(results);
                     }
                 });
         },
@@ -89,22 +92,13 @@ helper =
 store =
     {
         //保存数据
-        setLocalData: (key, value) => {
-            localStorage.setItem(key, JSON.stringify(value));
-        },
-        //读取数据
-        getLocalData: (key) => {
-            return JSON.parse(localStorage.getItem(key));
-        },
-
-        //保存数据
         setSyncData: (key, value) => {
             chrome.storage.sync.set({[key]: JSON.stringify(value)}, function () {
             });
         },
         //读取数据
         getSyncData: (key) => {
-            return new Promise(function (resolve, reject) {
+            return new Promise(function (resolve) {
                 chrome.storage.sync.get(key, function (object) {
                     resolve(JSON.parse(object[key]));
                 });
@@ -127,8 +121,15 @@ tabs = {
     //监听tab更新
     onUpdated: (callback) => {
         chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-            if (callback !== undefined) {
+            if (callback !== undefined && changeInfo.status === "complete") {
                 callback(tabId, changeInfo, tab);
+            }
+        });
+    },
+    onRemoved: (callback) => {
+        chrome.tabs.onRemoved.addListener(function (tabId, removeInfo) {
+            if (callback !== undefined) {
+                callback(tabId, removeInfo);
             }
         });
     },
@@ -141,13 +142,18 @@ tabs = {
         });
     },
     //创建tab update监听器
-    createListening: () => {
+    createUpdateListening: () => {
         tabs.onUpdated(function (tabId, changeInfo, tab) {
             console.log("onUpdated");
-            var bookmarkIdByTab = bookmarkTabs[tab.id];
-            if (bookmarkIdByTab !== undefined && changeInfo.status === "complete") {
+            let bookmarkIdByTab = bookmarkTabs[tabId];
+            if (bookmarkIdByTab !== undefined) {
                 helper.updateBookmark(bookmarkIdByTab, tab)
             }
+        });
+    },
+    createRemoveListening: () => {
+        tabs.onRemoved(function (tabId) {
+            delete bookmarkTabs[tabId];
         });
     },
 };
@@ -155,7 +161,8 @@ tabs = {
 init = () => {
     helper.addMainBookmarkFolder();
     helper.setBadgeText();
-    tabs.createListening();
+    tabs.createUpdateListening();
+    tabs.createRemoveListening();
 };
 
 init();

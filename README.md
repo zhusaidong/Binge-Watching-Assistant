@@ -7,6 +7,12 @@
 
 https://chrome.google.com/webstore/detail/%E8%BF%BD%E5%89%A7%E5%8A%A9%E6%89%8B/pbnnheibacpamfaendimogbeaeciglpo
 
+## ide提示功能
+    方法1（推荐） 
+        File->Settings->Languages & Frameworks->JavaScript->Libraries->Download->输入chrome并->Download and Install
+    方法2
+        npm install --save @types/chrome
+
 ## changelog
 
 ### 1.0.4
