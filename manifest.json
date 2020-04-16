@@ -6,7 +6,7 @@
     "name": "追剧助手",
     "short_name": "追剧助手",
     "description": "追剧助手",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "icons": {
         "16": "assets/icon_16.png",
         "128": "assets/icon_128.png"

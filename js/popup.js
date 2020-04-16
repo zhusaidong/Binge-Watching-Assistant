@@ -6,7 +6,7 @@ var reflushBookmark = function()
 		{
 			//console.log("reflushBookmark",bookmarks);
 			backgroundPage.helper.setBadgeText();
-			
+
 			var html = '<span>追剧书签:</span><br>';
 			html += '<button type="button" class="btn btn-primary add-btn btn-sm">添加追剧</button><br><br>';
 			if(bookmarks.length > 0)
@@ -17,7 +17,7 @@ var reflushBookmark = function()
 					var url = bookmarks[i].url;
 					var title = bookmarks[i].title;
 					var id = bookmarks[i].id;
-					html += 
+					html +=
 						'<tr class="bookmark" data-id="' + id + '">\
 							<td style="width:5%" class="id">' + (i + 1) + '.</td>\
 							<td>\
@@ -25,14 +25,13 @@ var reflushBookmark = function()
 								url(&quot;chrome://favicon/size/16@1x/' + url + '&quot;) 1x,\
 								url(&quot;chrome://favicon/size/16@2x/' + url + '&quot;) 2x);"></div>\
 							</td>\
-							<td style="width:60%">\
-								<a target="_blank" class="link" href="' + url + '">\
+							<td style="width:70%">\
+								<a target="_blank" class="link" data-id="' + id + '" href="javascript:void(0);">\
 									<span class="bookmark-a" title="' + url + '">' + title + '</span>\
 								</a>\
 								<input type="text" class="form-control text-change" style="width:100%" value="' + title + '"/>\
 							</td>\
 							<td>\
-								<button type="button" class="btn btn-success replace-btn btn-sm" data-id="' + id + '">更新</button>\
 								<button type="button" class="btn btn-success change-btn btn-sm">编辑</button>\
 								<button type="button" class="btn btn-success save-btn btn-sm" data-id="' + id + '">保存</button>\
 								<button type="button" class="btn btn-danger cancel-btn btn-sm">取消</button>\
@@ -74,7 +73,7 @@ $(document).on('click','.add-btn',function()
 						backgroundPage.helper.addBookmark(
 							{
 								parentId:results.id,
-								index: results.children != undefined ? results.children.length : 0,
+								index: results.children !== undefined ? results.children.length : 0,
 								title:tab.title,
 								url:tab.url,
 							},function()
@@ -147,4 +146,10 @@ $(document).on('click','.cancel-btn',function()
 		$(this).parent().parent().find('.delete-btn').show();
 
 		reflushBookmark();
+	});
+$(document).on('click','.link',function(e)
+	{
+		backgroundPage.tabs.createAndListen($(this).data('id'));
+		e.preventDefault();
+		return false;
 	});
