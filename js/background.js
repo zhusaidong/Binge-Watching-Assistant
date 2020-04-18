@@ -146,7 +146,7 @@ class Bookmark {
     }
 }
 
-var helper = bookmark = new Bookmark("追剧助手v1.1.0");
+var helper = bookmark = new Bookmark("追剧助手");
 
 /**
  * 存储
