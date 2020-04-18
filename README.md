@@ -15,6 +15,10 @@ https://chrome.google.com/webstore/detail/%E8%BF%BD%E5%89%A7%E5%8A%A9%E6%89%8B/p
 
 ## changelog
 
+### 1.1.0
+    修复v1.0.4编辑链接失效bug
+    优化代码
+
 ### 1.0.4
     新增自动更新功能，看完新的一集电视再也无需手动更新追剧了。
 
