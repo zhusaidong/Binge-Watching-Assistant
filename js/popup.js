@@ -86,16 +86,18 @@ $(document).on('click', '.replace-btn', function () {
 });
 $(document).on('click', '.delete-btn', function () {
     if (confirm('确认删除？')) {
-        backgroundPage.helper.deleteBookmark($(this).data('id'));
+        backgroundPage.helper.deleteBookmark($(this).data('id'), function () {
+            backgroundPage.bookmark.setBadgeText();
+        });
         refreshBookmark();
     }
 });
 $(document).on('click', '.save-btn', function () {
     let id = $(this).data('id');
     let title = $(this).parent().parent().find('.text-change').val();
-    let url = $(this).parent().parent().find('.link').attr('href');
+    //let url = $(this).parent().parent().find('.link').attr('href');
 
-    backgroundPage.helper.updateBookmark(id, {title: title, url: url}, function () {
+    backgroundPage.helper.updateBookmark(id, {title: title}, function () {
         refreshBookmark();
     });
 
