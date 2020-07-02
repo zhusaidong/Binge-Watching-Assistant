@@ -59,7 +59,7 @@ let refreshBookmark = function () {
 refreshBookmark();
 
 $(document).on('click', '.add-btn', function () {
-    chrome.tabs.query({active: true}, function (tab) {
+    chrome.tabs.query({active: true,currentWindow: true}, function (tab) {
         backgroundPage.helper.getBookmarkFolder().then(function (results) {
             backgroundPage.helper.addBookmark(
                 {
