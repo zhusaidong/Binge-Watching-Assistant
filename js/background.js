@@ -18,13 +18,13 @@ class Bookmark {
     getBookmarks() {
         let that = this;
         return new Promise(function (resolve) {
-            that.getBookmarkFolder().then(function (result) {
-                chrome.bookmarks.getChildren(result.id, function (results) {
-                    resolve(results);
+            that.getBookmarkFolder().then(function (bookmarkFolder) {
+                chrome.bookmarks.getChildren(bookmarkFolder.id, function (results) {
+                    resolve([results, bookmarkFolder]);
                 });
             }, function () {
                 console.log("getBookmarks.getBookmarkFolder.reject");
-                resolve([]);
+                resolve([[], null]);
             });
         });
     }
@@ -137,16 +137,23 @@ class Bookmark {
      * 移动书签
      * @param bookmarkId
      * @param toIndex
+     * @param parentId
      * @param callback
      */
-    moveBookmark(bookmarkId, toIndex, callback) {
-        chrome.bookmarks.move(bookmarkId.toString(), {
-            index: toIndex
-        }, callback);
+    moveBookmark(bookmarkId, toIndex, parentId, callback) {
+        let destination = {};
+        if (toIndex !== null) {
+            destination.index = parseInt(toIndex);
+        }
+        if (parentId !== null) {
+            destination.parentId = parentId.toString();
+        }
+
+        chrome.bookmarks.move(bookmarkId.toString(), destination, callback);
     }
 }
 
-var helper = bookmark = new Bookmark("追剧助手");
+var helper = bookmark = new Bookmark("追剧助手v1.2.0");
 
 /**
  * 存储
@@ -227,7 +234,7 @@ class Tab {
         let that = this;
         helper.getBookmark(bookmarkId).then(function (result) {
             tabs.create(result.url).then(function (tab) {
-                that.bookmarkTabs[tab.id] = bookmarkId;
+                that.bookmarkTabs[tab.id] = {bookmarkId: bookmarkId, url: result.url};
             });
         });
     }
@@ -239,9 +246,10 @@ class Tab {
         let that = this;
         this.onUpdated(function (tabId, changeInfo, tab) {
             let bookmarkIdByTab = that.bookmarkTabs[tabId];
-            if (bookmarkIdByTab !== undefined) {
-                helper.getBookmark(bookmarkIdByTab).then(function () {
-                    helper.updateBookmark(bookmarkIdByTab, tab);
+            if (bookmarkIdByTab !== undefined && bookmarkIdByTab.url !== tab.url) {
+                helper.getBookmark(bookmarkIdByTab.bookmarkId).then(function () {
+                    that.bookmarkTabs[tabId].url = tab.url;
+                    helper.updateBookmark(bookmarkIdByTab.bookmarkId, tab);
                 });
             }
         });

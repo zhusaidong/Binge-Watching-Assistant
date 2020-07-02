@@ -13,6 +13,10 @@ https://chrome.google.com/webstore/detail/%E8%BF%BD%E5%89%A7%E5%8A%A9%E6%89%8B/p
     方法2
         npm install --save @types/chrome
 
+## TODO 
+    添加分类（书签文件夹）功能
+    难点是跨分类拖拽问题
+
 ## changelog
 
 ### 1.1.2
@@ -37,6 +41,6 @@ https://chrome.google.com/webstore/detail/%E8%BF%BD%E5%89%A7%E5%8A%A9%E6%89%8B/p
 ### 1.0.0 
     更新界面
     删除右键操作，更改为界面操作
-    
+
 ### 0.2.0
     美化界面

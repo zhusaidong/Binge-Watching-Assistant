@@ -1,65 +1,103 @@
 let backgroundPage = chrome.extension.getBackgroundPage();
 
+let nestable = () => {
+    $('.bookmarkFolder').nestable({
+        maxDepth: 1,
+        listNodeName: 'tbody',      // 创建树结构的的HTML标签（默认'ol'）
+        itemNodeName: 'tr',         // 创建树结构节点的HTML标签（默认'li'）
+        rootClass: 'bookmarkFolder',//根节点的class属性名称（默认'dd'）
+        listClass: 'bookmarkList',  // 所有节点的class属性名称（默认'dd-list'）
+        itemClass: 'bookmark',      // 树结构叶子节点class名称（默认'dd-item'）
+    }).on('change', function (e) {
+        if (e.isTrigger !== undefined && e.isTrigger === true) {
+            let target = $($(e.target).get(0));
+            let folderId = target.data('folderId');
+            let serializeBookmarkId = $(e.target).nestable('serialize');
+            for (var index in serializeBookmarkId) {
+                if (serializeBookmarkId.hasOwnProperty(index)) {
+                    let bookmarkId = serializeBookmarkId[index]['bookmarkId'];
+                    backgroundPage.bookmark.moveBookmark(bookmarkId, index, folderId);
+                }
+            }
+            refreshBookmark();
+        }
+    });
+};
+/**
+ * is folder
+ *
+ * @param bookmark object
+ *
+ * @returns {boolean}
+ */
+let isFolder = (bookmark) => {
+    return bookmark.url === undefined && bookmark.hasOwnProperty('dateGroupModified') && bookmark.dateGroupModified !== undefined;
+};
+let bookmarkFolder = (bookmarkFolder) => {
+    return new Promise(function (resolve) {
+        chrome.bookmarks.getChildren(bookmarkFolder.id, function (bookmarks) {
+            let bookmarkFolderTemplate = new SimpleTemplate('.bookmarkFolderTemplate');
+            let bookmarkListTemplate = new SimpleTemplate('.bookmarkListTemplate');
+
+            if (bookmarks.length > 0) {
+                let list = "";
+                for (let i = 0; i < bookmarks.length; i++) {
+                    let bookmark = bookmarks[i];
+                    if (!isFolder(bookmark)) {
+                        bookmarkListTemplate
+                            .setVars(bookmarks[i])
+                            .setVar('number', (i + 1));
+                        list += bookmarkListTemplate.toString();
+                        bookmarkListTemplate.clear();
+                    }
+                }
+                resolve(bookmarkFolderTemplate
+                    .setVar('bookmarkFolderName', bookmarkFolder.title)
+                    .setVar('bookmarkList', list)
+                    .toString());
+            }
+        });
+    });
+};
+
 let refreshBookmark = function () {
-    backgroundPage.helper.getBookmarks().then(function (bookmarks) {
+    backgroundPage.helper.getBookmarks().then(function ([bookmarks, bookmarkFolderObj]) {
         //console.log("refreshBookmark",bookmarks);
         backgroundPage.helper.setBadgeText();
-
-        let html = '<span>追剧书签:</span><br>';
-        html += '<button type="button" class="btn btn-primary add-btn btn-sm">添加追剧</button><br><br>';
+        let html = "";
+        let bookmarkFolderTemplate = new SimpleTemplate('.bookmarkFolderTemplate');
+        let bookmarkListTemplate = new SimpleTemplate('.bookmarkListTemplate');
         if (bookmarks.length > 0) {
-            html += '<table class="table"><tbody class="tbody">';
             for (let i = 0; i < bookmarks.length; i++) {
-                let url = bookmarks[i].url;
-                let title = bookmarks[i].title;
-                let id = bookmarks[i].id;
-                html +=
-                    '<tr class="bookmark" data-id="' + id + '">\
-							<td style="width:5%" class="id">' + (i + 1) + '.</td>\
-							<td>\
-								<div id="icon" class="website-icon" style="background-image: -webkit-image-set(\
-								url(&quot;chrome://favicon/size/16@1x/' + url + '&quot;) 1x,\
-								url(&quot;chrome://favicon/size/16@2x/' + url + '&quot;) 2x);"></div>\
-							</td>\
-							<td style="width:70%">\
-								<a target="_blank" class="link" data-id="' + id + '" href="javascript:void(0);">\
-									<span class="bookmark-a" title="' + url + '">' + title + '</span>\
-								</a>\
-								<input type="text" class="form-control text-change" style="width:100%" value="' + title + '"/>\
-							</td>\
-							<td>\
-								<button type="button" class="btn btn-success change-btn btn-sm">编辑</button>\
-								<button type="button" class="btn btn-success save-btn btn-sm" data-id="' + id + '">保存</button>\
-								<button type="button" class="btn btn-danger cancel-btn btn-sm">取消</button>\
-								<button type="button" class="btn btn-danger delete-btn btn-sm" data-id="' + id + '">删除</button>\
-							</td>\
-						</tr>';
-            }
-            html += '</tbody></table>';
-        } else {
-            html += '<hr>';
-        }
-        $('.bookmark-list').html(html);
-
-        //拖拽
-        $(".tbody").sortable({
-            revert: true,
-            placeholder: "tr",
-            stop: function (e, ui) {
-                let book = $('.bookmark');
-                for (let i = 0; i <= book.index(ui.item); i++) {
-                    backgroundPage.helper.moveBookmark(book.eq(i).data('id'), i);
+                let bookmark = bookmarks[i];
+                if (isFolder(bookmark)) {
+                    html += '<table class="bookmarkFolder" data-folder-id="' + bookmark.id + '"></table>';
+                    bookmarkFolder(bookmark).then(function (bookmarkFolderHtml) {
+                        $('.bookmarkFolder[data-folder-id="' + bookmark.id + '"]').html(bookmarkFolderHtml);
+                    });
+                } else {
+                    bookmarkListTemplate
+                        .setVars(bookmark)
+                        .setVar('number', (i + 1));
+                    html += bookmarkListTemplate.toString();
+                    bookmarkListTemplate.clear();
                 }
-                refreshBookmark();
-            },
-        }).disableSelection();
+            }
 
+            bookmarkFolderTemplate
+                .setVar('folderId', bookmarkFolderObj.id)
+                .setVar('bookmarkFolderName', "")
+                .setVar('bookmarkList', html)
+                .toHtml('.bookmarkFolderList');
+
+            nestable();
+        }
     });
 };
 refreshBookmark();
 
 $(document).on('click', '.add-btn', function () {
-    chrome.tabs.query({active: true, currentWindow: true}, function (tab) {
+    chrome.tabs.query({active: true}, function (tab) {
         backgroundPage.helper.getBookmarkFolder().then(function (results) {
             backgroundPage.helper.addBookmark(
                 {
@@ -73,64 +111,54 @@ $(document).on('click', '.add-btn', function () {
         });
     });
 });
-$(document).on('click', '.replace-btn', function () {
-    let id = $(this).data('id');
-    chrome.tabs.query({active: true}, function (tab) {
-        backgroundPage.helper.updateBookmark(id.toString(),
-            {
-                title: tab[0].title, url: tab[0].url
-            }, function () {
-                refreshBookmark();
-            });
-    });
-});
-$(document).on('click', '.delete-btn', function () {
+$(document).on('click', '.bookmarkOperationDelete', function () {
+    let parent = $(this).parent().parent();
+    let id = parent.data('bookmarkId');
     if (confirm('确认删除？')) {
-        backgroundPage.helper.deleteBookmark($(this).data('id'), function () {
+        backgroundPage.helper.deleteBookmark(id, function () {
             backgroundPage.bookmark.setBadgeText();
         });
         refreshBookmark();
     }
 });
-$(document).on('click', '.save-btn', function () {
-    let id = $(this).data('id');
-    let title = $(this).parent().parent().find('.text-change').val();
-    //let url = $(this).parent().parent().find('.link').attr('href');
+$(document).on('click', '.bookmarkOperationSave', function () {
+    let parent = $(this).parent().parent();
+
+    let id = parent.data('bookmarkId');
+    let title = parent.find('.bookmarkTextEdit').val();
 
     backgroundPage.helper.updateBookmark(id, {title: title}, function () {
         refreshBookmark();
     });
 
     $(this).hide();
-    $(this).parent().parent().find('.cancel-btn').hide();
-    $(this).parent().parent().find('.text-change').hide();
+    parent.find('.bookmarkOperationCancel').hide();
+    parent.find('.bookmarkTextEdit').hide();
 
-    $(this).parent().parent().find('.change-btn').show();
-    $(this).parent().parent().find('.link').show();
-    $(this).parent().parent().find('.delete-btn').show();
+    parent.find('.bookmarkOperationEdit').show();
+    parent.find('.bookmarkTextShow').show();
+    parent.find('.bookmarkOperationDelete').show();
 });
-$(document).on('click', '.change-btn', function () {
+$(document).on('click', '.bookmarkOperationEdit', function () {
     $(this).hide();
-    $(this).parent().parent().find('.link').hide();
-    $(this).parent().parent().find('.delete-btn').hide();
+    $(this).parent().parent().find('.bookmarkTextShow').hide();
+    $(this).parent().parent().find('.bookmarkOperationDelete').hide();
 
-    $(this).parent().parent().find('.save-btn').show();
-    $(this).parent().parent().find('.cancel-btn').show();
-    $(this).parent().parent().find('.text-change').show();
+    $(this).parent().parent().find('.bookmarkOperationSave').show();
+    $(this).parent().parent().find('.bookmarkOperationCancel').show();
+    $(this).parent().parent().find('.bookmarkTextEdit').show();
 
 });
-$(document).on('click', '.cancel-btn', function () {
+$(document).on('click', '.bookmarkOperationCancel', function () {
     $(this).hide();
-    $(this).parent().parent().find('.save-btn').hide();
-    $(this).parent().parent().find('.text-change').hide();
+    $(this).parent().parent().find('.bookmarkOperationSave').hide();
+    $(this).parent().parent().find('.bookmarkTextEdit').hide();
 
-    $(this).parent().parent().find('.link').show();
-    $(this).parent().parent().find('.change-btn').show();
-    $(this).parent().parent().find('.delete-btn').show();
-
-    refreshBookmark();
+    $(this).parent().parent().find('.bookmarkTextShow').show();
+    $(this).parent().parent().find('.bookmarkOperationEdit').show();
+    $(this).parent().parent().find('.bookmarkOperationDelete').show();
 });
-$(document).on('click', '.link', function (e) {
+$(document).on('click', '.bookmarkTextShow', function (e) {
     backgroundPage.tabs.createAndListen($(this).data('id'));
     e.preventDefault();
     return false;

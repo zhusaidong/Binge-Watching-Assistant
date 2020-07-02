@@ -1,67 +1,117 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html lang="zh">
-	<head>
-		<title>
-			追剧助手
-		</title>
-		<meta name="author" content="zsdroid">
-		<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-		<script src="../js/jquery.min.js" type="text/javascript"></script>
-		<link rel="stylesheet" type="text/css" href="../js/bootstrap.min.css">
-		<script src="../js/bootstrap.min.js" type="text/javascript"></script>
-		<script src="../js/jquery-ui.min.js" type="text/javascript"></script>
-		<script src="../js/popup.js" type="text/javascript"></script>
-		<style type="text/css">
-			ul
-			{ 
-				list-style-type: none;
-				padding: 0;
-				margin: 0 0 10px;
-			}
-			
-			.bookmark-list
-			{
-				width:600px;
-			}
-			.link
-			{
-				text-decoration: none;
-			}
-			.add-btn
-			{
-				margin-left: 500px;
-			}
-			.save-btn
-			{
-				display: none;
-			}
-			.cancel-btn
-			{
-				display: none;
-			}
-			.text-change
-			{
-				display: none;
-				width: 70%;
-			}
-			.bookmark
-			{
-				font-size: 14px;
-			}
-			.id
-			{
-				cursor: move;
-			}
+<html lang="zh-cn">
+<head>
+    <title>
+        追剧助手
+    </title>
+    <meta name="author" content="zsdroid">
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <script src="../js/jquery.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" type="text/css" href="../js/bootstrap.min.css"/>
+    <script type="text/javascript" src="../js/bootstrap.min.js"></script>
+    <script src="../js/jquery-ui.min.js" type="text/javascript"></script>
+    <script src="../js/simpleTemplate.js" type="text/javascript"></script>
+    <script src="../js/popup.js" type="text/javascript"></script>
+    <script src="../js/jquery.nestable.js" type="text/javascript"></script>
+    <link rel="stylesheet" type="text/css" href="../js/jquery.nestable.css"/>
+    <style type="text/css">
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0 0 10px;
+        }
 
-			.website-icon
-			{
-			    background-repeat: no-repeat;
-			    height: 16px;
-			    width: 16px;
-			}
-		</style>
-	</head>
-	<body>
-		<div class="bookmark-list"></div>
-	</body>
+        .bookmark-list {
+            width: 600px;
+        }
+
+        .link {
+            text-decoration: none;
+        }
+
+        .add-btn {
+            margin-left: 500px;
+        }
+
+        .save-btn {
+            display: none;
+        }
+
+        .cancel-btn {
+            display: none;
+        }
+
+        .text-change {
+            display: none;
+            width: 70%;
+        }
+
+        .bookmark {
+            font-size: 14px;
+        }
+
+        .id {
+            cursor: move;
+        }
+
+        .website-icon {
+            background-repeat: no-repeat;
+            height: 16px;
+            width: 16px;
+        }
+    </style>
+    <style type="text/css">
+        .bookmarkFolder {
+            width: 600px;
+        }
+
+        .dd-handle {
+            cursor: pointer;
+        }
+        .bookmarkOperationSave,.bookmarkOperationCancel,.bookmarkTextEdit{
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/html" class="bookmarkListTemplate">
+    <tr class="bookmark" data-bookmark-id="$(id)">
+        <!--拖曳点-->
+        <td style="width:5%" class="dd-handle bookmarkDraw"></td>
+        <!--序号-->
+        <td style="width:5%" class="bookmarkNumber">$(number).</td>
+        <!--logo-->
+        <td>
+            <div id="icon" class="bookmarkIcon" style="background-image: -webkit-image-set(
+								url(&quot;chrome://favicon/size/16@1x/' + url + '&quot;) 1x,
+								url(&quot;chrome://favicon/size/16@2x/' + url + '&quot;) 2x);"></div>
+        </td>
+        <td style="width:70%" class="bookmarkText">
+            <a href="javascript:void(0);" class="bookmarkTextShow" title="$(url)">$(title)</a>
+            <input type="text" class="form-control bookmarkTextEdit" style="width:100%" value="$(title)"/>
+        </td>
+        <td class="bookmarkOperation">
+            <button type="button" class="btn btn-success bookmarkOperationEdit btn-sm">编辑</button>
+            <button type="button" class="btn btn-success bookmarkOperationSave btn-sm">保存</button>
+            <button type="button" class="btn btn-danger bookmarkOperationCancel btn-sm">取消</button>
+            <button type="button" class="btn btn-danger bookmarkOperationDelete btn-sm">删除</button>
+        </td>
+    </tr>
+</script>
+<script type="text/html" class="bookmarkFolderTemplate">
+    <table class="bookmarkFolder" data-folder-id="$(folderId)">
+        <thead>$(bookmarkFolderName)</thead>
+        <tbody class="bookmarkList">
+            $(bookmarkList)
+        </tbody>
+    </table>
+</script>
+
+<div class="bookmarkFolderList">
+</div>
+<!--
+<div class="bookmark-list"></div>
+-->
+</body>
 </html>
