@@ -1,30 +1,31 @@
 {
 	"update_url": "http://clients2.google.com/service/update2/crx",
-    "manifest_version": 2,
-    "minimum_chrome_version": "38",
-    
-    "name": "追剧助手",
-    "short_name": "追剧助手",
-    "description": "追剧助手",
-    "version": "1.1.2",
-    "icons": {
-        "16": "assets/icon_16.png",
-        "128": "assets/icon_128.png"
-    },
-    "permissions": [
-        "bookmarks",
-        "storage",
-        "tabs",
-        "chrome://favicon/size/*"
-    ],
-    "background": {
-        "scripts": [
-            "js/background.js"
-        ]
-    },
-    "browser_action": {
-        "default_title": "追剧助手",
-        "default_icon": "assets/icon_128.png",
-        "default_popup": "html/popup.html"
-    }
+	"manifest_version": 2,
+	"minimum_chrome_version": "38",
+	
+	"name": "追剧助手",
+	"short_name": "追剧助手",
+	"description": "在互联网发展迅速的今天，在线观看电视剧、综艺剧、番剧已成为一种趋势。保存视频的观看进度已然成为一种需求。",
+	"version": "1.1.3",
+	"icons": {
+		"16": "assets/icon_16.png",
+		"128": "assets/icon_128.png"
+	},
+	"permissions": [
+		"bookmarks",
+		"storage",
+		"tabs",
+		"chrome://favicon/size/*"
+	],
+	"background": {
+		"scripts": [
+			"js/background.js"
+		]
+	},
+	"options_page": "html/options.html",
+	"browser_action": {
+		"default_title": "追剧助手",
+		"default_icon": "assets/icon_128.png",
+		"default_popup": "html/popup.html"
+	}
 }

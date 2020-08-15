@@ -8,10 +8,14 @@
 https://chrome.google.com/webstore/detail/%E8%BF%BD%E5%89%A7%E5%8A%A9%E6%89%8B/pbnnheibacpamfaendimogbeaeciglpo
 
 ## ide提示功能
-    方法1（推荐） 
-        File->Settings->Languages & Frameworks->JavaScript->Libraries->Download->输入chrome并->Download and Install
-    方法2
-        npm install --save @types/chrome
+
+> File -> Settings -> Languages & Frameworks -> JavaScript -> Libraries -> Download -> 输入chrome -> Download and Install
+
+## chrome扩展文档
+
+[中文文档](https://crxdoc-zh.appspot.com/extensions/api_index)
+
+[英文文档](https://developer.chrome.com/extensions/api_index)
 
 ## changelog
 
@@ -40,3 +44,11 @@ https://chrome.google.com/webstore/detail/%E8%BF%BD%E5%89%A7%E5%8A%A9%E6%89%8B/p
     
 ### 0.2.0
     美化界面
+
+## TODO
+
+ - [ ] 自主选择更新模式
+ - [ ] ui(更新ui，添加卡片模式)
+ - [ ] 标题的正则模式(根据网站正则匹配标题内容)
+ - [ ] 追完后的处理(删除或者归档保存)
+

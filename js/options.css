@@ -1,0 +1,87 @@
+body {
+    font-family: ProximaNova, Helvetica, Arial, "Lucida Grande", sans-serif;
+    background-color: #f0f0f0;
+    font-size: 14px;
+}
+
+#content {
+    width: 600px;
+    padding: 20px;
+    margin: 100px auto 0;
+    color: #383838;
+    background-color: white;
+    border: 1px #ccc solid;
+    box-shadow: #ccc 1px 1px 10px;
+    border-radius: 5px;
+}
+
+.update-option-div {
+    border-bottom: 1px #ccc solid;
+    padding-bottom: 20px
+}
+
+.update-option-indiv {
+    margin-left: 2em
+}
+
+ul#ignore-list-ul {
+    list-style: none;
+    border: 1px #ccc solid;
+    height: 300px;
+    width: 450px;
+    padding-left: 10px;
+    margin-top: 10px;
+    overflow-y: scroll;
+}
+
+li.ignore-list-li:hover {
+    color: #337ab7;
+}
+
+.ignore-list-remove {
+    cursor: pointer;
+}
+
+.num-input {
+    width: 2em;
+    text-align: center;
+}
+
+input#ignore-list-input {
+    width: 400px;
+}
+
+span.ignore-list-url {
+    font-size: 16px;
+    margin-left: 10px;
+}
+
+label {
+    font-weight: normal !important
+}
+
+::-webkit-scrollbar-thumb {
+    width: 8px;
+    min-height: 15px;
+    background: rgba(0, 0, 0, .3);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+    background: rgba(222, 222, 222, .5);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-track-piece {
+    background: #fff;
+}
+
+::-webkit-scrollbar-track {
+    background-color: #fff;
+}
+
+::-webkit-scrollbar-button {
+    display: none;
+}

@@ -178,6 +178,49 @@ class Store {
 
 var store = new Store();
 
+class Options
+{
+    #optionsKey = 'options';
+    
+    saveOption(key , value)
+    {
+        var that = this;
+        getOptions().then(function (options)
+        {
+            if (options == null)
+            {
+                options = {};
+            }
+            options[key] = value;
+            that.saveOptions(options);
+        });
+    };
+    
+    getOption(key)
+    {
+        var that = this;
+        return new Promise(function (resolve)
+        {
+            that.getOptions().then(function (options)
+            {
+                resolve(options == null ? null : options[key]);
+            });
+        });
+    };
+    
+    saveOptions(options)
+    {
+        store.setSyncData(this.#optionsKey , options);
+    };
+    
+    getOptions()
+    {
+        return store.getSyncData(this.#optionsKey);
+    };
+}
+
+var options = new Options();
+
 /**
  * 标签页
  */
