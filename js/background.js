@@ -1,4 +1,21 @@
 /**
+ * 工具类
+ */
+class Utils {
+    /**
+     * 相同主机地址
+     * @param url1
+     * @param url2
+     * @returns {boolean}
+     */
+    theSameHostUrl(url1, url2) {
+        return new URL(url1).origin === new URL(url2).origin;
+    }
+}
+
+var utils = new Utils();
+
+/**
  * 书签
  */
 class Bookmark {
@@ -13,7 +30,7 @@ class Bookmark {
 
     /**
      *获取追剧助手书签列表
-     * @returns {Promise<BookmarkTreeNode[]>}
+     * @returns {Promise<chrome.bookmarks.BookmarkTreeNode[]>}
      */
     getBookmarks() {
         let that = this;
@@ -32,7 +49,7 @@ class Bookmark {
     /**
      * 根据书签id获取书签内容
      * @param bookmarkId
-     * @returns {Promise<BookmarkTreeNode>}
+     * @returns {Promise<chrome.bookmarks.BookmarkTreeNode>}
      */
     getBookmark(bookmarkId) {
         return new Promise(function (resolve) {
@@ -72,7 +89,7 @@ class Bookmark {
 
     /**
      * 获取书签文件夹
-     * @returns {Promise<BookmarkTreeNode>}
+     * @returns {Promise<chrome.bookmarks.BookmarkTreeNode>}
      */
     getBookmarkFolder() {
         let that = this;
@@ -89,8 +106,8 @@ class Bookmark {
 
     /**
      * 添加书签
-     * @param object BookmarkCreateArg
-     * @param callback function
+     * @param object BookmarkChangesArg
+     * @param callback function(chrome.bookmarks.BookmarkTreeNode result){}
      */
     addBookmark(object, callback) {
         chrome.bookmarks.create(object, callback);
@@ -146,7 +163,7 @@ class Bookmark {
     }
 }
 
-var helper = bookmark = new Bookmark("追剧助手");
+var helper = bookmark = new Bookmark("追剧助手v1.1.3");
 
 /**
  * 存储
@@ -178,43 +195,34 @@ class Store {
 
 var store = new Store();
 
-class Options
-{
+class Options {
     #optionsKey = 'options';
-    
-    saveOption(key , value)
-    {
-        var that = this;
-        getOptions().then(function (options)
-        {
-            if (options == null)
-            {
+
+    saveOption(key, value) {
+        let that = this;
+        this.getOptions().then(function (options) {
+            if (options == null) {
                 options = {};
             }
             options[key] = value;
             that.saveOptions(options);
         });
     };
-    
-    getOption(key)
-    {
-        var that = this;
-        return new Promise(function (resolve)
-        {
-            that.getOptions().then(function (options)
-            {
+
+    getOption(key) {
+        let that = this;
+        return new Promise(function (resolve) {
+            that.getOptions().then(function (options) {
                 resolve(options == null ? null : options[key]);
             });
         });
     };
-    
-    saveOptions(options)
-    {
-        store.setSyncData(this.#optionsKey , options);
+
+    saveOptions(options) {
+        store.setSyncData(this.#optionsKey, options);
     };
-    
-    getOptions()
-    {
+
+    getOptions() {
         return store.getSyncData(this.#optionsKey);
     };
 }
@@ -269,10 +277,19 @@ class Tab {
     createAndListen(bookmarkId) {
         let that = this;
         helper.getBookmark(bookmarkId).then(function (result) {
-            tabs.create(result.url).then(function (tab) {
-                that.bookmarkTabs[tab.id] = bookmarkId;
+            that.create(result.url).then(function (tab) {
+                that.listeningTab(tab, bookmarkId);
             });
         });
+    }
+
+    /**
+     * 监听tab
+     * @param tab
+     * @param bookmarkId
+     */
+    listeningTab(tab, bookmarkId) {
+        this.bookmarkTabs[tab.id] = bookmarkId;
     }
 
     /**
@@ -283,8 +300,11 @@ class Tab {
         this.onUpdated(function (tabId, changeInfo, tab) {
             let bookmarkIdByTab = that.bookmarkTabs[tabId];
             if (bookmarkIdByTab !== undefined) {
-                helper.getBookmark(bookmarkIdByTab).then(function () {
-                    helper.updateBookmark(bookmarkIdByTab, tab);
+                helper.getBookmark(bookmarkIdByTab).then(function (result) {
+                    //判断tab的页面host不变才更新，防止误触
+                    if (utils.theSameHostUrl(result.url, tab.url)) {
+                        helper.updateBookmark(bookmarkIdByTab, tab);
+                    }
                 });
             }
         });
@@ -301,10 +321,10 @@ class Tab {
     }
 }
 
-var tabs = new Tab();
+var tab = new Tab();
 
 //初始化
-helper.addMainBookmarkFolder();
-helper.setBadgeText();
-tabs.createUpdateListener();
-tabs.createRemoveListener();
+bookmark.addMainBookmarkFolder();
+bookmark.setBadgeText();
+tab.createUpdateListener();
+tab.createRemoveListener();
