@@ -187,7 +187,11 @@ class Store {
     getSyncData(key) {
         return new Promise(function (resolve) {
             chrome.storage.sync.get(key, function (object) {
-                resolve(JSON.parse(object[key]));
+                if (object.hasOwnProperty(key)) {
+                    resolve(JSON.parse(object[key]));
+                } else {
+                    resolve({});
+                }
             });
         });
     }

@@ -1,71 +1,126 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html lang="zh">
-	<head>
-		<title>
-			追剧助手
-		</title>
-		<meta name="author" content="zsdroid">
-		<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-		<script src="../js/jquery.min.js" type="text/javascript"></script>
-		<link rel="stylesheet" type="text/css" href="../js/bootstrap-4.5.0-dist/css/bootstrap.min.css">
-		<script src="../js/bootstrap-4.5.0-dist/js/bootstrap.min.js" type="text/javascript"></script>
-		<script src="../js/jquery-ui.min.js" type="text/javascript"></script>
-		<script src="../js/popup.js" type="text/javascript"></script>
-		<style type="text/css">
-			ul
-			{ 
-				list-style-type: none;
-				padding: 0;
-				margin: 0 0 10px;
-			}
-			
-			.bookmark-list
-			{
-				width:600px;
-			}
-			.link
-			{
-				text-decoration: none;
-			}
-			.add-btn
-			{
-				margin-left: 500px;
-			}
-			.save-btn
-			{
-				display: none;
-			}
-			.cancel-btn
-			{
-				display: none;
-			}
-			.text-change
-			{
-				display: none;
-				width: 70%;
-			}
-			.bookmark
-			{
-				font-size: 14px;
-			}
-			.id
-			{
-				cursor: move;
-			}
+<head>
+    <title>
+        追剧助手
+    </title>
+    <meta name="author" content="zsdroid">
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <script src="../js/jquery.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" type="text/css" href="../js/bootstrap-4.5.0-dist/css/bootstrap.min.css">
+    <script src="../js/bootstrap-4.5.0-dist/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="../js/jquery-ui.min.js" type="text/javascript"></script>
+    <script type="application/javascript" src="../js/vue@2.6.11.js"></script>
+    <style type="text/css">
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0 0 10px;
+        }
 
-			.website-icon
-			{
-			    background-repeat: no-repeat;
-			    height: 16px;
-			    width: 16px;
-			}
-			
-			.v-align {
-				line-height: 200%;
-			}
-		</style>
-	</head>
-	<body>
-		<div class="bookmark-list"></div>
-	</body>
+        .bookmark-list {
+            width: 600px;
+        }
+
+        .link {
+            text-decoration: none;
+        }
+
+        .add-btn {
+            margin-left: 500px;
+            margin-bottom: 20px;
+        }
+
+        .save-btn {
+            display: none;
+        }
+
+        .cancel-btn {
+            display: none;
+        }
+
+        .text-change {
+            display: none;
+            width: 70%;
+        }
+
+        .website-icon {
+            background-repeat: no-repeat;
+            height: 16px;
+            width: 16px;
+        }
+    </style>
+</head>
+<body>
+<div class="bookmark-list">
+    <span>追剧书签:</span>
+    <button type="button" class="btn btn-primary add-btn btn-sm" @click="addBtn">添加追剧</button>
+    <template v-if="uiMode === 'list'">
+        <table class="table">
+            <tbody class="draggable-range">
+            <tr class="draggable-element" :data-id="bookmark.id" v-for="(bookmark,index) in bookmarks">
+                <td style="width:5%">
+                    {{index + 1}}.
+                </td>
+                <td style="width:5%">
+                    <img class="website-icon" :src="'chrome://favicon/size/16@1x/' + bookmark.url" alt="">
+                </td>
+                <td style="width:65%">
+                    <a target="_blank" class="link" href="javascript:void(0);">
+                        <span class="bookmark-a" :title="bookmark.url">{{bookmark.title}}</span>
+                    </a>
+                    <input type="text" class="form-control text-change" style="width:100%" v-model="bookmark.title">
+                </td>
+                <td>
+                    <button type="button" class="btn btn-success change-btn btn-sm" @click="changeBtn">编辑
+                    </button>
+                    <button type="button" class="btn btn-success save-btn btn-sm" @click="saveBtn">保存
+                    </button>
+                    <button type="button" class="btn btn-danger cancel-btn btn-sm" @click="cancelBtn">
+                        取消
+                    </button>
+                    <button type="button" class="btn btn-danger delete-btn btn-sm" @click="deleteBtn">
+                        删除
+                    </button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </template>
+    <template v-if="uiMode === 'card'">
+        <div class="draggable-range">
+            <div class="card border-1 mb-sm-n1 mt-sm-n1 draggable-element" :data-id="bookmark.id"
+                 v-for="(bookmark,index) in bookmarks">
+                <div class="card-body border d-flex justify-content-start">
+                    <div style="width:5%">
+                        {{index + 1}}.
+                    </div>
+                    <div style="width:5%">
+                        <img class="website-icon" :src="'chrome://favicon/size/16@1x/' + bookmark.url" alt="">
+                    </div>
+                    <div class="align-self-center" style="width:85%">
+                        <a target="_blank" class="link" href="javascript:void(0);">
+                            <span class="bookmark-a card-link" :title="bookmark.url">{{bookmark.title}}</span>
+                        </a>
+                        <input type="text" class="form-control text-change" style="width:100%" :value="bookmark.title">
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="button" class="btn btn-success change-btn btn-sm" @click="changeBtn">编辑
+                    </button>
+                    <button type="button" class="btn btn-success save-btn btn-sm" @click="saveBtn">保存
+                    </button>
+                    <button type="button" class="btn btn-danger cancel-btn btn-sm" @click="cancelBtn">
+                        取消
+                    </button>
+                    <button type="button" class="btn btn-danger delete-btn btn-sm" @click="deleteBtn">
+                        删除
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
+</div>
+</body>
+<script src="../js/popup.js" type="text/javascript"></script>
 </html>
