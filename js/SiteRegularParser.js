@@ -52,6 +52,14 @@ class SiteRegularSet {
     }
 
     getRules() {
+        return this.rules;
+    }
+
+    getDefaultRules() {
+        return this.defaultRules;
+    }
+
+    getAllRules() {
         return this.defaultRules.concat(this.rules);
     }
 }
@@ -68,7 +76,7 @@ class SiteRegularParser {
     }
 
     parse(url, title) {
-        if (!siteRegularSet instanceof SiteRegularSet) {
+        if (!this.siteRegularSet instanceof SiteRegularSet) {
             return title;
         }
 
@@ -86,18 +94,4 @@ class SiteRegularParser {
     }
 }
 
-/*
-let siteRegularSet = new SiteRegularSet();
-siteRegularSet.setRule(new SiteRegular(/https:\/\/v.qq.com\/x\/cover\/mzc00200jox8n4y\/(.*).html/,
-    /经典传奇(.*)/, "经典传奇-$1"))
-siteRegularSet.setRule(new SiteRegular(/https:\/\/www.bilibili.com\/video\/BV1KJ411s7QJ\/(.*)/,
-    /【高清-中字-公开课】(.*)/, "$1"))
-
-let siteRegularParser = new SiteRegularParser();
-siteRegularParser.setRegularSet(siteRegularSet);
-
-console.log(siteRegularParser.parse("https://www.bilibili.com/video/BV1KJ411s7QJ/?p=6",
-    "【高清-中字-公开课】依据基本原理构建现代计算机：从与非门到俄罗斯方块_哔哩哔哩 (゜-゜)つロ 干杯~-bilibili"));
-console.log(siteRegularParser.parse("https://v.qq.com/x/cover/mzc00200jox8n4y/q00340xt74z.html",
-    "经典传奇秘境探寻·夜郎古国福地之谜"));
-*/
+var siteRegularSet = new SiteRegularSet();

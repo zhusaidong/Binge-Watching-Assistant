@@ -1,14 +1,25 @@
 new Vue({
     el: "#content",
     data: {
-        backgroundPage: chrome.extension.getBackgroundPage()
+        backgroundPage: chrome.extension.getBackgroundPage(),
+        siteRegular: {
+            defaultSiteRegulars: [],
+            customSiteRegulars: [],
+        }
     },
     created: function () {
         //console.log("created");
+        this.siteRegular.defaultSiteRegulars = this.backgroundPage.siteRegularSet.getDefaultRules();
+        let that = this;
         this.backgroundPage.options.getOptions().then(function (options) {
             for (let name in options) {
                 if (options.hasOwnProperty(name)) {
-                    $(".formOptions").find("input[name=" + name + "][value=" + options[name] + "]").attr("checked", true);
+                    if (name === 'siteRegulars') {
+                        that.siteRegular.customSiteRegulars = options[name];
+                        that.backgroundPage.siteRegularSet.setRules(options[name]);
+                    } else {
+                        $(".formOptions").find("input[name=" + name + "][value=" + options[name] + "]").attr("checked", true);
+                    }
                 }
             }
         });
@@ -40,6 +51,12 @@ new Vue({
             })
             this.backgroundPage.options.saveOptions(option);
             this.showSuccess("保存成功");
+        },
+        /**
+         * 保存规则
+         */
+        saveSiteRegular: function () {
+            this.backgroundPage.options.saveOptions({siteRegulars: this.siteRegulars});
         }
     }
 });
