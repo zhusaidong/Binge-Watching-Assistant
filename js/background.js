@@ -195,6 +195,13 @@ class Store {
             });
         });
     }
+
+    /**
+     * 清除所有数据
+     */
+    clearAllData(){
+        chrome.storage.sync.clear();
+    }
 }
 
 var store = new Store();

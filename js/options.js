@@ -5,13 +5,20 @@ new Vue({
         siteRegular: {
             defaultSiteRegulars: [],
             customSiteRegulars: [],
-        }
+        },
+        editSite: {
+            isEdit: false,
+            editIndex: null,
+            currentSiteRegular: {}
+        },
     },
     created: function () {
+        //this.backgroundPage.store.clearAllData();
         //console.log("created");
         this.siteRegular.defaultSiteRegulars = this.backgroundPage.siteRegularSet.getDefaultRules();
         let that = this;
         this.backgroundPage.options.getOptions().then(function (options) {
+            console.log('getOptions', options);
             for (let name in options) {
                 if (options.hasOwnProperty(name)) {
                     if (name === 'siteRegulars') {
@@ -56,7 +63,33 @@ new Vue({
          * 保存规则
          */
         saveSiteRegular: function () {
-            this.backgroundPage.options.saveOptions({siteRegulars: this.siteRegulars});
+            let isAdd = this.editSite.editIndex == null;
+            if (isAdd) {
+                this.siteRegular.customSiteRegulars.push(this.editSite.currentSiteRegular);
+            } else {
+                this.siteRegular.customSiteRegulars[this.editSite.editIndex] = this.editSite.currentSiteRegular;
+            }
+            this.editSite.currentSiteRegular = {};
+            this.editSite.isEdit = false;
+            this.editSite.editIndex = null;
+
+            this.backgroundPage.options.saveOptions({siteRegulars: this.siteRegular.customSiteRegulars});
+
+            this.showSuccess("保存成功");
+        },
+        addSiteRegular: function () {
+            this.editSite.isEdit = true;
+            this.editSite.currentSiteRegular = {};
+        },
+        editSiteRegular: function (index, row) {
+            this.editSite.isEdit = true;
+            this.editSite.editIndex = index;
+            this.editSite.currentSiteRegular = Object.assign({}, row);
+        },
+        cancelSiteRegular: function () {
+            this.editSite.currentSiteRegular = {};
+            this.editSite.isEdit = false;
+            this.editSite.editIndex = null;
         }
     }
 });

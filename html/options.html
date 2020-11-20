@@ -49,37 +49,46 @@
             </form>
         </div>
         <div class="tab-pane" id="title-matching-rules">
-            <label>默认:</label>
-            <div v-for="item in siteRegular.defaultSiteRegulars">
+            <div>
+                <button type="button" class="btn btn-primary" @click="addSiteRegular">新增规则</button>
+            </div>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>站点规则</th>
+                    <th>原始标题</th>
+                    <th>新标题</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="item in siteRegular.defaultSiteRegulars">
+                    <td>{{ item.siteReg }}</td>
+                    <td>{{ item.titleReg }}</td>
+                    <td>{{ item.newTitleReg }}</td>
+                    <td>-</td>
+                </tr>
+                <tr v-for="(item,index) in siteRegular.customSiteRegulars">
+                    <td>{{ item.siteReg }}</td>
+                    <td>{{ item.titleReg }}</td>
+                    <td>{{ item.newTitleReg }}</td>
+                    <td><a href="#" @click="editSiteRegular(index,item)">编辑</a></td>
+                </tr>
+                </tbody>
+            </table>
+
+            <form :hidden="!editSite.isEdit" action="#">
                 <div class="form-group">
                     <label>站点规则</label>
-                    <input type="text" class="form-control defaultSiteRegular" :value="item.siteReg" disabled>
+                    <input type="text" class="form-control" v-model="editSite.currentSiteRegular.siteReg">
                     <label>原始标题</label>
-                    <input type="text" class="form-control defaultSiteRegular" :value="item.titleReg" disabled>
+                    <input type="text" class="form-control" v-model="editSite.currentSiteRegular.titleReg">
                     <label>新标题</label>
-                    <input type="text" class="form-control defaultSiteRegular" :value="item.newTitleReg" disabled>
+                    <input type="text" class="form-control" v-model="editSite.currentSiteRegular.newTitleReg">
                 </div>
-            </div>
-            <label>自定义:</label>
-            <div v-for="item in siteRegular.customSiteRegulars">
-                <div class="form-group">
-                    <label>站点规则</label>
-                    <input type="text" class="form-control customSiteRegular" :value="item.siteReg">
-                    <label>原始标题</label>
-                    <input type="text" class="form-control customSiteRegular" :value="item.titleReg">
-                    <label>新标题</label>
-                    <input type="text" class="form-control customSiteRegular" :value="item.newTitleReg">
-                </div>
-            </div>
-            <div class="form-group">
-                <label>站点规则</label>
-                <input type="text" class="form-control customSiteRegular">
-                <label>原始标题</label>
-                <input type="text" class="form-control customSiteRegular">
-                <label>新标题</label>
-                <input type="text" class="form-control customSiteRegular">
-            </div>
-            <button type="button" class="btn btn-success save-option" @click="saveSiteRegular">保存</button>
+                <button type="button" class="btn btn-success save-option" @click="saveSiteRegular">保存</button>
+                <button type="button" class="btn btn-secondary save-option" @click="cancelSiteRegular">取消</button>
+            </form>
         </div>
         <div class="tab-pane" id="watched-bookmark">
 
