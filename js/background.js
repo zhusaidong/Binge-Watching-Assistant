@@ -163,7 +163,7 @@ class Bookmark {
     }
 }
 
-var helper = bookmark = new Bookmark("追剧助手v1.1.3");
+var helper = bookmark = new Bookmark("追剧助手开发版");
 
 /**
  * 存储
