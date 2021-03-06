@@ -23,6 +23,7 @@ new Vue({
                 if (options.hasOwnProperty(name)) {
                     if (name === 'siteRegulars') {
                         that.siteRegular.customSiteRegulars = options[name];
+                        //TODO 直接从background里获取，background里维护siteRegularSet
                         that.backgroundPage.siteRegularSet.setRules(options[name]);
                     } else {
                         $(".formOptions").find("input[name=" + name + "][value=" + options[name] + "]").attr("checked", true);

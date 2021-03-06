@@ -47,7 +47,7 @@ class SiteRegularSet {
     }
 
     setRules(rules) {
-        this.rules.concat(this.rules);
+        this.rules = this.rules.concat(rules);
         return this;
     }
 
@@ -80,10 +80,11 @@ class SiteRegularParser {
             return title;
         }
 
-        let rules = this.siteRegularSet.getRules();
+        let rules = this.siteRegularSet.getAllRules();
         for (let index in rules) {
             if (rules.hasOwnProperty(index)) {
                 let siteRegular = rules[index];
+                console.log(siteRegular);
                 if (new RegExp(siteRegular.getSiteReg()).test(url)) {
                     title = title.replace(new RegExp(siteRegular.getTitleReg()), siteRegular.getNewTitleReg());
                 }
@@ -95,3 +96,4 @@ class SiteRegularParser {
 }
 
 var siteRegularSet = new SiteRegularSet();
+var siteRegularParser = new SiteRegularParser();

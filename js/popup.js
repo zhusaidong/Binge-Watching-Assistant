@@ -22,7 +22,7 @@ new Vue({
                 this.backgroundPage.options.getOption("uiMode"),
                 this.backgroundPage.helper.getBookmarks()
             ]).then(function (values) {
-                that.uiMode = values[0];
+                that.uiMode = values[0] || "list";
                 let bookmarks = values[1];
                 that.bookmarks = bookmarks;
 
@@ -74,10 +74,16 @@ new Vue({
             let that = this;
             chrome.tabs.query({active: true, currentWindow: true}, function (tab) {
                 that.backgroundPage.helper.getBookmarkFolder().then(function (bookmarkFolder) {
+                    //添加时解析标题
+                    let siteRegularParser = that.backgroundPage.siteRegularParser;
+                    siteRegularParser.setRegularSet(that.backgroundPage.siteRegularSet);
+                    let parseTitle = siteRegularParser.parse(tab[0].url, tab[0].title);
+                    console.log(parseTitle)
+
                     that.backgroundPage.helper.addBookmark({
                         parentId: bookmarkFolder.id,
                         index: bookmarkFolder.children !== undefined ? bookmarkFolder.children.length : 0,
-                        title: tab[0].title,
+                        title: parseTitle || tab[0].title,
                         url: tab[0].url,
                     }, function (result) {
                         that.refreshBookmark();
