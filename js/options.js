@@ -15,19 +15,17 @@ new Vue({
     created: function () {
         //this.backgroundPage.store.clearAllData();
         //console.log("created");
-        this.siteRegular.defaultSiteRegulars = this.backgroundPage.siteRegularSet.getDefaultRules();
         let that = this;
-        this.backgroundPage.options.getOptions().then(function (options) {
-            console.log('getOptions', options);
+        this.backgroundPage.getSiteRegularSet().then(function (set) {
+            console.log(set);
+            that.siteRegular.customSiteRegulars = set.getRules();
+            that.siteRegular.defaultSiteRegulars = set.getDefaultRules();
+        });
+
+        this.backgroundPage.options.getOption("option").then(function (options) {
             for (let name in options) {
                 if (options.hasOwnProperty(name)) {
-                    if (name === 'siteRegulars') {
-                        that.siteRegular.customSiteRegulars = options[name];
-                        //TODO 直接从background里获取，background里维护siteRegularSet
-                        that.backgroundPage.siteRegularSet.setRules(options[name]);
-                    } else {
-                        $(".formOptions").find("input[name=" + name + "][value=" + options[name] + "]").attr("checked", true);
-                    }
+                    $(".formOptions").find("input[name=" + name + "][value=" + options[name] + "]").attr("checked", true);
                 }
             }
         });
@@ -57,7 +55,7 @@ new Vue({
             $('.formOptions').serializeArray().forEach(function (obj) {
                 option[obj.name] = obj.value;
             })
-            this.backgroundPage.options.saveOptions(option);
+            this.backgroundPage.options.saveOption("option", option);
             this.showSuccess("保存成功");
         },
         /**
@@ -74,7 +72,7 @@ new Vue({
             this.editSite.isEdit = false;
             this.editSite.editIndex = null;
 
-            this.backgroundPage.options.saveOptions({siteRegulars: this.siteRegular.customSiteRegulars});
+            this.backgroundPage.options.saveOption("siteRegulars",this.siteRegular.customSiteRegulars);
 
             this.showSuccess("保存成功");
         },

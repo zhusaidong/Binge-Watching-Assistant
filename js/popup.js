@@ -19,11 +19,10 @@ new Vue({
         refreshBookmark: function () {
             let that = this;
             Promise.all([
-                this.backgroundPage.options.getOption("uiMode"),
+                this.backgroundPage.options.getOption("option"),
                 this.backgroundPage.helper.getBookmarks()
-            ]).then(function (values) {
-                that.uiMode = values[0] || "list";
-                let bookmarks = values[1];
+            ]).then(function ([option, bookmarks]) {
+                that.uiMode = option["uiMode"] || "list";
                 that.bookmarks = bookmarks;
 
                 let regulateBookmarks = {};
@@ -73,12 +72,14 @@ new Vue({
         addBtn: function () {
             let that = this;
             chrome.tabs.query({active: true, currentWindow: true}, function (tab) {
-                that.backgroundPage.helper.getBookmarkFolder().then(function (bookmarkFolder) {
+                Promise.all([
+                    that.backgroundPage.helper.getBookmarkFolder(),
+                    that.backgroundPage.getSiteRegularSet()
+                ]).then(function ([bookmarkFolder, siteRegularSet]) {
                     //添加时解析标题
                     let siteRegularParser = that.backgroundPage.siteRegularParser;
-                    siteRegularParser.setRegularSet(that.backgroundPage.siteRegularSet);
+                    siteRegularParser.setRegularSet(siteRegularSet);
                     let parseTitle = siteRegularParser.parse(tab[0].url, tab[0].title);
-                    console.log(parseTitle)
 
                     that.backgroundPage.helper.addBookmark({
                         parentId: bookmarkFolder.id,
@@ -99,10 +100,11 @@ new Vue({
          */
         linkBtn: function (e) {
             let target = e.target;
-            let card = $(target).parents('.card');
+            let bookmark = $(target).parents('.bookmark');
 
-            this.backgroundPage.tabs.createAndListen(card.data('id'));
+            this.backgroundPage.tab.createAndListen(bookmark.data('id'));
             e.preventDefault();
+
             return false;
         },
 

@@ -30,8 +30,8 @@ class SiteRegular {
  */
 class SiteRegularSet {
     defaultRules = [
-        new SiteRegular(/https:\/\/www.bilibili.com\/video\/*/,
-            /(.*)_哔哩哔哩 \(゜-゜\)つロ 干杯~-bilibili/,
+        new SiteRegular("https://www.bilibili.com/video/*",
+            "(.*)_哔哩哔哩 (゜-゜)つロ 干杯~-bilibili",
             "$1")
     ];
 
@@ -68,25 +68,24 @@ class SiteRegularSet {
  * 站点标题规则解析器
  */
 class SiteRegularParser {
-    siteRegularSet;
+    #siteRegularSet;
 
     setRegularSet(siteRegularSet) {
-        this.siteRegularSet = siteRegularSet;
+        this.#siteRegularSet = siteRegularSet;
         return this;
     }
 
     parse(url, title) {
-        if (!this.siteRegularSet instanceof SiteRegularSet) {
+        if (!this.#siteRegularSet instanceof SiteRegularSet) {
             return title;
         }
 
-        let rules = this.siteRegularSet.getAllRules();
+        let rules = this.#siteRegularSet.getAllRules();
         for (let index in rules) {
             if (rules.hasOwnProperty(index)) {
                 let siteRegular = rules[index];
-                console.log(siteRegular);
                 if (new RegExp(siteRegular.getSiteReg()).test(url)) {
-                    title = title.replace(new RegExp(siteRegular.getTitleReg()), siteRegular.getNewTitleReg());
+                    return title.replace(new RegExp(siteRegular.getTitleReg()), siteRegular.getNewTitleReg());
                 }
             }
         }
@@ -95,5 +94,26 @@ class SiteRegularParser {
     }
 }
 
-var siteRegularSet = new SiteRegularSet();
 var siteRegularParser = new SiteRegularParser();
+
+function getSiteRegularSet() {
+    return new Promise(resolve => {
+        let siteRegularSet = new SiteRegularSet();
+        options.getOption("siteRegulars").then(function (set) {
+            if (set !== undefined) {
+                //object转成SiteRegular
+                for (let s in set) {
+                    if (set.hasOwnProperty(s)) {
+                        siteRegularSet.setRule(
+                            set[s]["siteReg"] || "",
+                            set[s]["titleReg"] || "",
+                            set[s]["newTitleReg"] || "");
+                    }
+                }
+            }
+            resolve(siteRegularSet)
+        });
+    })
+}
+
+

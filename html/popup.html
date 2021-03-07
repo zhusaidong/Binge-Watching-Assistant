@@ -25,7 +25,7 @@
         .link {
             text-decoration: none;
             word-break: break-all;
-        }
+         }
 
         .add-btn {
             margin-left: 500px;
@@ -59,7 +59,7 @@
     <template v-if="uiMode === 'list'">
         <table class="table">
             <tbody class="draggable-range">
-            <tr class="draggable-element" :data-id="bookmark.id" v-for="(bookmark,index) in bookmarks">
+            <tr class="bookmark draggable-element" :data-id="bookmark.id" v-for="(bookmark,index) in bookmarks">
                 <td style="width:5%">
                     {{index + 1}}.
                 </td>
@@ -67,7 +67,7 @@
                     <img class="website-icon" :src="'chrome://favicon/size/16@1x/' + bookmark.url" alt="">
                 </td>
                 <td style="width:65%">
-                    <a target="_blank" class="link" href="javascript:void(0);">
+                    <a class="link" href="#" @click="linkBtn">
                         <span class="bookmark-a" :title="bookmark.url">{{bookmark.title}}</span>
                     </a>
                     <input type="text" class="form-control text-change" style="width:100%" v-model="bookmark.title">
@@ -89,8 +89,8 @@
         </table>
     </template>
     <template v-if="uiMode === 'card'">
-        <div class="draggable-range">
-            <div class="card border-1 mb-sm-n1 mt-sm-n1 draggable-element" :data-id="bookmark.id"
+        <div class="table draggable-range">
+            <div class="bookmark border-1 mb-sm-n1 mt-sm-n1 draggable-element" :data-id="bookmark.id"
                  v-for="(bookmark,index) in bookmarks">
                 <div class="card-body border d-flex justify-content-start">
                     <div style="width:5%">
@@ -100,7 +100,7 @@
                         <img class="website-icon" :src="'chrome://favicon/size/16@1x/' + bookmark.url" alt="">
                     </div>
                     <div class="align-self-center" style="width:85%">
-                        <a target="_blank" class="link" href="javascript:void(0);">
+                        <a class="link" href="#" @click="linkBtn">
                             <span class="bookmark-a card-link" :title="bookmark.url">{{bookmark.title}}</span>
                         </a>
                         <input type="text" class="form-control text-change" style="width:100%" :value="bookmark.title">

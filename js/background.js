@@ -199,7 +199,7 @@ class Store {
     /**
      * 清除所有数据
      */
-    clearAllData(){
+    clearAllData() {
         chrome.storage.sync.clear();
     }
 }
@@ -314,7 +314,17 @@ class Tab {
                 helper.getBookmark(bookmarkIdByTab).then(function (result) {
                     //判断tab的页面host不变才更新，防止误触
                     if (utils.theSameHostUrl(result.url, tab.url)) {
-                        helper.updateBookmark(bookmarkIdByTab, tab);
+                        if (getSiteRegularSet === undefined) {
+                            helper.updateBookmark(bookmarkIdByTab, tab);
+                        } else {
+                            getSiteRegularSet().then(function (siteRegularSet) {
+                                //更新时解析标题
+                                siteRegularParser.setRegularSet(siteRegularSet);
+                                tab.title = siteRegularParser.parse(tab.url, tab.title);
+
+                                helper.updateBookmark(bookmarkIdByTab, tab);
+                            })
+                        }
                     }
                 });
             }
