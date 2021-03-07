@@ -25,7 +25,7 @@
         .link {
             text-decoration: none;
             word-break: break-all;
-         }
+        }
 
         .add-btn {
             margin-left: 500px;
@@ -51,6 +51,19 @@
             width: 16px;
         }
     </style>
+    <style type="text/css">
+        .bookmark{
+        }
+        .bookmark > .bookmark-no{
+        }
+        .bookmark >  .bookmark-icon{
+        }
+        .bookmark > .bookmark-text{
+            font-size: 14px;
+        }
+        .bookmark > .bookmark-btn{
+        }
+    </style>
 </head>
 <body>
 <div class="bookmark-list">
@@ -60,22 +73,24 @@
         <table class="table">
             <tbody class="draggable-range">
             <tr class="bookmark draggable-element" :data-id="bookmark.id" v-for="(bookmark,index) in bookmarks">
-                <td style="width:5%">
+                <td class="bookmark-no">
                     {{index + 1}}.
                 </td>
-                <td style="width:5%">
+                <td class="bookmark-icon">
                     <img class="website-icon" :src="'chrome://favicon/size/16@1x/' + bookmark.url" alt="">
                 </td>
-                <td style="width:65%">
+                <td class="bookmark-text" style="width:67%;">
                     <a class="link" href="#" @click="linkBtn">
                         <span class="bookmark-a" :title="bookmark.url">{{bookmark.title}}</span>
                     </a>
                     <input type="text" class="form-control text-change" style="width:100%" v-model="bookmark.title">
                 </td>
-                <td>
-                    <button type="button" class="btn btn-success change-btn btn-sm" @click="changeBtn">编辑
+                <td class="bookmark-btn">
+                    <button type="button" class="btn btn-success change-btn btn-sm" @click="changeBtn">
+                        编辑
                     </button>
-                    <button type="button" class="btn btn-success save-btn btn-sm" @click="saveBtn">保存
+                    <button type="button" class="btn btn-success save-btn btn-sm" @click="saveBtn">
+                        保存
                     </button>
                     <button type="button" class="btn btn-danger cancel-btn btn-sm" @click="cancelBtn">
                         取消
@@ -93,20 +108,20 @@
             <div class="bookmark border-1 mb-sm-n1 mt-sm-n1 draggable-element" :data-id="bookmark.id"
                  v-for="(bookmark,index) in bookmarks">
                 <div class="card-body border d-flex justify-content-start">
-                    <div style="width:5%">
+                    <div class="bookmark-no" style="width:5%">
                         {{index + 1}}.
                     </div>
-                    <div style="width:5%">
+                    <div class="bookmark-icon" style="width:5%">
                         <img class="website-icon" :src="'chrome://favicon/size/16@1x/' + bookmark.url" alt="">
                     </div>
-                    <div class="align-self-center" style="width:85%">
+                    <div class="bookmark-text align-self-center" style="width:85%">
                         <a class="link" href="#" @click="linkBtn">
                             <span class="bookmark-a card-link" :title="bookmark.url">{{bookmark.title}}</span>
                         </a>
                         <input type="text" class="form-control text-change" style="width:100%" :value="bookmark.title">
                     </div>
                 </div>
-                <div class="card-footer">
+                <div class="bookmark-btn card-footer">
                     <button type="button" class="btn btn-success change-btn btn-sm" @click="changeBtn">编辑
                     </button>
                     <button type="button" class="btn btn-success save-btn btn-sm" @click="saveBtn">保存
