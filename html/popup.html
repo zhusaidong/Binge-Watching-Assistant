@@ -69,6 +69,8 @@
 <div class="bookmark-list">
     <span>追剧书签:</span>
     <button type="button" class="btn btn-primary add-btn btn-sm" @click="addBtn">添加追剧</button>
+    <button type="button" class="btn btn-primary add-btn btn-sm" @click="addSeparator">添加分隔线</button>
+
     <template v-if="uiMode === 'list'">
         <table class="table">
             <tbody class="draggable-range">
@@ -80,9 +82,15 @@
                     <img class="website-icon" :src="'chrome://favicon/size/16@1x/' + bookmark.url" alt="">
                 </td>
                 <td class="bookmark-text" style="width:67%;">
-                    <a class="link" href="#" @click="linkBtn">
-                        <span class="bookmark-a" :title="bookmark.url">{{bookmark.title}}</span>
-                    </a>
+                    <!-- 是分隔线 -->
+                    <template v-if="bookmark.url.indexOf('chrome://bookmarks') == 0 && bookmark.title.indexOf('-----') == 0">
+                        <span class="bookmark-a link" :title="bookmark.url">{{bookmark.title}}</span>
+                    </template>
+                    <template v-else>
+                        <a class="link" href="#" @click="linkBtn">
+                            <span class="bookmark-a" :title="bookmark.url">{{bookmark.title}}</span>
+                        </a>
+                    </template>
                     <input type="text" class="form-control text-change" style="width:100%" v-model="bookmark.title">
                 </td>
                 <td class="bookmark-btn">

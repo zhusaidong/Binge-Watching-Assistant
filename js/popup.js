@@ -201,5 +201,25 @@ new Vue({
 
             this.refreshBookmark();
         },
+
+        /**
+         * 添加分隔线
+         */
+        addSeparator: function () {
+            const name = prompt("输入分隔线的名称");
+            if (name != null) {
+                const that = this;
+                this.backgroundPage.helper.getBookmarkFolder().then(function (bookmarkFolder) {
+                    that.backgroundPage.helper.addBookmark({
+                        parentId: bookmarkFolder.id,
+                        index: bookmarkFolder.children !== undefined ? bookmarkFolder.children.length : 0,
+                        title: "--------------------------" + name + "---------------------------",
+                        url: "chrome://bookmarks/",
+                    }, function () {
+                        that.refreshBookmark();
+                    });
+                });
+            }
+        }
     }
 });
