@@ -12,6 +12,7 @@
         "128": "assets/icon_128.png"
     },
     "permissions": [
+        "contextMenus",
         "bookmarks",
         "storage",
         "tabs",

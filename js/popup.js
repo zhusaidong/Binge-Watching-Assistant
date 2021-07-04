@@ -16,7 +16,7 @@ new Vue({
         /**
          * 刷新书签
          */
-        refreshBookmark: function () {
+        refreshBookmark: function (draggableFlag) {
             let that = this;
             Promise.all([
                 this.backgroundPage.options.getOption("option"),
@@ -27,16 +27,19 @@ new Vue({
 
                 let regulateBookmarks = {};
                 for (let i = 0; i < bookmarks.length; i++) {
-                    regulateBookmarks[bookmarks[i].id] = bookmarks[i];
-                    regulateBookmarks[bookmarks[i].id]['edit'] = false;
+                    let id = bookmarks[i].id;
+                    regulateBookmarks[id] = bookmarks[i];
+                    regulateBookmarks[id]['edit'] = false;
                 }
                 that.regulateBookmarks = regulateBookmarks;
                 //console.log("refreshBookmark", that.bookmarks, that.regulateBookmarks);
 
                 that.backgroundPage.helper.setBadgeText();
-                setTimeout(function () {
-                    that.draggableBookmark()
-                }, 1);
+                if (draggableFlag || true) {
+                    setTimeout(function () {
+                        that.draggableBookmark();
+                    }, 1);
+                }
             })
         },
 
@@ -48,7 +51,7 @@ new Vue({
          */
         draggableBookmark: function () {
             let that = this;
-            $(".draggable-range").sortable({
+            $('.draggable-range').sortable({
                 revert: true,
                 cursor: "move",
                 forcePlaceholderSize: true,
@@ -60,7 +63,7 @@ new Vue({
                         that.backgroundPage.helper.moveBookmark(books.eq(i).data('id'), i);
                     }
                     setTimeout(function () {
-                        that.refreshBookmark()
+                        that.refreshBookmark(false)
                     }, 1);
                 },
             }).disableSelection();
@@ -206,6 +209,7 @@ new Vue({
          * 添加分隔线
          */
         addSeparator: function () {
+            const separatorLine = ''.padEnd(25, '-');
             const name = prompt("输入分隔线的名称");
             if (name != null) {
                 const that = this;
@@ -213,7 +217,7 @@ new Vue({
                     that.backgroundPage.helper.addBookmark({
                         parentId: bookmarkFolder.id,
                         index: bookmarkFolder.children !== undefined ? bookmarkFolder.children.length : 0,
-                        title: "--------------------------" + name + "---------------------------",
+                        title: separatorLine + name + separatorLine,
                         url: "chrome://bookmarks/",
                     }, function () {
                         that.refreshBookmark();

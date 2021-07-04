@@ -345,7 +345,22 @@ class Tab {
 var tab = new Tab();
 
 //初始化
-bookmark.addMainBookmarkFolder();
-bookmark.setBadgeText();
-tab.createUpdateListener();
-tab.createRemoveListener();
+let init = () => {
+    bookmark.addMainBookmarkFolder();
+    bookmark.setBadgeText();
+    tab.createUpdateListener();
+    tab.createRemoveListener();
+
+    //创建扩展的菜单
+    chrome.contextMenus.create({
+        'title': '去书签管理器管理书签',
+        contexts: ['browser_action'],
+        onclick: function (info, t) {
+            bookmark.getBookmarkFolder().then(b => {
+                tab.create('chrome://bookmarks/?id=' + b.id);
+            });
+        }
+    });
+};
+
+init();

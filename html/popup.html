@@ -28,8 +28,8 @@
         }
 
         .add-btn {
-            margin-left: 500px;
-            margin-bottom: 20px;
+            margin-left: 430px;
+            margin-bottom: 15px;
         }
 
         .save-btn {
@@ -52,29 +52,38 @@
         }
     </style>
     <style type="text/css">
-        .bookmark{
+        .bookmark {
         }
-        .bookmark > .bookmark-no{
+
+        .bookmark > .bookmark-no {
         }
-        .bookmark >  .bookmark-icon{
+
+        .bookmark > .bookmark-icon {
         }
-        .bookmark > .bookmark-text{
+
+        .bookmark > .bookmark-text {
             font-size: 14px;
         }
-        .bookmark > .bookmark-btn{
+
+        .bookmark > .bookmark-btn {
         }
     </style>
 </head>
 <body>
 <div class="bookmark-list">
     <span>追剧书签:</span>
-    <button type="button" class="btn btn-primary add-btn btn-sm" @click="addBtn">添加追剧</button>
-    <button type="button" class="btn btn-primary add-btn btn-sm" @click="addSeparator">添加分隔线</button>
+    <div class="add-btn">
+        <button type="button" class="btn btn-primary btn-sm" @click="addBtn">添加追剧</button>
+        <button type="button" class="btn btn-primary btn-sm" @click="addSeparator">添加分隔线</button>
+    </div>
 
     <template v-if="uiMode === 'list'">
         <table class="table">
             <tbody class="draggable-range">
-            <tr class="bookmark draggable-element" :data-id="bookmark.id" v-for="(bookmark,index) in bookmarks">
+            <tr class="bookmark draggable-element"
+                :data-id="bookmark.id"
+                :key="bookmark.id"
+                v-for="(bookmark,index) in bookmarks">
                 <td class="bookmark-no">
                     {{index + 1}}.
                 </td>
@@ -83,7 +92,8 @@
                 </td>
                 <td class="bookmark-text" style="width:67%;">
                     <!-- 是分隔线 -->
-                    <template v-if="bookmark.url.indexOf('chrome://bookmarks') == 0 && bookmark.title.indexOf('-----') == 0">
+                    <template
+                            v-if="bookmark.url.indexOf('chrome://bookmarks') == 0 && bookmark.title.indexOf('-----') == 0">
                         <span class="bookmark-a link" :title="bookmark.url">{{bookmark.title}}</span>
                     </template>
                     <template v-else>
@@ -111,9 +121,12 @@
             </tbody>
         </table>
     </template>
+
     <template v-if="uiMode === 'card'">
         <div class="table draggable-range">
-            <div class="bookmark border-1 mb-sm-n1 mt-sm-n1 draggable-element" :data-id="bookmark.id"
+            <div class="bookmark border-1 mb-sm-n1 mt-sm-n1 draggable-element"
+                 :data-id="bookmark.id"
+                 :key="bookmark.id"
                  v-for="(bookmark,index) in bookmarks">
                 <div class="card-body border d-flex justify-content-start">
                     <div class="bookmark-no" style="width:5%">
@@ -123,9 +136,16 @@
                         <img class="website-icon" :src="'chrome://favicon/size/16@1x/' + bookmark.url" alt="">
                     </div>
                     <div class="bookmark-text align-self-center" style="width:85%">
-                        <a class="link" href="#" @click="linkBtn">
-                            <span class="bookmark-a card-link" :title="bookmark.url">{{bookmark.title}}</span>
-                        </a>
+                        <!-- 是分隔线 -->
+                        <template
+                                v-if="bookmark.url.indexOf('chrome://bookmarks') == 0 && bookmark.title.indexOf('-----') == 0">
+                            <span class="bookmark-a link" :title="bookmark.url">{{bookmark.title}}</span>
+                        </template>
+                        <template v-else>
+                            <a class="link" href="#" @click="linkBtn">
+                                <span class="bookmark-a" :title="bookmark.url">{{bookmark.title}}</span>
+                            </a>
+                        </template>
                         <input type="text" class="form-control text-change" style="width:100%" :value="bookmark.title">
                     </div>
                 </div>
