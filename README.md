@@ -19,6 +19,12 @@ https://chrome.google.com/webstore/detail/%E8%BF%BD%E5%89%A7%E5%8A%A9%E6%89%8B/p
 
 ## changelog
 
+### 1.1.4
+    使用vue渲染页面，添加ui选项，标题匹配功能
+
+### 1.1.3
+    修复未正确换行顶开操作按钮的bug
+
 ### 1.1.2
     修复多窗口时添加追剧不正确的bug
 
