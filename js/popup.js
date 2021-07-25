@@ -7,7 +7,7 @@ new Vue({
         backgroundPage: chrome.extension.getBackgroundPage(),
         bookmarks: [],
         regulateBookmarks: {},
-        uiMode: "",
+        uiMode: ""
     },
     created: function () {
         this.refreshBookmark();
@@ -22,7 +22,7 @@ new Vue({
                 this.backgroundPage.options.getOption("option"),
                 this.backgroundPage.helper.getBookmarks()
             ]).then(function ([option, bookmarks]) {
-                that.uiMode = option["uiMode"] || "list";
+                that.uiMode = (option !== undefined && option["uiMode"]) || "list";
                 that.bookmarks = bookmarks;
 
                 let regulateBookmarks = {};

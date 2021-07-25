@@ -8,6 +8,7 @@
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
     <script src="../js/jquery.min.js" type="text/javascript"></script>
     <link rel="stylesheet" type="text/css" href="../js/bootstrap-4.5.0-dist/css/bootstrap.min.css">
+<!--    <link rel="stylesheet" type="text/css" href="../js/font-awesome-4.7.0/css/font-awesome.min.css">-->
     <script src="../js/bootstrap-4.5.0-dist/js/bootstrap.min.js" type="text/javascript"></script>
     <script src="../js/jquery-ui.min.js" type="text/javascript"></script>
     <script type="application/javascript" src="../js/vue@2.6.11.js"></script>
@@ -52,20 +53,26 @@
         }
     </style>
     <style type="text/css">
-        .bookmark {
-        }
-
-        .bookmark > .bookmark-no {
-        }
-
-        .bookmark > .bookmark-icon {
-        }
-
-        .bookmark > .bookmark-text {
+        .bookmark-text{
             font-size: 14px;
         }
 
-        .bookmark > .bookmark-btn {
+        .bookmark > .bookmark-text {
+            padding-left: 0;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            word-break: break-all;
+        }
+
+        .bookmark > .bookmark-btn > i {
+            cursor: pointer;
+        }
+
+        table {
+            min-height: 20px;
+            line-height: 20px;
+            table-layout: fixed;
         }
     </style>
 </head>
@@ -84,13 +91,12 @@
                 :data-id="bookmark.id"
                 :key="bookmark.id"
                 v-for="(bookmark,index) in bookmarks">
-                <td class="bookmark-no">
+
+                <td class="bookmark-no" style="width: 13%;">
                     {{index + 1}}.
-                </td>
-                <td class="bookmark-icon">
                     <img class="website-icon" :src="'chrome://favicon/size/16@1x/' + bookmark.url" alt="">
                 </td>
-                <td class="bookmark-text" style="width:67%;">
+                <td class="bookmark-text">
                     <!-- 是分隔线 -->
                     <template
                             v-if="bookmark.url.indexOf('chrome://bookmarks') == 0 && bookmark.title.indexOf('-----') == 0">
@@ -103,12 +109,10 @@
                     </template>
                     <input type="text" class="form-control text-change" style="width:100%" v-model="bookmark.title">
                 </td>
-                <td class="bookmark-btn">
-                    <button type="button" class="btn btn-success change-btn btn-sm" @click="changeBtn">
-                        编辑
+                <td class="bookmark-btn" style="width: 21%;">
+                    <button type="button" class="btn btn-success change-btn btn-sm" @click="changeBtn">编辑
                     </button>
-                    <button type="button" class="btn btn-success save-btn btn-sm" @click="saveBtn">
-                        保存
+                    <button type="button" class="btn btn-success save-btn btn-sm" @click="saveBtn">保存
                     </button>
                     <button type="button" class="btn btn-danger cancel-btn btn-sm" @click="cancelBtn">
                         取消
@@ -128,14 +132,13 @@
                  :data-id="bookmark.id"
                  :key="bookmark.id"
                  v-for="(bookmark,index) in bookmarks">
+
                 <div class="card-body border d-flex justify-content-start">
-                    <div class="bookmark-no" style="width:5%">
+                    <div class="bookmark-no" style="width:13%">
                         {{index + 1}}.
-                    </div>
-                    <div class="bookmark-icon" style="width:5%">
                         <img class="website-icon" :src="'chrome://favicon/size/16@1x/' + bookmark.url" alt="">
                     </div>
-                    <div class="bookmark-text align-self-center" style="width:85%">
+                    <div class="bookmark-text align-self-center">
                         <!-- 是分隔线 -->
                         <template
                                 v-if="bookmark.url.indexOf('chrome://bookmarks') == 0 && bookmark.title.indexOf('-----') == 0">
