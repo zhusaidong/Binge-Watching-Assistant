@@ -21,7 +21,7 @@ new Vue({
             Promise.all([
                 this.backgroundPage.options.getOption("option"),
                 this.backgroundPage.helper.getBookmarks()
-            ]).then(function ([option, bookmarks]) {
+            ]).then(([option, bookmarks]) => {
                 that.uiMode = (option !== undefined && option["uiMode"]) || "list";
                 that.bookmarks = bookmarks;
 
@@ -36,7 +36,7 @@ new Vue({
 
                 that.backgroundPage.helper.setBadgeText();
                 if (draggableFlag || true) {
-                    setTimeout(function () {
+                    setTimeout(() => {
                         that.draggableBookmark();
                     }, 1);
                 }
@@ -57,12 +57,12 @@ new Vue({
                 forcePlaceholderSize: true,
                 opacity: 0.8,
                 placeholder: ".draggable-element",
-                update: function (e, ui) {
+                update: (e, ui) => {
                     let books = $('.draggable-element');
                     for (let i = 0; i <= books.index(ui.item); i++) {
                         that.backgroundPage.helper.moveBookmark(books.eq(i).data('id'), i);
                     }
-                    setTimeout(function () {
+                    setTimeout(() => {
                         that.refreshBookmark(false)
                     }, 1);
                 },
@@ -74,11 +74,11 @@ new Vue({
          */
         addBtn: function () {
             let that = this;
-            chrome.tabs.query({active: true, currentWindow: true}, function (tab) {
+            chrome.tabs.query({active: true, currentWindow: true}, tab => {
                 Promise.all([
                     that.backgroundPage.helper.getBookmarkFolder(),
                     that.backgroundPage.getSiteRegularSet()
-                ]).then(function ([bookmarkFolder, siteRegularSet]) {
+                ]).then(([bookmarkFolder, siteRegularSet]) => {
                     //添加时解析标题
                     let siteRegularParser = that.backgroundPage.siteRegularParser;
                     siteRegularParser.setRegularSet(siteRegularSet);
@@ -89,7 +89,7 @@ new Vue({
                         index: bookmarkFolder.children !== undefined ? bookmarkFolder.children.length : 0,
                         title: parseTitle || tab[0].title,
                         url: tab[0].url,
-                    }, function (result) {
+                    }, result => {
                         that.refreshBookmark();
                         //自动更新模式下，添加完立即监听
                         that.backgroundPage.tab.listeningTab(tab[0], result.id);
@@ -120,11 +120,13 @@ new Vue({
 
             let that = this;
             let id = card.data('id');
-            chrome.tabs.query({active: true}, function (tab) {
-                that.backgroundPage.helper.updateBookmark(id.toString(),
+            chrome.tabs.query({active: true}, tab => {
+                that.backgroundPage.helper.updateBookmark(
+                    id.toString(),
                     {
-                        title: tab[0].title, url: tab[0].url
-                    }, function () {
+                        title: tab[0].title,
+                        url: tab[0].url
+                    }, () => {
                         that.refreshBookmark();
                     });
             });
@@ -140,7 +142,7 @@ new Vue({
 
             let that = this;
             if (confirm('确认删除？')) {
-                this.backgroundPage.helper.deleteBookmark(card.data('id'), function () {
+                this.backgroundPage.helper.deleteBookmark(card.data('id'), () => {
                     that.backgroundPage.bookmark.setBadgeText();
                 });
                 this.refreshBookmark();
@@ -158,7 +160,7 @@ new Vue({
             let id = card.data('id');
             let title = card.find('.text-change').val();
 
-            this.backgroundPage.helper.updateBookmark(id, {title: title}, function () {
+            this.backgroundPage.helper.updateBookmark(id, {title: title}, () => {
                 that.refreshBookmark();
             });
 
@@ -209,17 +211,18 @@ new Vue({
          * 添加分隔线
          */
         addSeparator: function () {
-            const separatorLine = ''.padEnd(25, '-');
             const name = prompt("输入分隔线的名称");
             if (name != null) {
+                const separatorLine = ''.padEnd(25, '-');
                 const that = this;
-                this.backgroundPage.helper.getBookmarkFolder().then(function (bookmarkFolder) {
+                this.backgroundPage.helper.getBookmarkFolder().then(bookmarkFolder => {
+                    let index = bookmarkFolder.children !== undefined ? bookmarkFolder.children.length : 0;
                     that.backgroundPage.helper.addBookmark({
                         parentId: bookmarkFolder.id,
-                        index: bookmarkFolder.children !== undefined ? bookmarkFolder.children.length : 0,
+                        index: index,
                         title: separatorLine + name + separatorLine,
                         url: "chrome://bookmarks/",
-                    }, function () {
+                    }, () => {
                         that.refreshBookmark();
                     });
                 });

@@ -16,16 +16,18 @@ new Vue({
         //this.backgroundPage.store.clearAllData();
         //console.log("created");
         let that = this;
-        this.backgroundPage.getSiteRegularSet().then(function (set) {
+        this.backgroundPage.getSiteRegularSet().then(set => {
             console.log(set);
             that.siteRegular.customSiteRegulars = set.getRules();
             that.siteRegular.defaultSiteRegulars = set.getDefaultRules();
         });
 
-        this.backgroundPage.options.getOption("option").then(function (options) {
+        this.backgroundPage.options.getOption("option").then(options => {
             for (let name in options) {
                 if (options.hasOwnProperty(name)) {
-                    $(".formOptions").find("input[name=" + name + "][value=" + options[name] + "]").attr("checked", true);
+                    $(".formOptions")
+                        .find("input[name=" + name + "][value=" + options[name] + "]")
+                        .attr("checked", true);
                 }
             }
         });
@@ -40,9 +42,11 @@ new Vue({
          */
         showSuccess: function (t) {
             $("#alert").remove();
-            let e = '<div class="alert alert-success" id="alert" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>' + t + "</div>";
+            let e = '<div class="alert alert-success" id="alert" role="alert">' +
+                '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                '<span aria-hidden="true">×</span></button>' + t + "</div>";
             $(e).insertBefore($("#tab-nav"), null).addClass("in");
-            setTimeout(function () {
+            setTimeout(() => {
                 $("#alert").remove();
             }, 1000);
         },
@@ -52,9 +56,10 @@ new Vue({
         saveOption: function () {
             console.log("saveOption func clicked!");
             let option = {};
-            $('.formOptions').serializeArray().forEach(function (obj) {
-                option[obj.name] = obj.value;
-            })
+            $('.formOptions').serializeArray()
+                .forEach(obj => {
+                    option[obj.name] = obj.value;
+                });
             this.backgroundPage.options.saveOption("option", option);
             this.showSuccess("保存成功");
         },
@@ -72,7 +77,7 @@ new Vue({
             this.editSite.isEdit = false;
             this.editSite.editIndex = null;
 
-            this.backgroundPage.options.saveOption("siteRegulars",this.siteRegular.customSiteRegulars);
+            this.backgroundPage.options.saveOption("siteRegulars", this.siteRegular.customSiteRegulars);
 
             this.showSuccess("保存成功");
         },

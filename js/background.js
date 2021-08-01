@@ -34,12 +34,12 @@ class Bookmark {
      */
     getBookmarks() {
         let that = this;
-        return new Promise(function (resolve) {
-            that.getBookmarkFolder().then(function (result) {
-                chrome.bookmarks.getChildren(result.id, function (results) {
+        return new Promise(resolve => {
+            that.getBookmarkFolder().then(result => {
+                chrome.bookmarks.getChildren(result.id, results => {
                     resolve(results);
                 });
-            }, function () {
+            }, () => {
                 console.log("getBookmarks.getBookmarkFolder.reject");
                 resolve([]);
             });
@@ -52,8 +52,8 @@ class Bookmark {
      * @returns {Promise<chrome.bookmarks.BookmarkTreeNode>}
      */
     getBookmark(bookmarkId) {
-        return new Promise(function (resolve) {
-            chrome.bookmarks.get(bookmarkId.toString(), function (results) {
+        return new Promise(resolve => {
+            chrome.bookmarks.get(bookmarkId.toString(), results => {
                 if (results !== undefined && results.length > 0) {
                     resolve(results[0]);
                 }
@@ -76,8 +76,8 @@ class Bookmark {
      */
     addMainBookmarkFolder(callback) {
         let that = this;
-        this.getBookmarkFolder().then(function () {
-        }, function () {
+        this.getBookmarkFolder().then(() => {
+        }, () => {
             //如果创建时不指定parentId，则所创建的书签会默认加入到其他书签中
             chrome.bookmarks.create(
                 {
@@ -93,8 +93,8 @@ class Bookmark {
      */
     getBookmarkFolder() {
         let that = this;
-        return new Promise(function (resolve, reject) {
-            chrome.bookmarks.search(that.mainBookmarkFolder, function (results) {
+        return new Promise((resolve, reject) => {
+            chrome.bookmarks.search(that.mainBookmarkFolder, results => {
                 if (results.length === 0) {
                     reject();
                 } else {
@@ -117,7 +117,7 @@ class Bookmark {
      * setBadgeText
      */
     setBadgeText() {
-        this.getBookmarks().then(function (bookmarks) {
+        this.getBookmarks().then(bookmarks => {
             if (bookmarks.length > 0) {
                 chrome.browserAction.setBadgeText(
                     {
@@ -185,8 +185,8 @@ class Store {
      * @returns {Promise<object>}
      */
     getSyncData(key) {
-        return new Promise(function (resolve) {
-            chrome.storage.sync.get(key, function (object) {
+        return new Promise(resolve => {
+            chrome.storage.sync.get(key, object => {
                 if (object.hasOwnProperty(key)) {
                     resolve(JSON.parse(object[key]));
                 } else {
@@ -211,7 +211,7 @@ class Options {
 
     saveOption(key, value) {
         let that = this;
-        this.getOptions().then(function (options) {
+        this.getOptions().then(options => {
             if (options == null) {
                 options = {};
             }
@@ -222,8 +222,8 @@ class Options {
 
     getOption(key) {
         let that = this;
-        return new Promise(function (resolve) {
-            that.getOptions().then(function (options) {
+        return new Promise(resolve => {
+            that.getOptions().then(options => {
                 resolve(options == null ? null : options[key]);
             });
         });
@@ -252,10 +252,10 @@ class Tab {
      * @returns {Promise<object>}
      */
     create(url) {
-        return new Promise(function (resolve) {
+        return new Promise(resolve => {
             chrome.tabs.create({
                 url: url
-            }, function (tab) {
+            }, tab => {
                 resolve(tab);
             });
         });
@@ -266,7 +266,7 @@ class Tab {
      * @param callback
      */
     onUpdated(callback) {
-        chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+        chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
             if (callback !== undefined && changeInfo.status === "complete") {
                 callback(tabId, changeInfo, tab);
             }
@@ -287,8 +287,8 @@ class Tab {
      */
     createAndListen(bookmarkId) {
         let that = this;
-        helper.getBookmark(bookmarkId).then(function (result) {
-            that.create(result.url).then(function (tab) {
+        helper.getBookmark(bookmarkId).then(result => {
+            that.create(result.url).then(tab => {
                 that.listeningTab(tab, bookmarkId);
             });
         });
@@ -308,16 +308,16 @@ class Tab {
      */
     createUpdateListener() {
         let that = this;
-        this.onUpdated(function (tabId, changeInfo, tab) {
+        this.onUpdated((tabId, changeInfo, tab) => {
             let bookmarkIdByTab = that.bookmarkTabs[tabId];
             if (bookmarkIdByTab !== undefined) {
-                helper.getBookmark(bookmarkIdByTab).then(function (result) {
+                helper.getBookmark(bookmarkIdByTab).then(result => {
                     //判断tab的页面host不变才更新，防止误触
                     if (utils.theSameHostUrl(result.url, tab.url)) {
                         if (getSiteRegularSet === undefined) {
                             helper.updateBookmark(bookmarkIdByTab, tab);
                         } else {
-                            getSiteRegularSet().then(function (siteRegularSet) {
+                            getSiteRegularSet().then(siteRegularSet => {
                                 //更新时解析标题
                                 siteRegularParser.setRegularSet(siteRegularSet);
                                 tab.title = siteRegularParser.parse(tab.url, tab.title);
@@ -336,13 +336,15 @@ class Tab {
      */
     createRemoveListener() {
         let that = this;
-        this.onRemoved(function (tabId) {
+        this.onRemoved(tabId => {
             delete that.bookmarkTabs[tabId];
         });
     }
 }
 
 var tab = new Tab();
+
+//var bg = {bookmark, utils, helper, store, options, tab}
 
 //初始化
 let init = () => {
@@ -355,9 +357,9 @@ let init = () => {
     chrome.contextMenus.create({
         'title': '去书签管理器管理书签',
         contexts: ['browser_action'],
-        onclick: function (info, t) {
+        onclick: (info, t) => {
             bookmark.getBookmarkFolder().then(b => {
-                tab.create('chrome://bookmarks/?id=' + b.id);
+                tab.create('chrome://bookmarks/?id=' + b.id).then();
             });
         }
     });

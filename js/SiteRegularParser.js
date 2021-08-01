@@ -99,7 +99,7 @@ var siteRegularParser = new SiteRegularParser();
 function getSiteRegularSet() {
     return new Promise(resolve => {
         let siteRegularSet = new SiteRegularSet();
-        options.getOption("siteRegulars").then(function (set) {
+        options.getOption("siteRegulars").then(set => {
             if (set !== undefined) {
                 //object转成SiteRegular
                 for (let s in set) {
@@ -115,5 +115,3 @@ function getSiteRegularSet() {
         });
     })
 }
-
-
