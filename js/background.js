@@ -163,7 +163,7 @@ class Bookmark {
     }
 }
 
-var helper = bookmark = new Bookmark("追剧助手");
+var helper = bookmark = new Bookmark(chrome.runtime.getManifest().name);
 
 /**
  * 存储

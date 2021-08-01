@@ -21,6 +21,7 @@ https://chrome.google.com/webstore/detail/%E8%BF%BD%E5%89%A7%E5%8A%A9%E6%89%8B/p
 
 ### 1.1.4
     使用vue渲染页面，添加ui选项，标题匹配功能
+    完善“添加即监听”的功能
 
 ### 1.1.3
     修复未正确换行顶开操作按钮的bug
