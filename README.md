@@ -57,4 +57,5 @@ https://chrome.google.com/webstore/detail/%E8%BF%BD%E5%89%A7%E5%8A%A9%E6%89%8B/p
  - [x] 优化更新，相同host的地址才能更新，防止误触
  - [x] ui(更新ui-vue，添加卡片模式)
  - [x] 标题的正则模式(根据网站正则匹配标题内容)
- - [ ] 排序问题
+ - [x] 添加即监听
+ - [] 优化ui
