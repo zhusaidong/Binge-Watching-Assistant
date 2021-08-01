@@ -20,7 +20,7 @@ new Vue({
             let that = this;
             Promise.all([
                 this.backgroundPage.options.getOption("option"),
-                this.backgroundPage.helper.getBookmarks()
+                this.backgroundPage.bookmark.getBookmarks()
             ]).then(([option, bookmarks]) => {
                 that.uiMode = (option !== undefined && option["uiMode"]) || "list";
                 that.bookmarks = bookmarks;
@@ -34,7 +34,7 @@ new Vue({
                 that.regulateBookmarks = regulateBookmarks;
                 //console.log("refreshBookmark", that.bookmarks, that.regulateBookmarks);
 
-                that.backgroundPage.helper.setBadgeText();
+                that.backgroundPage.bookmark.setBadgeText();
                 if (draggableFlag || true) {
                     setTimeout(() => {
                         that.draggableBookmark();
@@ -60,7 +60,7 @@ new Vue({
                 update: (e, ui) => {
                     let books = $('.draggable-element');
                     for (let i = 0; i <= books.index(ui.item); i++) {
-                        that.backgroundPage.helper.moveBookmark(books.eq(i).data('id'), i);
+                        that.backgroundPage.bookmark.moveBookmark(books.eq(i).data('id'), i);
                     }
                     setTimeout(() => {
                         that.refreshBookmark(false)
@@ -76,7 +76,7 @@ new Vue({
             let that = this;
             chrome.tabs.query({active: true, currentWindow: true}, tab => {
                 Promise.all([
-                    that.backgroundPage.helper.getBookmarkFolder(),
+                    that.backgroundPage.bookmark.getBookmarkFolder(),
                     that.backgroundPage.getSiteRegularSet()
                 ]).then(([bookmarkFolder, siteRegularSet]) => {
                     //添加时解析标题
@@ -84,7 +84,7 @@ new Vue({
                     siteRegularParser.setRegularSet(siteRegularSet);
                     let parseTitle = siteRegularParser.parse(tab[0].url, tab[0].title);
 
-                    that.backgroundPage.helper.addBookmark({
+                    that.backgroundPage.bookmark.addBookmark({
                         parentId: bookmarkFolder.id,
                         index: bookmarkFolder.children !== undefined ? bookmarkFolder.children.length : 0,
                         title: parseTitle || tab[0].title,
@@ -121,7 +121,7 @@ new Vue({
             let that = this;
             let id = card.data('id');
             chrome.tabs.query({active: true}, tab => {
-                that.backgroundPage.helper.updateBookmark(
+                that.backgroundPage.bookmark.updateBookmark(
                     id.toString(),
                     {
                         title: tab[0].title,
@@ -142,7 +142,7 @@ new Vue({
 
             let that = this;
             if (confirm('确认删除？')) {
-                this.backgroundPage.helper.deleteBookmark(card.data('id'), () => {
+                this.backgroundPage.bookmark.deleteBookmark(card.data('id'), () => {
                     that.backgroundPage.bookmark.setBadgeText();
                 });
                 this.refreshBookmark();
@@ -160,7 +160,7 @@ new Vue({
             let id = card.data('id');
             let title = card.find('.text-change').val();
 
-            this.backgroundPage.helper.updateBookmark(id, {title: title}, () => {
+            this.backgroundPage.bookmark.updateBookmark(id, {title: title}, () => {
                 that.refreshBookmark();
             });
 
@@ -215,9 +215,9 @@ new Vue({
             if (name != null) {
                 const separatorLine = ''.padEnd(25, '-');
                 const that = this;
-                this.backgroundPage.helper.getBookmarkFolder().then(bookmarkFolder => {
+                this.backgroundPage.bookmark.getBookmarkFolder().then(bookmarkFolder => {
                     let index = bookmarkFolder.children !== undefined ? bookmarkFolder.children.length : 0;
-                    that.backgroundPage.helper.addBookmark({
+                    that.backgroundPage.bookmark.addBookmark({
                         parentId: bookmarkFolder.id,
                         index: index,
                         title: separatorLine + name + separatorLine,

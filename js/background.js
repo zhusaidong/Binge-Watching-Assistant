@@ -163,7 +163,7 @@ class Bookmark {
     }
 }
 
-var helper = bookmark = new Bookmark(chrome.runtime.getManifest().name);
+var bookmark = new Bookmark(chrome.runtime.getManifest().name);
 
 /**
  * 存储
@@ -206,6 +206,9 @@ class Store {
 
 var store = new Store();
 
+/**
+ * 选项
+ */
 class Options {
     #optionsKey = 'options';
 
@@ -287,7 +290,7 @@ class Tab {
      */
     createAndListen(bookmarkId) {
         let that = this;
-        helper.getBookmark(bookmarkId).then(result => {
+        bookmark.getBookmark(bookmarkId).then(result => {
             that.create(result.url).then(tab => {
                 that.listeningTab(tab, bookmarkId);
             });
@@ -311,18 +314,18 @@ class Tab {
         this.onUpdated((tabId, changeInfo, tab) => {
             let bookmarkIdByTab = that.bookmarkTabs[tabId];
             if (bookmarkIdByTab !== undefined) {
-                helper.getBookmark(bookmarkIdByTab).then(result => {
+                bookmark.getBookmark(bookmarkIdByTab).then(result => {
                     //判断tab的页面host不变才更新，防止误触
                     if (utils.theSameHostUrl(result.url, tab.url)) {
                         if (getSiteRegularSet === undefined) {
-                            helper.updateBookmark(bookmarkIdByTab, tab);
+                            bookmark.updateBookmark(bookmarkIdByTab, tab);
                         } else {
                             getSiteRegularSet().then(siteRegularSet => {
                                 //更新时解析标题
                                 siteRegularParser.setRegularSet(siteRegularSet);
                                 tab.title = siteRegularParser.parse(tab.url, tab.title);
 
-                                helper.updateBookmark(bookmarkIdByTab, tab);
+                                bookmark.updateBookmark(bookmarkIdByTab, tab);
                             })
                         }
                     }
@@ -343,8 +346,6 @@ class Tab {
 }
 
 var tab = new Tab();
-
-//var bg = {bookmark, utils, helper, store, options, tab}
 
 //初始化
 let init = () => {
