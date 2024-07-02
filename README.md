@@ -13,7 +13,25 @@ https://chrome.google.com/webstore/detail/%E8%BF%BD%E5%89%A7%E5%8A%A9%E6%89%8B/p
     方法2
         npm install --save @types/chrome
 
+## 关于书签图标
+
+https://developer.chrome.com/docs/extensions/how-to/ui/favicons?hl=zh-cn
+
+## todo
+
+- [x] 升级manifest_version到v3：监听更新的逻辑需要改动，popup.js无法直接引用background.js了，全局变量的方式（bookmarkTabs）得改
+- [x] 添加新页面时立即开启监听
+- [ ] 监听tab时会判断页面完全加载才去更新书签，这样会使得页面加载缓慢时（js，图片等）无法正确更新书签。
+- [ ] 界面换vue重写
+
 ## changelog
+
+### 1.1.4
+    升级manifest_version到v3
+    在当前页面添加追剧时立即生效，无需重新打开
+
+### 1.1.3
+    修复未正确换行顶开操作按钮的bug
 
 ### 1.1.2
     修复多窗口时添加追剧不正确的bug
