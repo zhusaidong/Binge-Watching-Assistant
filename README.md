@@ -17,11 +17,32 @@ https://chrome.google.com/webstore/detail/%E8%BF%BD%E5%89%A7%E5%8A%A9%E6%89%8B/p
 
 [英文文档](https://developer.chrome.com/extensions/api_index)
 
+## 关于书签图标
+
+https://developer.chrome.com/docs/extensions/how-to/ui/favicons?hl=zh-cn
+
+## todo
+
+- [x] 升级manifest_version到v3：监听更新的逻辑需要改动，popup.js无法直接引用background.js了，全局变量的方式（bookmarkTabs）得改
+- [x] 添加新页面时立即开启监听
+- [ ] 监听tab时会判断页面完全加载才去更新书签，这样会使得页面加载缓慢时（js，图片等）无法正确更新书签。
+- [ ] 界面换vue重写
+- [x] 优化更新，相同host的地址才能更新，防止误触
+- [x] ui(更新ui-vue，添加卡片模式)
+- [x] 标题的正则模式(根据网站正则匹配标题内容)
+- [x] 添加即监听
+- [] 优化ui
+
+
 ## changelog
 
-### 1.1.4
+### 1.1.5
     使用vue渲染页面，添加ui选项，标题匹配功能
     完善“添加即监听”的功能
+
+### 1.1.4
+    升级manifest_version到v3
+    在当前页面添加追剧时立即生效，无需重新打开
 
 ### 1.1.3
     修复未正确换行顶开操作按钮的bug
@@ -51,11 +72,3 @@ https://chrome.google.com/webstore/detail/%E8%BF%BD%E5%89%A7%E5%8A%A9%E6%89%8B/p
     
 ### 0.2.0
     美化界面
-
-## TODO
-
- - [x] 优化更新，相同host的地址才能更新，防止误触
- - [x] ui(更新ui-vue，添加卡片模式)
- - [x] 标题的正则模式(根据网站正则匹配标题内容)
- - [x] 添加即监听
- - [] 优化ui

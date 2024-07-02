@@ -1,369 +1,40 @@
-/**
- * 工具类
- */
-class Utils {
-    /**
-     * 相同主机地址
-     * @param url1
-     * @param url2
-     * @returns {boolean}
-     */
-    theSameHostUrl(url1, url2) {
-        return new URL(url1).origin === new URL(url2).origin;
-    }
-}
+import {tabs, bookmark, listenMessage, initBackground} from './helper.js';
 
-var utils = new Utils();
-
-/**
- * 书签
- */
-class Bookmark {
-    /**
-     * 主目录
-     */
-    mainBookmarkFolder;
-
-    constructor(mainBookmarkFolder) {
-        this.mainBookmarkFolder = mainBookmarkFolder;
-    }
-
-    /**
-     *获取追剧助手书签列表
-     * @returns {Promise<chrome.bookmarks.BookmarkTreeNode[]>}
-     */
-    getBookmarks() {
-        let that = this;
-        return new Promise(resolve => {
-            that.getBookmarkFolder().then(result => {
-                chrome.bookmarks.getChildren(result.id, results => {
-                    resolve(results);
-                });
-            }, () => {
-                console.log("getBookmarks.getBookmarkFolder.reject");
-                resolve([]);
-            });
-        });
-    }
-
-    /**
-     * 根据书签id获取书签内容
-     * @param bookmarkId
-     * @returns {Promise<chrome.bookmarks.BookmarkTreeNode>}
-     */
-    getBookmark(bookmarkId) {
-        return new Promise(resolve => {
-            chrome.bookmarks.get(bookmarkId.toString(), results => {
-                if (results !== undefined && results.length > 0) {
-                    resolve(results[0]);
-                }
-            });
-        });
-    }
-
-    /**
-     * 删除书签
-     * @param bookmarkId
-     * @param callback
-     */
-    deleteBookmark(bookmarkId, callback) {
-        chrome.bookmarks.remove(bookmarkId.toString(), callback);
-    }
-
-    /**
-     * 添加主书签文件夹
-     * @param callback
-     */
-    addMainBookmarkFolder(callback) {
-        let that = this;
-        this.getBookmarkFolder().then(() => {
-        }, () => {
-            //如果创建时不指定parentId，则所创建的书签会默认加入到其他书签中
-            chrome.bookmarks.create(
-                {
-                    title: that.mainBookmarkFolder,
-                    url: '',
-                }, callback);
-        });
-    }
-
-    /**
-     * 获取书签文件夹
-     * @returns {Promise<chrome.bookmarks.BookmarkTreeNode>}
-     */
-    getBookmarkFolder() {
-        let that = this;
-        return new Promise((resolve, reject) => {
-            chrome.bookmarks.search(that.mainBookmarkFolder, results => {
-                if (results.length === 0) {
-                    reject();
-                } else {
-                    resolve(results[0]);
-                }
-            });
-        });
-    }
-
-    /**
-     * 添加书签
-     * @param object BookmarkChangesArg
-     * @param callback function(chrome.bookmarks.BookmarkTreeNode result){}
-     */
-    addBookmark(object, callback) {
-        chrome.bookmarks.create(object, callback);
-    }
-
-    /**
-     * setBadgeText
-     */
-    setBadgeText() {
-        this.getBookmarks().then(bookmarks => {
-            if (bookmarks.length > 0) {
-                chrome.browserAction.setBadgeText(
-                    {
-                        text: bookmarks.length.toString()
-                    });
-            }
-            if (bookmarks.length >= 100) {
-                chrome.browserAction.setBadgeBackgroundColor({
-                    color: "#ff0000"
-                });
-            }
-        });
-    }
-
-    /**
-     * 更新书签
-     * @param bookmarkId - bookmark id
-     * @param tab - BookmarkChangesArg
-     * @param callback - function
-     */
-    updateBookmark(bookmarkId, tab, callback) {
-        let changes = {};
-        if (tab.title !== undefined) {
-            changes.title = tab.title;
-        }
-        if (tab.url !== undefined) {
-            changes.url = tab.url;
-        }
-
-        chrome.bookmarks.update(bookmarkId.toString(), changes, callback);
-    }
-
-    /**
-     * 移动书签
-     * @param bookmarkId
-     * @param toIndex
-     * @param callback
-     */
-    moveBookmark(bookmarkId, toIndex, callback) {
-        chrome.bookmarks.move(bookmarkId.toString(), {
-            index: toIndex
-        }, callback);
-    }
-}
-
-var bookmark = new Bookmark(chrome.runtime.getManifest().name);
-
-/**
- * 存储
- */
-class Store {
-    /**
-     * 保存数据
-     * @param key
-     * @param value
-     * @param callback
-     */
-    setSyncData(key, value, callback) {
-        chrome.storage.sync.set({[key]: JSON.stringify(value)}, callback);
-    }
-
-    /**
-     * 读取数据
-     * @param key
-     * @returns {Promise<object>}
-     */
-    getSyncData(key) {
-        return new Promise(resolve => {
-            chrome.storage.sync.get(key, object => {
-                if (object.hasOwnProperty(key)) {
-                    resolve(JSON.parse(object[key]));
-                } else {
-                    resolve({});
-                }
-            });
-        });
-    }
-
-    /**
-     * 清除所有数据
-     */
-    clearAllData() {
-        chrome.storage.sync.clear();
-    }
-}
-
-var store = new Store();
-
-/**
- * 选项
- */
-class Options {
-    #optionsKey = 'options';
-
-    saveOption(key, value) {
-        let that = this;
-        this.getOptions().then(options => {
-            if (options == null) {
-                options = {};
-            }
-            options[key] = value;
-            that.saveOptions(options);
-        });
-    };
-
-    getOption(key) {
-        let that = this;
-        return new Promise(resolve => {
-            that.getOptions().then(options => {
-                resolve(options == null ? null : options[key]);
-            });
-        });
-    };
-
-    saveOptions(options) {
-        store.setSyncData(this.#optionsKey, options);
-    };
-
-    getOptions() {
-        return store.getSyncData(this.#optionsKey);
-    };
-}
-
-var options = new Options();
-
-/**
- * 标签页
- */
-class Tab {
-    bookmarkTabs = {};
-
-    /**
-     * 创建tab
-     * @param url
-     * @returns {Promise<object>}
-     */
-    create(url) {
-        return new Promise(resolve => {
-            chrome.tabs.create({
-                url: url
-            }, tab => {
-                resolve(tab);
-            });
-        });
-    }
-
-    /**
-     * 监听tab更新
-     * @param callback
-     */
-    onUpdated(callback) {
-        chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-            if (callback !== undefined && changeInfo.status === "complete") {
-                callback(tabId, changeInfo, tab);
-            }
-        });
-    }
-
-    /**
-     * 监听tab移除
-     * @param callback
-     */
-    onRemoved(callback) {
-        chrome.tabs.onRemoved.addListener(callback);
-    }
-
-    /**
-     * 创建tab并监听
-     * @param bookmarkId
-     */
-    createAndListen(bookmarkId) {
-        let that = this;
-        bookmark.getBookmark(bookmarkId).then(result => {
-            that.create(result.url).then(tab => {
-                that.listeningTab(tab, bookmarkId);
-            });
-        });
-    }
-
-    /**
-     * 监听tab
-     * @param tab
-     * @param bookmarkId
-     */
-    listeningTab(tab, bookmarkId) {
-        this.bookmarkTabs[tab.id] = bookmarkId;
-    }
-
-    /**
-     * 创建tab update监听器
-     */
-    createUpdateListener() {
-        let that = this;
-        this.onUpdated((tabId, changeInfo, tab) => {
-            let bookmarkIdByTab = that.bookmarkTabs[tabId];
-            if (bookmarkIdByTab !== undefined) {
-                bookmark.getBookmark(bookmarkIdByTab).then(result => {
-                    //判断tab的页面host不变才更新，防止误触
-                    if (utils.theSameHostUrl(result.url, tab.url)) {
-                        if (getSiteRegularSet === undefined) {
-                            bookmark.updateBookmark(bookmarkIdByTab, tab);
-                        } else {
-                            getSiteRegularSet().then(siteRegularSet => {
-                                //更新时解析标题
-                                siteRegularParser.setRegularSet(siteRegularSet);
-                                tab.title = siteRegularParser.parse(tab.url, tab.title);
-
-                                bookmark.updateBookmark(bookmarkIdByTab, tab);
-                            })
-                        }
-                    }
-                });
-            }
-        });
-    }
-
-    /**
-     * 创建tab remove监听器
-     */
-    createRemoveListener() {
-        let that = this;
-        this.onRemoved(tabId => {
-            delete that.bookmarkTabs[tabId];
-        });
-    }
-}
-
-var tab = new Tab();
+//全局的书签-标签的关联变量
+const bookmarkTabs = {};
 
 //初始化
-let init = () => {
-    bookmark.addMainBookmarkFolder();
-    bookmark.setBadgeText();
-    tab.createUpdateListener();
-    tab.createRemoveListener();
+initBackground();
 
-    //创建扩展的菜单
-    chrome.contextMenus.create({
-        'title': '去书签管理器管理书签',
-        contexts: ['browser_action'],
-        onclick: (info, t) => {
-            bookmark.getBookmarkFolder().then(b => {
-                tab.create('chrome://bookmarks/?id=' + b.id).then();
+/**
+ * 创建tab update监听器
+ */
+tabs.onUpdated(function (tabId, changeInfo, tab) {
+    let bookmarkIdByTab = bookmarkTabs[tabId];
+    if (bookmarkIdByTab !== undefined) {
+        bookmark.getBookmark(bookmarkIdByTab).then(function () {
+            bookmark.updateBookmark(bookmarkIdByTab, tab);
+        });
+    }
+});
+/**
+* 创建tab remove监听器
+*/
+tabs.onRemoved(function (tabId) {
+    delete bookmarkTabs[tabId];
+});
+
+//创建监听
+listenMessage((request)=>{
+    const bookmarkId = request.bookmark_id;
+    const tabId = request.tab_id;
+    if(tabId == null){
+        bookmark.getBookmark(bookmarkId).then(function (bookmark) {
+            tabs.create(bookmark.url).then(function (tab) {
+                bookmarkTabs[tab.id] = bookmarkId;
             });
-        }
-    });
-};
-
-init();
+        });
+    }else {
+        bookmarkTabs[tabId] = bookmarkId;
+    }
+});
