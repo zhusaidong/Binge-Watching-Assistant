@@ -31,7 +31,7 @@ https://developer.chrome.com/docs/extensions/how-to/ui/favicons?hl=zh-cn
 - [x] ui(更新ui-vue，添加卡片模式)
 - [x] 标题的正则模式(根据网站正则匹配标题内容)
 - [x] 添加即监听
-- [] 优化ui
+- [ ] 优化ui
 
 
 ## changelog

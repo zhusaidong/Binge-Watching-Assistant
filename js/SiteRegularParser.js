@@ -1,3 +1,5 @@
+import {options} from "./helper.js";
+
 /**
  * 站点标题规则
  */
@@ -94,9 +96,9 @@ class SiteRegularParser {
     }
 }
 
-var siteRegularParser = new SiteRegularParser();
+export var siteRegularParser = new SiteRegularParser();
 
-function getSiteRegularSet() {
+export function getSiteRegularSet() {
     return new Promise(resolve => {
         let siteRegularSet = new SiteRegularSet();
         options.getOption("siteRegulars").then(set => {

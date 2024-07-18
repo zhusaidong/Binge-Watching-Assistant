@@ -1,3 +1,6 @@
+//const isDev = chrome.runtime.id !== 'pbnnheibacpamfaendimogbeaeciglpo';
+const isDev = chrome.runtime.getManifest().name.includes("开发");
+
 /**
  * 书签
  */
@@ -168,7 +171,11 @@ class Store {
     getSyncData(key) {
         return new Promise(function (resolve) {
             chrome.storage.sync.get(key, function (object) {
-                resolve(JSON.parse(object[key]));
+                if(object === undefined || object[key] === undefined){
+                    resolve(null)
+                } else {
+                    resolve(JSON.parse(object[key]));
+                }
             });
         });
     }
@@ -214,8 +221,8 @@ class Tab {
     }
 }
 
-export var bookmark = new Bookmark("追剧助手");
-export var tabs = new Tab();
+export const bookmark = new Bookmark(chrome.runtime.getManifest().name);
+export const tabs = new Tab();
 
 /**
  * 发送消息
@@ -247,4 +254,113 @@ export function listenMessage(requestCallback){
 export function initBackground(){
     bookmark.addMainBookmarkFolder();
     bookmark.setBadgeText();
+
+    console.log(chrome.runtime.id)
+
+    //创建扩展的菜单
+    chrome.contextMenus.create({
+        id: 'bwa-main',
+        title: '去书签管理器管理追剧的书签',
+        type: 'normal',
+        contexts: ['action']
+    });
+    if(isDev){
+        chrome.contextMenus.create({
+            id: 'bwa-dev-options',
+            title: '开发者选项',
+            type: 'normal',
+            contexts: ['action'],
+        });
+        chrome.contextMenus.create({
+            id: 'bwa-dev-open-popup',
+            title: '打开popup.html',
+            type: 'normal',
+            parentId: 'bwa-dev-options',
+            contexts: ['action']
+        });
+        chrome.contextMenus.create({
+            id: 'bwa-dev-open-options',
+            title: '打开options.html',
+            type: 'normal',
+            parentId: 'bwa-dev-options',
+            contexts: ['action']
+        });
+    }
+    chrome.contextMenus.onClicked.addListener((info, t) => {
+        switch (info.menuItemId){
+            case "bwa-main":
+                bookmark.getBookmarkFolder().then(b => {
+                    tabs.create('chrome://bookmarks/?id=' + b.id);
+                });
+                break;
+            case "bwa-dev-open-popup":
+                tabs.create(chrome.runtime.getURL("/html/popup.html"));
+                break;
+            case "bwa-dev-open-options":
+                tabs.create(chrome.runtime.getURL("/html/options.html"));
+                break;
+        }
+    })
 }
+
+//======v.1.1.5=================
+
+/**
+ * 工具类
+ */
+class Utils {
+    /**
+     * 相同主机地址
+     * @param url1
+     * @param url2
+     * @returns {boolean}
+     */
+    theSameHostUrl(url1, url2) {
+        return new URL(url1).origin === new URL(url2).origin;
+    }
+}
+
+//export const utils = new Utils();
+
+export function faviconURL(u) {
+    const url = new URL(chrome.runtime.getURL("/_favicon/"));
+    url.searchParams.set("pageUrl", u);
+    url.searchParams.set("size", "16");
+    return url.toString();
+}
+
+const store = new Store();
+
+class Options {
+    #optionsKey = 'options';
+
+    saveOption(key, value) {
+        let that = this;
+        this.getOptions().then(options => {
+            if (options == null) {
+                options = {};
+            }
+            options[key] = value;
+            that.saveOptions(options);
+        });
+    };
+
+    getOption(key) {
+        let that = this;
+        return new Promise(resolve => {
+            that.getOptions().then(options => {
+                resolve(options == null ? null : options[key]);
+            });
+        });
+    };
+
+    saveOptions(options) {
+        store.setSyncData(this.#optionsKey, options);
+    };
+
+    getOptions() {
+        return store.getSyncData(this.#optionsKey);
+    };
+}
+
+export const options = new Options();

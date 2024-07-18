@@ -1,3 +1,5 @@
+import {siteRegularParser,getSiteRegularSet} from "./SiteRegularParser.js";
+
 new Vue({
     el: "#content",
     data: {
@@ -16,7 +18,7 @@ new Vue({
         //this.backgroundPage.store.clearAllData();
         //console.log("created");
         let that = this;
-        this.backgroundPage.getSiteRegularSet().then(set => {
+        getSiteRegularSet().then(set => {
             console.log(set);
             that.siteRegular.customSiteRegulars = set.getRules();
             that.siteRegular.defaultSiteRegulars = set.getDefaultRules();

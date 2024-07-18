@@ -1,11 +1,9 @@
-import {bookmark, sendMessage} from './helper.js';
+import {bookmark, sendMessage, faviconURL} from './helper.js';
+import {siteRegularParser,getSiteRegularSet} from "./SiteRegularParser.js";
 
-function faviconURL(u) {
-    const url = new URL(chrome.runtime.getURL("/_favicon/"));
-    url.searchParams.set("pageUrl", u);
-    url.searchParams.set("size", "16");
-    return url.toString();
-}
+getSiteRegularSet().then(res=>{
+    console.log("getSiteRegularSet",res)
+})
 
 let refreshBookmark = function () {
     bookmark.getBookmarks().then(function (bookmarks) {
