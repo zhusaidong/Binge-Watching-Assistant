@@ -29,6 +29,9 @@ https://developer.chrome.com/docs/extensions/how-to/ui/favicons?hl=zh-cn
 
 ## changelog
 
+### 1.1.5
+    修复service_worker沉寂，导致功能异常的问题
+
 ### 1.1.4
     升级manifest_version到v3
     在当前页面添加追剧时立即生效，无需重新打开
