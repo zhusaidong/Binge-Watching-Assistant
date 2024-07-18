@@ -18,10 +18,13 @@
         "tabs",
         "favicon"
     ],
-    "content_security_policy": {
-        //"extension_pages": "script-src 'self' 'unsafe-eval'; object-src 'self' 'unsafe-eval'",
-        "extension_pages": "script-src 'self'; object-src 'self'"
-    },
+    "web_accessible_resources": [
+        {
+          "resources": ["_favicon/*"],
+          "matches": ["<all_urls>"],
+          "extension_ids": ["*"]
+        }
+    ],
     "background": {
         "service_worker": "js/background.js",
         "type": "module"
