@@ -2,6 +2,7 @@ import {tabs, bookmark, listenMessage, initBackground} from './helper.js';
 
 //全局的书签-标签的关联变量
 const bookmarkTabs = {};
+let bookmarkTabSize = 0;
 
 //初始化
 initBackground();
@@ -22,6 +23,7 @@ tabs.onUpdated(function (tabId, changeInfo, tab) {
 */
 tabs.onRemoved(function (tabId) {
     delete bookmarkTabs[tabId];
+    bookmarkTabSize--;
 });
 
 //创建监听
@@ -37,4 +39,24 @@ listenMessage((request)=>{
     }else {
         bookmarkTabs[tabId] = bookmarkId;
     }
+    bookmarkTabSize++;
+    startWait();
 });
+
+//有活动期间，保活
+//@see https://blog.csdn.net/qq_35606400/article/details/136327698
+let keepAlive = null;
+function startWait(){
+    if(keepAlive === null){
+        keepAlive = setInterval(waitUntil, 5 * 1000);
+        console.log("create keepAlive");
+    }
+}
+function waitUntil() {
+    chrome.runtime.getPlatformInfo().then(r => {
+    });
+    if(bookmarkTabSize === 0){
+        clearInterval(keepAlive);
+        keepAlive = null;
+    }
+}

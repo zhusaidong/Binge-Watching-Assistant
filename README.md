@@ -23,6 +23,9 @@ https://developer.chrome.com/docs/extensions/how-to/ui/favicons?hl=zh-cn
 - [x] 添加新页面时立即开启监听
 - [ ] 监听tab时会判断页面完全加载才去更新书签，这样会使得页面加载缓慢时（js，图片等）无法正确更新书签。
 - [ ] 界面换vue重写
+- [ ] service_worker 无法永久运行，意味着“全局的书签-标签的关联变量”无法持久保存，导致一段时间后功能会失效，只能用存储代替。
+> 根据定义，Service Worker 由事件驱动，在闲置时终止。这样，Chrome 就可以优化扩展程序的性能和内存消耗。
+
 
 ## changelog
 

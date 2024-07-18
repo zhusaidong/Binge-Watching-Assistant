@@ -233,7 +233,7 @@ export function listenMessage(requestCallback){
     chrome.runtime.onMessage.addListener((request, sender, sendResponse)=>{
         // console.log("get the message[request]", request)
         // console.log("get the message[sender]", sender)
-        if(sender.id !== "fglkplipljcbgfmionimlijpjkekbedc" && sender.id !== "pbnnheibacpamfaendimogbeaeciglpo"){
+        if(sender.id !== "joofmpiiaojlabiemjajakihgpgamoil" && sender.id !== "pbnnheibacpamfaendimogbeaeciglpo"){
             return;
         }
         requestCallback(request);
