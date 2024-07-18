@@ -29,7 +29,7 @@ https://developer.chrome.com/docs/extensions/how-to/ui/favicons?hl=zh-cn
 
 ## changelog
 
-### 1.1.5
+### 1.1.6
     修复service_worker沉寂，导致功能异常的问题
 
 ### 1.1.4
