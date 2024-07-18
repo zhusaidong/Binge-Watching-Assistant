@@ -8,14 +8,17 @@
 https://chrome.google.com/webstore/detail/%E8%BF%BD%E5%89%A7%E5%8A%A9%E6%89%8B/pbnnheibacpamfaendimogbeaeciglpo
 
 ## ide提示功能
-
-> File -> Settings -> Languages & Frameworks -> JavaScript -> Libraries -> Download -> 输入chrome -> Download and Install
+    方法1（推荐） 
+        File->Settings->Languages & Frameworks->JavaScript->Libraries->Download->输入chrome并->Download and Install
+    方法2
+        npm install --save @types/chrome
 
 ## chrome扩展文档
 
 [中文文档](https://crxdoc-zh.appspot.com/extensions/api_index)
 
 [英文文档](https://developer.chrome.com/extensions/api_index)
+
 
 ## 关于书签图标
 
@@ -38,11 +41,11 @@ https://developer.chrome.com/docs/extensions/how-to/ui/favicons?hl=zh-cn
 
 ## changelog
 
-### 1.1.6
+### 1.2.0
     使用vue渲染页面，添加ui选项，标题匹配功能
     完善“添加即监听”的功能
 
-### 1.1.5
+### 1.1.6
     修复service_worker沉寂，导致功能异常的问题
 
 ### 1.1.4

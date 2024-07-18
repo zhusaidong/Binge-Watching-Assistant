@@ -2,7 +2,6 @@ import {tabs, bookmark, listenMessage, initBackground} from './helper.js';
 
 //全局的书签-标签的关联变量
 const bookmarkTabs = {};
-let bookmarkTabSize = 0;
 
 //初始化
 initBackground();
@@ -12,6 +11,7 @@ initBackground();
  */
 tabs.onUpdated(function (tabId, changeInfo, tab) {
     let bookmarkIdByTab = bookmarkTabs[tabId];
+    //bookmarkTabs.hasOwnProperty(tabId)
     if (bookmarkIdByTab !== undefined) {
         bookmark.getBookmark(bookmarkIdByTab).then(function () {
             bookmark.updateBookmark(bookmarkIdByTab, tab);
@@ -22,8 +22,11 @@ tabs.onUpdated(function (tabId, changeInfo, tab) {
 * 创建tab remove监听器
 */
 tabs.onRemoved(function (tabId) {
-    delete bookmarkTabs[tabId];
-    bookmarkTabSize--;
+    let bookmarkIdByTab = bookmarkTabs[tabId];
+    //bookmarkTabs.hasOwnProperty(tabId)
+    if (bookmarkIdByTab !== undefined) {
+        delete bookmarkTabs[tabId];
+    }
 });
 
 //创建监听
@@ -39,7 +42,6 @@ listenMessage((request)=>{
     }else {
         bookmarkTabs[tabId] = bookmarkId;
     }
-    bookmarkTabSize++;
     startWait();
 });
 
@@ -53,8 +55,12 @@ function startWait(){
     }
 }
 function waitUntil() {
+    console.log("living");
     chrome.runtime.getPlatformInfo().then(r => {
+        //console.log("getPlatformInfo", r.os)
     });
+    let bookmarkTabSize = Object.keys(bookmarkTabs).length;
+    //console.log("bookmarkTabSize", bookmarkTabSize)
     if(bookmarkTabSize === 0){
         clearInterval(keepAlive);
         keepAlive = null;
