@@ -38,9 +38,12 @@ https://developer.chrome.com/docs/extensions/how-to/ui/favicons?hl=zh-cn
 
 ## changelog
 
-### 1.1.5
+### 1.1.6
     使用vue渲染页面，添加ui选项，标题匹配功能
     完善“添加即监听”的功能
+
+### 1.1.5
+    修复service_worker沉寂，导致功能异常的问题
 
 ### 1.1.4
     升级manifest_version到v3
