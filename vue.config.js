@@ -65,7 +65,8 @@ module.exports = defineConfig({
         },
         devtool: isDevMode ? 'inline-source-map' : false,
         optimization: {
-            minimize: true, // 确保启用了压缩
+            //开发环境不启用压缩，使编译速度加快
+            minimize: !isDevMode, // 确保启用了压缩
             minimizer: [
                 new UglifyPlugin({
                     uglifyOptions: {

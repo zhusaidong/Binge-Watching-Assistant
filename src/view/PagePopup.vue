@@ -1,26 +1,37 @@
 <template>
   <div class="main_app">
 
+    <!-- 按钮部分 -->
     <el-button @click="addBookmark()">添加追剧</el-button>
-    <el-button @click="addSeparator()">添加书签分隔</el-button>
+    <el-tooltip content="分隔，起到类似于分类的作用" placement="top">
+      <el-button @click="openSeparatorDialog=true;separatorName='';">添加分隔</el-button>
+    </el-tooltip>
+    <!--添加分隔的弹窗-->
+    <el-dialog v-model="openSeparatorDialog" title="添加分隔" :close-on-click-modal="true">
+      <el-form>
+        <el-form-item>
+          <el-input v-model="separatorName" clearable placeholder="输入分隔名称"/>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="addSeparator();openSeparatorDialog=false">提交</el-button>
+        <el-button @click="openSeparatorDialog=false">取消</el-button>
+      </template>
+    </el-dialog>
 
+    <!-- 搜索部分 -->
     <el-divider content-position="left">搜索</el-divider>
 
     <el-form>
-      <el-input v-model="searchKey" width="100px" @input="refreshBookmark()" clearable placeholder="输入搜索内容"/>
+      <el-input v-model="searchKey" @input="refreshBookmark()" clearable placeholder="输入搜索内容"/>
     </el-form>
 
+    <!-- 书签部分 -->
     <el-divider content-position="left">追剧书签</el-divider>
 
-    <VueDraggable v-model="bookmarkList" target="tbody" :onEnd="onDraggableEnd">
-      <el-table :data="bookmarkList"
-                id="dragTable"
-                :stripe="true"
-                :show-overflow-tooltip="true"
-                :show-header="false"
-                row-key="id"
-                empty-text="暂无数据"
-      >
+    <VueDraggable v-model="bookmarkList" target="tbody" :onEnd="onDraggableEnd" :animation="150"
+                  :handle="draggableHandle">
+      <el-table :data="bookmarkList" :stripe="true" :show-header="false" row-key="id" empty-text="暂无数据">
         <el-table-column label="序号" width="40px">
           <template #default="scope">
             {{ scope.$index + 1 }}.
@@ -38,6 +49,7 @@
         <el-table-column prop="link" label="标题">
           <template #default="scope">
             <div v-if="scope.row.isEditing">
+              <!--fixme：在增加了拖拽排序后，编辑时的输入框无法用鼠标做拖动连选文本了-->
               <el-input type="text" v-model="scope.row.title"/>
             </div>
             <div v-else>
@@ -45,9 +57,11 @@
                 <el-divider content-position="center">{{ scope.row.title }}</el-divider>
               </div>
               <div v-else>
-                <el-link @click="openBookmark(scope.row.id)">
-                  <span class="bookmark-a" :title="scope.row.url">{{ scope.row.title }}</span>
-                </el-link>
+                <el-tooltip :content="scope.row.url" placement="bottom">
+                  <el-link @click="openBookmark(scope.row.id)">
+                    {{ scope.row.title }}
+                  </el-link>
+                </el-tooltip>
               </div>
             </div>
           </template>
@@ -94,9 +108,13 @@
 import {bookmark, sendMessage} from "@/script/helper";
 import {ref, onMounted} from 'vue'
 import {VueDraggable} from 'vue-draggable-plus';
+import {ElMessageBox} from "element-plus";
 
 const searchKey = ref("");
 const bookmarkList = ref([]);
+const openSeparatorDialog = ref(false);
+const separatorName = ref("");
+const draggableHandle = ref(".cell")
 
 onMounted(() => {
   refreshBookmark();
@@ -161,6 +179,18 @@ const addBookmark = () => {
  */
 const cancelEditBookmark = (row) => {
   row.isEditing = false;
+  if (!isHaveEdit()) {
+    draggableHandle.value = ".cell";
+  }
+}
+
+const isHaveEdit = () => {
+  for (let i = 0; i < bookmarkList.value.length; i++) {
+    if (bookmarkList.value[i].isEditing) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**
@@ -169,6 +199,7 @@ const cancelEditBookmark = (row) => {
  */
 const editBookmark = (row) => {
   row.isEditing = true;
+  draggableHandle.value = ".cell1";
 }
 
 /**
@@ -186,12 +217,17 @@ const saveBookmark = (row) => {
  * @param id
  */
 const deleteBookmark = (id) => {
-  if (confirm('确认删除？')) {
+  ElMessageBox.confirm('确定要删除吗？', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
     bookmark.deleteBookmark(id, function () {
       bookmark.setBadgeText();
     });
     refreshBookmark();
-  }
+  }).catch(() => {
+  });
 }
 
 /**
@@ -218,7 +254,7 @@ const faviconURL = (u) => {
  * 添加书签分隔
  */
 const addSeparator = () => {
-  const title = prompt("输入分隔的名称：");
+  const title = separatorName.value;//prompt("输入分隔的名称：");
   if (title != null) {
     bookmark.getBookmarkFolder().then(function (results) {
       bookmark.addBookmark(
