@@ -149,30 +149,30 @@ class Bookmark {
 /**
  * 存储
  */
-class Store {
-    /**
-     * 保存数据
-     * @param key
-     * @param value
-     * @param callback
-     */
-    setSyncData(key, value, callback) {
-        chrome.storage.sync.set({[key]: JSON.stringify(value)}, callback);
-    }
-
-    /**
-     * 读取数据
-     * @param key
-     * @returns {Promise<object>}
-     */
-    getSyncData(key) {
-        return new Promise(function (resolve) {
-            chrome.storage.sync.get(key, function (object) {
-                resolve(JSON.parse(object[key]));
-            });
-        });
-    }
-}
+// class Store {
+//     /**
+//      * 保存数据
+//      * @param key
+//      * @param value
+//      * @param callback
+//      */
+//     setSyncData(key, value, callback) {
+//         chrome.storage.sync.set({[key]: JSON.stringify(value)}, callback);
+//     }
+//
+//     /**
+//      * 读取数据
+//      * @param key
+//      * @returns {Promise<object>}
+//      */
+//     getSyncData(key) {
+//         return new Promise(function (resolve) {
+//             chrome.storage.sync.get(key, function (object) {
+//                 resolve(JSON.parse(object[key]));
+//             });
+//         });
+//     }
+// }
 
 /**
  * 标签页

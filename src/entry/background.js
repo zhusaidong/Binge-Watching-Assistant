@@ -58,8 +58,7 @@ function startWait() {
 
 function waitUntil() {
     console.log("living");
-    chrome.runtime.getPlatformInfo().then(r => {
-        //console.log("getPlatformInfo", r.os)
+    chrome.runtime.getPlatformInfo().then(() => {
     });
     let bookmarkTabSize = Object.keys(bookmarkTabs).length;
     //console.log("bookmarkTabSize", bookmarkTabSize)

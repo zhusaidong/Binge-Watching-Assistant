@@ -1,14 +1,14 @@
 const path = require('path')
 const fs = require('fs')
-
 // Generate pages object
 const pages = {}
+const chromeName = getEntryFile(path.resolve(`src/entry`))
+const isDevMode = process.env.NODE_ENV === 'development'
+const {defineConfig} = require('@vue/cli-service')
 
 function getEntryFile(entryPath) {
     return fs.readdirSync(entryPath)
 }
-
-const chromeName = getEntryFile(path.resolve(`src/entry`))
 
 function getFileExtension(filename) {
     return /[.]/.exec(filename) ? /[^.]+$/.exec(filename)[0] : undefined
@@ -24,13 +24,9 @@ chromeName.forEach((name) => {
     }
 })
 
-const isDevMode = process.env.NODE_ENV === 'development'
-
-const {defineConfig} = require('@vue/cli-service')
 module.exports = defineConfig({
     transpileDependencies: true,
-    // 关闭eslint校验
-    lintOnSave: false,
+    lintOnSave: true,
     pages,
     filenameHashing: false,
     chainWebpack: (config) => {

@@ -1,5 +1,5 @@
 import {createApp} from 'vue'
-import App from '../view/popup.vue'
+import App from '../view/PagePopup.vue'
 import ElementPlus from "element-plus";
 import "element-plus/dist/index.css";
 
