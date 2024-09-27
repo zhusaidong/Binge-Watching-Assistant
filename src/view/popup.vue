@@ -7,111 +7,113 @@
     <el-divider content-position="left">搜索</el-divider>
 
     <el-form>
-      <el-input v-model="searchKey" width="100px" @input="refreshBookmark()" clearable
-                placeholder="输入搜索内容，按回车"/>
+      <el-input v-model="searchKey" width="100px" @input="refreshBookmark()" clearable placeholder="输入搜索内容"/>
     </el-form>
 
     <el-divider content-position="left">追剧书签</el-divider>
 
-    <el-table :data="bookmarkList"
-              id="dragTable"
-              :stripe="true"
-              :show-overflow-tooltip="true"
-              :show-header="false"
-              row-key="id"
-              empty-text="暂无数据"
-    >
-      <el-table-column label="序号" width="40px">
-        <template #default="scope">
-          {{ scope.$index + 1 }}.
-        </template>
-      </el-table-column>
-      <el-table-column prop="url" label="图标" width="40px">
-        <template #default="scope">
-          <div v-if="!scope.row.separator" id="icon" class="website-icon"
-               :style="{backgroundImage :'url('+faviconURL(scope.row.url)+')'}"></div>
-          <div v-else>
-          </div>
-        </template>
-      </el-table-column>
-      <el-table-column prop="link" label="标题">
-        <template #default="scope">
-          <div v-if="scope.row.isEditing">
-            <el-input type="text" v-model="scope.row.title"/>
-          </div>
-          <div v-else>
-            <div v-if="scope.row.separator">
-              <el-divider content-position="center">{{ scope.row.title }}</el-divider>
+    <VueDraggable v-model="bookmarkList" target="tbody" :onEnd="onDraggableEnd">
+      <el-table :data="bookmarkList"
+                id="dragTable"
+                :stripe="true"
+                :show-overflow-tooltip="true"
+                :show-header="false"
+                row-key="id"
+                empty-text="暂无数据"
+      >
+        <el-table-column label="序号" width="40px">
+          <template #default="scope">
+            {{ scope.$index + 1 }}.
+            <div v-show="false" class="bookmark">{{ scope.row.id }}</div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="url" label="图标" width="40px">
+          <template #default="scope">
+            <div v-if="!scope.row.separator" id="icon" class="website-icon"
+                 :style="{backgroundImage :'url('+faviconURL(scope.row.url)+')'}"></div>
+            <div v-else>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="link" label="标题">
+          <template #default="scope">
+            <div v-if="scope.row.isEditing">
+              <el-input type="text" v-model="scope.row.title"/>
             </div>
             <div v-else>
-              <el-link @click="openBookmark(scope.row.id)">
-                <span class="bookmark-a" :title="scope.row.url">{{ scope.row.title }}</span>
-              </el-link>
+              <div v-if="scope.row.separator">
+                <el-divider content-position="center">{{ scope.row.title }}</el-divider>
+              </div>
+              <div v-else>
+                <el-link @click="openBookmark(scope.row.id)">
+                  <span class="bookmark-a" :title="scope.row.url">{{ scope.row.title }}</span>
+                </el-link>
+              </div>
             </div>
-          </div>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" width="120px">
-        <template #default="scope">
-          <div v-if="scope.row.isEditing">
-            <el-button
-                link
-                type="primary"
-                @click="saveBookmark(scope.row)"
-            >保存
-            </el-button>
-            <el-button
-                link
-                type="danger"
-                @click="cancelEditBookmark(scope.row)"
-            >取消
-            </el-button>
-          </div>
-          <div v-else>
-            <el-button
-                link
-                type="primary"
-                @click="editBookmark(scope.row)"
-            >编辑
-            </el-button>
-            <el-button
-                link
-                type="danger"
-                @click="deleteBookmark(scope.row.id)"
-            >删除
-            </el-button>
-          </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="120px">
+          <template #default="scope">
+            <div v-if="scope.row.isEditing">
+              <el-button
+                  link
+                  type="primary"
+                  @click="saveBookmark(scope.row)"
+              >保存
+              </el-button>
+              <el-button
+                  link
+                  type="danger"
+                  @click="cancelEditBookmark(scope.row)"
+              >取消
+              </el-button>
+            </div>
+            <div v-else>
+              <el-button
+                  link
+                  type="primary"
+                  @click="editBookmark(scope.row)"
+              >编辑
+              </el-button>
+              <el-button
+                  link
+                  type="danger"
+                  @click="deleteBookmark(scope.row.id)"
+              >删除
+              </el-button>
+            </div>
 
-        </template>
-      </el-table-column>
-    </el-table>
+          </template>
+        </el-table-column>
+      </el-table>
+    </VueDraggable>
   </div>
 </template>
 
 <script setup>
 import {bookmark, sendMessage} from "@/entry/helper";
 import {ref} from "vue";
-import Sortable from 'sortablejs'
 import {onMounted} from 'vue'
+import {VueDraggable} from 'vue-draggable-plus';
 
 const searchKey = ref("");
 const bookmarkList = ref([]);
 
-const setSort = () => {
-  const el = document.querySelector('#dragTable table tbody')
-  new Sortable(el, {
-    sort: true,
-    ghostClass: 'sortable-ghost',
-    onEnd: (e) => {
-      console.log("onEnd", e.oldIndex, e.newIndex)
-      const start = Math.min(e.oldIndex, e.newIndex)
-      const end = Math.max(e.oldIndex, e.newIndex)
-      for (let i = start; i <= end; i++) {
-        console.log("bookmarkList", bookmarkList.value[i])
-        bookmark.moveBookmark(bookmarkList.value[i].id, i);
-      }
-    },
-  })
+onMounted(() => {
+  refreshBookmark();
+})
+
+/**
+ * 拖拽结束事件
+ * @param e
+ */
+const onDraggableEnd = (e) => {
+  //拖拽结束时需要对变动的区域的书签进行重新排序
+  const start = Math.min(e.oldIndex, e.newIndex)
+  const end = Math.max(e.oldIndex, e.newIndex)
+  for (let i = start; i < end; i++) {
+    bookmark.moveBookmark(bookmarkList.value[i].id, i)
+  }
 }
 /**
  * 读取书签记录
@@ -132,11 +134,6 @@ const refreshBookmark = () => {
     bookmarkList.value = bookmarks;
   });
 }
-
-onMounted(() => {
-  refreshBookmark();
-  setSort()
-})
 
 /**
  * 添加书签

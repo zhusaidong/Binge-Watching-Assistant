@@ -33,6 +33,14 @@ https://developer.chrome.com/docs/extensions/how-to/ui/favicons?hl=zh-cn
 
 ## changelog
 
+### 1.1.7
+
+> 重构项目，使用vue开发，让界面更美观
+>
+> 增加搜索模式，用于搜索追剧
+> 
+> 增加分隔模式，相当于分类模式
+
 ### 1.1.6
     修复service_worker沉寂，导致功能异常的问题
 
