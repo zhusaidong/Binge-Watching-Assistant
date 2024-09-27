@@ -2,10 +2,14 @@
 追剧助手-谷歌扩展
 
 > 在互联网发展迅速的今天，在线观看电视剧、综艺剧、番剧已成为一种趋势。保存视频的观看进度已然成为一种需求。
-> 
+>
 > 在线观看视频时，可以添加新剧，也可以更新当前视频的观看进度
 
 https://chrome.google.com/webstore/detail/%E8%BF%BD%E5%89%A7%E5%8A%A9%E6%89%8B/pbnnheibacpamfaendimogbeaeciglpo
+
+## vue开发
+
+使用[vue-cli-plugin-chrome-extension-cli](https://github.com/sanyu1225/vue-cli-plugin-chrome-extension-cli)生成架构
 
 ## ide提示功能
     方法1（推荐） 
@@ -58,9 +62,9 @@ https://developer.chrome.com/docs/extensions/how-to/ui/favicons?hl=zh-cn
 ### 1.0.1
     修复书签同步后无列表的bug
 
-### 1.0.0 
+### 1.0.0
     更新界面
     删除右键操作，更改为界面操作
-    
+
 ### 0.2.0
     美化界面
