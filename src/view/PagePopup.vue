@@ -91,9 +91,8 @@
 </template>
 
 <script setup>
-import {bookmark, sendMessage} from "@/entry/helper";
-import {ref} from "vue";
-import {onMounted} from 'vue'
+import {bookmark, sendMessage} from "@/script/helper";
+import {ref, onMounted} from 'vue'
 import {VueDraggable} from 'vue-draggable-plus';
 
 const searchKey = ref("");

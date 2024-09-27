@@ -20,26 +20,31 @@ chromeName.forEach((name) => {
     pages[fileName] = {
         entry: `src/entry/${name}`,
         template: 'public/index.html',
-        filename: `${fileName}.html`
+        filename: `html/${fileName}.html`
     }
 })
-
+const UglifyPlugin = require("uglifyjs-webpack-plugin");
 module.exports = defineConfig({
     transpileDependencies: true,
     lintOnSave: true,
     pages,
     filenameHashing: false,
+    productionSourceMap: false,
     chainWebpack: (config) => {
         config.plugin('copy').use(require('copy-webpack-plugin'), [
             {
                 patterns: [
                     {
-                        from: path.resolve(`src/manifest.${process.env.NODE_ENV}.json`),
+                        from: path.resolve(`src/manifest.json`),
                         to: `${path.resolve('dist')}/manifest.json`
                     },
                     {
                         from: path.resolve(`public/`),
-                        to: `${path.resolve('dist')}/`
+                        to: `${path.resolve('dist/static')}/`
+                    },
+                    {
+                        from: path.resolve(`src/script/`),
+                        to: `${path.resolve('dist/js')}/`
                     }
                 ]
             }
@@ -55,10 +60,37 @@ module.exports = defineConfig({
     },
     configureWebpack: {
         output: {
-            filename: `[name].js`,
+            filename: `js/[name].js`,
             chunkFilename: `[name].js`
         },
-        devtool: isDevMode ? 'inline-source-map' : false
+        devtool: isDevMode ? 'inline-source-map' : false,
+        optimization: {
+            minimize: true, // 确保启用了压缩
+            minimizer: [
+                new UglifyPlugin({
+                    uglifyOptions: {
+                        // 在UglifyJs删除没有用到的代码时不输出警告
+                        warnings: false,
+                        compress: {
+                            // 删除所有的 `console` 语句，可以兼容ie浏览器
+                            drop_console: true, // console
+                            drop_debugger: false,
+                            pure_funcs: ["console.log"], // 移除console
+                            // 内嵌定义了但是只用到一次的变量
+                            // collapse_vars: true,
+                            // 提取出出现多次但是没有定义成变量去引用的静态值
+                            // reduce_vars: true,
+                        },
+                        output: {
+                            // 最紧凑的输出
+                            beautify: false,
+                            // 删除所有的注释
+                            comments: false,
+                        },
+                    },
+                }),
+            ],
+        },
     },
     css: {
         extract: false // Make sure the css is the same

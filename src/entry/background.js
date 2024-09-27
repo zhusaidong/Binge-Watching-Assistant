@@ -1,4 +1,4 @@
-import {tabs, bookmark, listenMessage, initBackground} from './helper.js';
+import {tabs, bookmark, listenMessage, initBackground} from '../script/helper.js';
 
 //全局的书签-标签的关联变量
 const bookmarkTabs = {};
