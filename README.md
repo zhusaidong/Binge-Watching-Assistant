@@ -37,6 +37,10 @@ https://developer.chrome.com/docs/extensions/how-to/ui/favicons?hl=zh-cn
 
 ## changelog
 
+### 1.1.8
+
+> 添加分类功能
+
 ### 1.1.7
 
 > 重构项目，使用vue开发，让界面更美观

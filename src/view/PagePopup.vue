@@ -29,18 +29,19 @@
     <!-- 书签部分 -->
     <el-divider content-position="left">追剧书签</el-divider>
 
+    <!--fixme: 加入文件夹后，拖拽会是个问题，涉及跨文件夹拖拽-->
     <VueDraggable v-model="bookmarkList" target="tbody" :onEnd="onDraggableEnd" :animation="150"
                   :handle="draggableHandle">
-      <el-table :data="bookmarkList" :stripe="true" :show-header="false" row-key="id" empty-text="暂无数据">
-        <el-table-column label="序号" width="40px">
+      <el-table :data="bookmarkList" :stripe="true" :show-header="false" row-key="id" empty-text="暂无数据"
+                default-expand-all>
+        <el-table-column label="序号" width="60px">
           <template #default="scope">
             {{ scope.$index + 1 }}.
-            <div v-show="false" class="bookmark">{{ scope.row.id }}</div>
           </template>
         </el-table-column>
         <el-table-column prop="url" label="图标" width="40px">
           <template #default="scope">
-            <div v-if="!scope.row.separator" id="icon" class="website-icon"
+            <div v-if="!scope.row.isFolder" id="icon" class="website-icon"
                  :style="{backgroundImage :'url('+faviconURL(scope.row.url)+')'}"></div>
             <div v-else>
             </div>
@@ -53,11 +54,11 @@
               <el-input type="text" v-model="scope.row.title"/>
             </div>
             <div v-else>
-              <div v-if="scope.row.separator">
+              <div v-if="scope.row.isFolder">
                 <el-divider content-position="center">{{ scope.row.title }}</el-divider>
               </div>
               <div v-else>
-                <el-tooltip :content="scope.row.url" placement="bottom">
+                <el-tooltip :content="scope.row.url" placement="bottom" :show-after="500">
                   <el-link @click="openBookmark(scope.row.id)">
                     {{ scope.row.title }}
                   </el-link>
@@ -137,17 +138,18 @@ const onDraggableEnd = (e) => {
  */
 const refreshBookmark = () => {
   bookmark.getBookmarks().then(function (bookmarks) {
+    //console.log("bookmarks", bookmarks)
     bookmark.setBadgeText();
     for (let i = 0; i < bookmarks.length; i++) {
+      //fixme：添加文件夹模式后，搜索会有问题
       if (searchKey.value !== "" && !bookmarks[i].title.includes(searchKey.value)) {
         bookmarks.splice(i, 1);
         i--;
         continue;
       }
-      bookmarks[i].separator = bookmarks[i].url === 'chrome://separator/'
+      bookmarks[i].isFolder = bookmarks[i].url === undefined
       bookmarks[i].isEditing = false;
     }
-
     bookmarkList.value = bookmarks;
   });
 }
@@ -157,19 +159,15 @@ const refreshBookmark = () => {
  */
 const addBookmark = () => {
   chrome.tabs.query({active: true, currentWindow: true}, function (tab) {
-    bookmark.getBookmarkFolder().then(function (results) {
-      bookmark.addBookmark(
-          {
-            parentId: results.id,
-            index: results.children !== undefined ? results.children.length : 0,
-            title: tab[0].title,
-            url: tab[0].url,
-          }, function (bookmark) {
-            refreshBookmark();
-            //添加新页面时立即开启监听
-            sendMessage({bookmark_id: bookmark.id, tab_id: tab[0].id});
-          });
-    });
+    bookmark.addBookmarkV2(
+        {
+          title: tab[0].title,
+          url: tab[0].url,
+        }, function (bookmark) {
+          refreshBookmark();
+          //添加新页面时立即开启监听
+          sendMessage({bookmark_id: bookmark.id, tab_id: tab[0].id});
+        });
   });
 }
 
@@ -256,17 +254,17 @@ const faviconURL = (u) => {
 const addSeparator = () => {
   const title = separatorName.value;//prompt("输入分隔的名称：");
   if (title != null) {
-    bookmark.getBookmarkFolder().then(function (results) {
-      bookmark.addBookmark(
-          {
-            parentId: results.id,
-            index: results.children !== undefined ? results.children.length : 0,
-            title: title,
-            url: "chrome://separator/",
-          }, function () {
-            refreshBookmark();
-          });
-    });
+    // bookmark.addBookmarkV2(
+    //     {
+    //       title: title,
+    //       url: "chrome://separator/",
+    //     }, function () {
+    //       refreshBookmark();
+    //     });
+    bookmark.createBookmarkFolder(
+        title, function () {
+          refreshBookmark();
+        });
   }
 };
 </script>

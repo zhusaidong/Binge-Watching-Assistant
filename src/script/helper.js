@@ -18,12 +18,12 @@ class Bookmark {
     getBookmarks() {
         let that = this;
         return new Promise(function (resolve) {
-            that.getBookmarkFolder().then(function (result) {
-                chrome.bookmarks.getChildren(result.id, function (results) {
-                    resolve(results);
+            that.getMainBookmarkFolder().then(result => {
+                chrome.bookmarks.getSubTree(result.id, function (results) {
+                    resolve(results[0].children);
                 });
             }, function () {
-                console.log("getBookmarks.getBookmarkFolder.reject");
+                console.log("getBookmarks.getMainBookmarkFolder.reject");
                 resolve([]);
             });
         });
@@ -59,7 +59,7 @@ class Bookmark {
      */
     addMainBookmarkFolder(callback) {
         let that = this;
-        this.getBookmarkFolder().then(function () {
+        this.getMainBookmarkFolder().then(function () {
         }, function () {
             //如果创建时不指定parentId，则所创建的书签会默认加入到其他书签中
             chrome.bookmarks.create(
@@ -74,7 +74,7 @@ class Bookmark {
      * 获取书签文件夹
      * @returns {Promise<BookmarkTreeNode>}
      */
-    getBookmarkFolder() {
+    getMainBookmarkFolder() {
         let that = this;
         return new Promise(function (resolve, reject) {
             chrome.bookmarks.search(that.mainBookmarkFolder, function (results) {
@@ -96,17 +96,51 @@ class Bookmark {
         chrome.bookmarks.create(object, callback);
     }
 
+    addBookmarkV2(object, callback) {
+        let that = this;
+        this.getMainBookmarkFolder().then(function (result) {
+            that.addBookmark(
+                {
+                    parentId: result.id,
+                    index: result.children !== undefined ? result.children.length : 0,
+                    title: object.title,
+                    url: object.url,
+                }, callback);
+        });
+    }
+
+    /**
+     * 创建书签文件夹
+     * @param title
+     * @param callback
+     */
+    createBookmarkFolder(title, callback) {
+        this.addBookmarkV2(
+            {
+                title: title,
+            }, callback);
+    }
+
     /**
      * setBadgeText
      */
     setBadgeText() {
         this.getBookmarks().then(function (bookmarks) {
-            if (bookmarks.length > 0) {
+            //循环获取文件夹里的书签数
+            let count = 0;
+            for (let i = 0; i < bookmarks.length; i++) {
+                if (bookmarks[i].children !== undefined) {
+                    count += bookmarks[i].children.length
+                } else {
+                    count += 1;
+                }
+            }
+            if (count > 0) {
                 chrome.action.setBadgeText(
                     {
-                        text: bookmarks.length.toString()
+                        text: count.toString()
                     });
-                if (bookmarks.length >= 100) {
+                if (count >= 100) {
                     chrome.action.setBadgeBackgroundColor({
                         color: "#ff0000"
                     });
