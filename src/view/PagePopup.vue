@@ -29,7 +29,12 @@
     <!-- 书签部分 -->
     <el-divider content-position="left">追剧书签</el-divider>
 
-    <!--fixme: 加入文件夹后，拖拽会是个问题，涉及跨文件夹拖拽-->
+    <!--
+    fixme:
+      加入文件夹后，拖拽会是个问题，涉及跨文件夹拖拽。
+      其实el-table不适合用在这（el-table适合于展示，而我们的需求是创建书签后需要能拖进某个文件夹（包含了操作））。
+      可以试试el-tree
+    -->
     <VueDraggable v-model="bookmarkList" target="tbody" :onEnd="onDraggableEnd" :animation="150"
                   :handle="draggableHandle">
       <el-table :data="bookmarkList" :stripe="true" :show-header="false" row-key="id" empty-text="暂无数据"
@@ -50,7 +55,6 @@
         <el-table-column prop="link" label="标题">
           <template #default="scope">
             <div v-if="scope.row.isEditing">
-              <!--fixme：在增加了拖拽排序后，编辑时的输入框无法用鼠标做拖动连选文本了-->
               <el-input type="text" v-model="scope.row.title"/>
             </div>
             <div v-else>
@@ -141,14 +145,32 @@ const refreshBookmark = () => {
     //console.log("bookmarks", bookmarks)
     bookmark.setBadgeText();
     for (let i = 0; i < bookmarks.length; i++) {
-      //fixme：添加文件夹模式后，搜索会有问题
-      if (searchKey.value !== "" && !bookmarks[i].title.includes(searchKey.value)) {
-        bookmarks.splice(i, 1);
-        i--;
-        continue;
-      }
       bookmarks[i].isFolder = bookmarks[i].url === undefined
       bookmarks[i].isEditing = false;
+
+      //搜索
+      if (searchKey.value !== "") {
+        //如果是文件夹
+        if (bookmarks[i].isFolder) {
+          //如果匹配到了文件夹名称，直接显示整个文件夹；匹配不到，再判断子节点的内容
+          if (!bookmarks[i].title.includes(searchKey.value)) {
+            //匹配子节点：子节点匹配不到，直接删除整个文件夹；匹配到了，将匹配到的替换子节点（只显示匹配到的）
+            let filter = bookmarks[i].children.filter(b => b.title.includes(searchKey.value));
+            if (filter.length === 0) {
+              bookmarks.splice(i, 1);
+              i--;
+            } else {
+              bookmarks[i].children = filter;
+            }
+          }
+        } else {
+          //如果不是文件夹，直接匹配书签标题即可
+          if (!bookmarks[i].title.includes(searchKey.value)) {
+            bookmarks.splice(i, 1);
+            i--;
+          }
+        }
+      }
     }
     bookmarkList.value = bookmarks;
   });
