@@ -3,14 +3,12 @@
 
     <!-- 按钮部分 -->
     <el-button @click="addBookmark()">添加追剧</el-button>
-    <el-tooltip content="分隔，起到类似于分类的作用" placement="top">
-      <el-button @click="openSeparatorDialog=true;separatorName='';">添加分隔</el-button>
-    </el-tooltip>
+    <el-button @click="openSeparatorDialog=true;separatorName='';">添加分类</el-button>
     <!--添加分隔的弹窗-->
-    <el-dialog v-model="openSeparatorDialog" title="添加分隔" :close-on-click-modal="true">
+    <el-dialog v-model="openSeparatorDialog" title="添加分类" :close-on-click-modal="true">
       <el-form>
         <el-form-item>
-          <el-input v-model="separatorName" clearable placeholder="输入分隔名称"/>
+          <el-input v-model="separatorName" clearable placeholder="输入分类名称"/>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -29,114 +27,157 @@
     <!-- 书签部分 -->
     <el-divider content-position="left">追剧书签</el-divider>
 
-    <!--
-    fixme:
-      加入文件夹后，拖拽会是个问题，涉及跨文件夹拖拽。
-      其实el-table不适合用在这（el-table适合于展示，而我们的需求是创建书签后需要能拖进某个文件夹（包含了操作））。
-      可以试试el-tree
-    -->
-    <VueDraggable v-model="bookmarkList" target="tbody" :onEnd="onDraggableEnd" :animation="150"
-                  :handle="draggableHandle">
-      <el-table :data="bookmarkList" :stripe="true" :show-header="false" row-key="id" empty-text="暂无数据"
-                default-expand-all>
-        <el-table-column label="序号" width="60px">
-          <template #default="scope">
-            {{ scope.$index + 1 }}.
-          </template>
-        </el-table-column>
-        <el-table-column prop="url" label="图标" width="40px">
-          <template #default="scope">
-            <div v-if="!scope.row.isFolder" id="icon" class="website-icon"
-                 :style="{backgroundImage :'url('+faviconURL(scope.row.url)+')'}"></div>
-            <div v-else>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="link" label="标题">
-          <template #default="scope">
-            <div v-if="scope.row.isEditing">
-              <el-input type="text" v-model="scope.row.title"/>
-            </div>
-            <div v-else>
-              <div v-if="scope.row.isFolder">
-                <el-divider content-position="center">{{ scope.row.title }}</el-divider>
+    <el-tree
+        :data="bookmarkList"
+        node-key="id"
+        default-expand-all
+        @node-drop="onDraggableEnd"
+        :draggable="editStatusNumber === 0"
+        empty-text="暂无数据"
+        :props="{children: 'children',label: 'title'}"
+        :allow-drop="allowDrop"
+        :indent="30"
+    >
+      <template #default="{ data }">
+
+        <el-table :data="[data]" row-key="id" :show-header="false" :tree-props="{children:'children1'}">
+          <el-table-column prop="url" label="图标" width="30px">
+            <template #default="scope">
+              <div v-if="!scope.row.isFolder" id="icon" class="website-icon"
+                   :style="{backgroundImage :'url('+faviconURL(scope.row.url)+')'}"></div>
+              <div v-else>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column prop="link" label="标题">
+            <template #default="scope">
+              <div v-if="scope.row.isEditing">
+                <el-input type="text" v-model="scope.row.title"/>
               </div>
               <div v-else>
-                <el-tooltip :content="scope.row.url" placement="bottom" :show-after="500">
-                  <el-link @click="openBookmark(scope.row.id)">
-                    {{ scope.row.title }}
-                  </el-link>
-                </el-tooltip>
+                <div v-if="scope.row.isFolder">
+                  <el-divider content-position="center">{{ scope.row.title }}</el-divider>
+                </div>
+                <div v-else>
+                  <el-tooltip :content="scope.row.url" placement="bottom" :show-after="500">
+                    <el-link :underline="false" @click="openBookmark(scope.row.id)">
+                      {{ scope.row.title }}
+                    </el-link>
+                  </el-tooltip>
+                </div>
               </div>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="120px">
-          <template #default="scope">
-            <div v-if="scope.row.isEditing">
-              <el-button
-                  link
-                  type="primary"
-                  @click="saveBookmark(scope.row)"
-              >保存
-              </el-button>
-              <el-button
-                  link
-                  type="danger"
-                  @click="cancelEditBookmark(scope.row)"
-              >取消
-              </el-button>
-            </div>
-            <div v-else>
-              <el-button
-                  link
-                  type="primary"
-                  @click="editBookmark(scope.row)"
-              >编辑
-              </el-button>
-              <el-button
-                  link
-                  type="danger"
-                  @click="deleteBookmark(scope.row.id)"
-              >删除
-              </el-button>
-            </div>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="120px">
+            <template #default="scope">
+              <div v-if="scope.row.isEditing">
+                <el-button
+                    link
+                    type="primary"
+                    @click.stop="saveBookmark(scope.row)"
+                >保存
+                </el-button>
+                <el-button
+                    link
+                    type="danger"
+                    @click.stop="cancelEditBookmark(scope.row)"
+                >取消
+                </el-button>
+              </div>
+              <div v-else>
+                <el-button
+                    link
+                    type="primary"
+                    @click.stop="editBookmark(scope.row)"
+                >编辑
+                </el-button>
+                <el-button
+                    link
+                    type="danger"
+                    @click.stop="deleteBookmark(scope.row.id)"
+                >删除
+                </el-button>
+              </div>
 
-          </template>
-        </el-table-column>
-      </el-table>
-    </VueDraggable>
+            </template>
+          </el-table-column>
+        </el-table>
+
+      </template>
+    </el-tree>
   </div>
 </template>
 
 <script setup>
 import {bookmark, sendMessage} from "@/script/helper";
 import {ref, onMounted} from 'vue'
-import {VueDraggable} from 'vue-draggable-plus';
 import {ElMessageBox} from "element-plus";
 
 const searchKey = ref("");
 const bookmarkList = ref([]);
 const openSeparatorDialog = ref(false);
 const separatorName = ref("");
-const draggableHandle = ref(".cell")
+//处于编辑状态的数量，编辑时不能拖拽
+const editStatusNumber = ref(0)
 
 onMounted(() => {
   refreshBookmark();
 })
 
 /**
- * 拖拽结束事件
- * @param e
+ * 允许拖放范围：文件夹可以拖放，非文件夹不能嵌套
+ * @param draggingNode
+ * @param dropNode
+ * @param type
+ * @returns {boolean}
  */
-const onDraggableEnd = (e) => {
-  //拖拽结束时需要对变动的区域的书签进行重新排序
-  const start = Math.min(e.oldIndex, e.newIndex)
-  const end = Math.max(e.oldIndex, e.newIndex)
-  for (let i = start; i < end; i++) {
-    bookmark.moveBookmark(bookmarkList.value[i].id, i)
+const allowDrop = (draggingNode, dropNode, type) => {
+  //如果拖拽对象是个文件夹，释放对象只能是文件夹，切不能内嵌
+  if (draggingNode.data.isFolder) {
+    return dropNode.level === draggingNode.level && type !== 'inner';
+  } else {
+    //如果拖拽对象是个书签，可以放到文件夹中内嵌但不能内嵌到书签中（释放对象可以是文件夹，不能是书签）
+    return dropNode.data.isFolder || type !== 'inner';
   }
 }
+
+/**
+ * 拖拽结束事件
+ * @param currentNode 被拖拽节点对应的 Node
+ * @param targetNode 结束拖拽时最后进入的节点
+ * @param position 被拖拽节点的放置位置（before、after、inner）
+ */
+const onDraggableEnd = (currentNode, targetNode, position) => {
+  //console.log("onDraggableEnd", currentNode, targetNode, position)
+  if (position === 'inner') {
+    //console.log("移到内部")
+    bookmark.moveBookmarkToFolder(currentNode.data.id, targetNode.data.id);
+  } else {
+    if (currentNode.data.parentId === targetNode.data.parentId) {
+      //console.log("同文件夹移动")
+      if (position === 'before') {
+        bookmark.moveBookmark(currentNode.data.id, targetNode.data.index);
+      } else {
+        bookmark.moveBookmark(currentNode.data.id, targetNode.data.index + 1);
+      }
+    } else {
+      //console.log("移到外面/其他文件夹")
+      if (position === 'before') {
+        bookmark.moveBookmarkToFolder(currentNode.data.id, targetNode.data.parentId, targetNode.data.index);
+      } else {
+        bookmark.moveBookmarkToFolder(currentNode.data.id, targetNode.data.parentId, targetNode.data.index + 1);
+      }
+    }
+  }
+
+  //拖拽结束时需要对变动的区域的书签进行重新排序
+  // const start = Math.min(e.oldIndex, e.newIndex)
+  // const end = Math.max(e.oldIndex, e.newIndex)
+  // for (let i = start; i < end; i++) {
+  //   bookmark.moveBookmark(bookmarkList.value[i].id, i)
+  // }
+}
+
 /**
  * 读取书签记录
  */
@@ -199,18 +240,7 @@ const addBookmark = () => {
  */
 const cancelEditBookmark = (row) => {
   row.isEditing = false;
-  if (!isHaveEdit()) {
-    draggableHandle.value = ".cell";
-  }
-}
-
-const isHaveEdit = () => {
-  for (let i = 0; i < bookmarkList.value.length; i++) {
-    if (bookmarkList.value[i].isEditing) {
-      return true;
-    }
-  }
-  return false;
+  editStatusNumber.value--;
 }
 
 /**
@@ -219,7 +249,8 @@ const isHaveEdit = () => {
  */
 const editBookmark = (row) => {
   row.isEditing = true;
-  draggableHandle.value = ".cell1";
+  editStatusNumber.value++;
+  event.preventDefault();
 }
 
 /**
@@ -276,13 +307,7 @@ const faviconURL = (u) => {
 const addSeparator = () => {
   const title = separatorName.value;//prompt("输入分隔的名称：");
   if (title != null) {
-    // bookmark.addBookmarkV2(
-    //     {
-    //       title: title,
-    //       url: "chrome://separator/",
-    //     }, function () {
-    //       refreshBookmark();
-    //     });
+    separatorName.value = "";
     bookmark.createBookmarkFolder(
         title, function () {
           refreshBookmark();
@@ -306,4 +331,10 @@ const addSeparator = () => {
   height: 16px;
   width: 16px;
 }
+
+.el-tree .el-tree-node__content {
+  height: auto;
+  background-color: #f5f7fa;
+}
+
 </style>

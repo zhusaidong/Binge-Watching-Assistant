@@ -178,6 +178,13 @@ class Bookmark {
             index: toIndex
         }, callback);
     }
+
+    moveBookmarkToFolder(bookmarkId, parentId, toIndex, callback) {
+        chrome.bookmarks.move(bookmarkId.toString(), {
+            parentId: parentId,
+            index: toIndex
+        }, callback);
+    }
 }
 
 /**
