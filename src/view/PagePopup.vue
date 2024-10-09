@@ -40,11 +40,11 @@
     >
       <template #default="{ data }">
         <el-table :data="[data]" row-key="id" :show-header="false" :tree-props="{children:'children1'}">
-          <!--          <el-table-column label="序号" width="40px">-->
-          <!--            <template #default="scope">-->
-          <!--              {{ scope.row.$treeNodeId }}.-->
-          <!--            </template>-->
-          <!--          </el-table-column>-->
+          <el-table-column label="序号" width="45px">
+            <template #default="scope">
+              {{ scope.row.$treeNodeId }}.
+            </template>
+          </el-table-column>
           <el-table-column prop="url" label="图标" width="30px">
             <template #default="scope">
               <div v-if="!scope.row.isFolder" id="icon" class="website-icon"
