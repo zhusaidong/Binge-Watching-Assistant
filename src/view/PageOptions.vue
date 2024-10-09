@@ -1,20 +1,19 @@
 <template>
   <div class="main_app">
-    <h1>Hello {{ msg }}</h1>
 
-    <el-tabs>
-      <el-tab-pane title="标签管理">
-
+    <el-tabs type="border-card" v-model="activeTab">
+      <el-tab-pane label="标签管理" name="tags">
         <el-button @click="addTag()">添加标签</el-button>
-
-        <el-descriptions v-model="tagList">
-          <el-descriptions-item #default="slot">
-            {{ slot.name }} ({{ slot.count }})
-          </el-descriptions-item>
-        </el-descriptions>
+        <el-tag
+            v-for="item in tagList"
+            :key="item.label"
+            :type="item.type"
+            effect="plain">
+          {{ item.label }}({{ item.count }})
+        </el-tag>
       </el-tab-pane>
-      
-      <el-tab-pane title="标题正则">
+
+      <el-tab-pane label="标题正则" name="titleRegs">
         <el-form v-model="titleReg">
           <el-form-item>
             <el-input v-model="titleReg.title"/>
@@ -22,15 +21,11 @@
           <el-form-item>
             <el-input v-model="titleReg.domain"/>
           </el-form-item>
-
-          <template #footer="slot">
-
-          </template>
         </el-form>
 
         <el-divider>列表</el-divider>
 
-        <el-table data="titleRegList">
+        <el-table :data="titleRegList">
           <el-table-column prop="title" label="标题"/>
           <el-table-column prop="domain" label="域名"/>
         </el-table>
@@ -46,6 +41,7 @@ import {store} from "@/script/helper";
 const tagList = ref([]);
 const titleRegList = ref([]);
 const titleReg = ref({});
+const activeTab = ref("tags");
 
 const addTag = () => {
 
@@ -53,7 +49,8 @@ const addTag = () => {
 
 function getTagList() {
   store.getSyncData("tag.list").then(list => {
-    tagList.value = list;
+    console.log("list=", list)
+    tagList.value = list === null ? [] : list;
   })
 }
 

@@ -1,4 +1,9 @@
-import { createApp } from 'vue'
-import App from '../view/options.vue'
+import {createApp} from 'vue'
+import App from '../view/PageOptions.vue'
+import ElementPlus from "element-plus";
+import "element-plus/dist/index.css";
 
-createApp(App).mount('#app')
+const app = createApp(App);
+
+app.use(ElementPlus);
+app.mount("#app");
