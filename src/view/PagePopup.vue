@@ -3,16 +3,16 @@
 
     <!-- 按钮部分 -->
     <el-button @click="addBookmark()">添加追剧</el-button>
-    <el-button @click="openSeparatorDialog=true;separatorName='';">添加分类</el-button>
+    <el-button @click="openSeparatorDialog=true;separatorName='';">添加文件夹</el-button>
     <!--添加分隔的弹窗-->
-    <el-dialog v-model="openSeparatorDialog" title="添加分类" :close-on-click-modal="true">
+    <el-dialog v-model="openSeparatorDialog" title="添加文件夹" :close-on-click-modal="true">
       <el-form>
         <el-form-item>
-          <el-input v-model="separatorName" clearable placeholder="输入分类名称"/>
+          <el-input v-model="separatorName" clearable placeholder="输入文件夹名称"/>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="addSeparator();openSeparatorDialog=false">提交</el-button>
+        <el-button type="primary" @click="addSeparator();openSeparatorDialog=false">提交</el-button>
         <el-button @click="openSeparatorDialog=false">取消</el-button>
       </template>
     </el-dialog>
@@ -39,14 +39,16 @@
         :indent="30"
     >
       <template #default="{ data }">
-
         <el-table :data="[data]" row-key="id" :show-header="false" :tree-props="{children:'children1'}">
+          <!--          <el-table-column label="序号" width="40px">-->
+          <!--            <template #default="scope">-->
+          <!--              {{ scope.row.$treeNodeId }}.-->
+          <!--            </template>-->
+          <!--          </el-table-column>-->
           <el-table-column prop="url" label="图标" width="30px">
             <template #default="scope">
               <div v-if="!scope.row.isFolder" id="icon" class="website-icon"
                    :style="{backgroundImage :'url('+faviconURL(scope.row.url)+')'}"></div>
-              <div v-else>
-              </div>
             </template>
           </el-table-column>
           <el-table-column prop="link" label="标题">
@@ -68,7 +70,7 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="120px">
+          <el-table-column label="操作" width="105px">
             <template #default="scope">
               <div v-if="scope.row.isEditing">
                 <el-button
@@ -91,18 +93,18 @@
                     @click.stop="editBookmark(scope.row)"
                 >编辑
                 </el-button>
+                <!--文件夹为空时可以删除-->
                 <el-button
                     link
+                    v-if="!scope.row.isFolder || scope.row.children === undefined || scope.row.children.length === 0"
                     type="danger"
                     @click.stop="deleteBookmark(scope.row.id)"
                 >删除
                 </el-button>
               </div>
-
             </template>
           </el-table-column>
         </el-table>
-
       </template>
     </el-tree>
   </div>
