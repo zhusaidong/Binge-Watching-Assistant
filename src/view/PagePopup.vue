@@ -19,14 +19,25 @@
 
     <!-- 搜索部分 -->
     <el-divider content-position="left">搜索</el-divider>
-
-    <el-form>
-      <el-input v-model="searchKey" @input="refreshBookmark()" clearable placeholder="输入搜索内容"/>
+    <el-form :inline="true">
+      <el-form-item>
+        <el-input v-model="searchKey" @input="refreshBookmark()" clearable placeholder="输入搜索内容"/>
+      </el-form-item>
+      <el-form-item>
+        <el-select v-model="searchTag" filterable multiple placeholder="请选择标签" @change="refreshBookmark()"
+                   style="width:200px">
+          <el-option
+              v-for="item in tagList"
+              :key="item"
+              :label="item"
+              :value="item">
+          </el-option>
+        </el-select>
+      </el-form-item>
     </el-form>
 
     <!-- 书签部分 -->
     <el-divider content-position="left">追剧书签</el-divider>
-
     <el-tree
         :data="bookmarkList"
         node-key="id"
@@ -40,17 +51,20 @@
     >
       <template #default="{ data }">
         <el-table :data="[data]" row-key="id" :show-header="false" :tree-props="{children:'children1'}">
+          <!--序号-->
           <el-table-column label="序号" width="45px">
             <template #default="scope">
-              {{ scope.row.$treeNodeId }}.
+              {{ scope.row.$index }}.
             </template>
           </el-table-column>
+          <!--图标-->
           <el-table-column prop="url" label="图标" width="30px">
             <template #default="scope">
               <div v-if="!scope.row.isFolder" id="icon" class="website-icon"
                    :style="{backgroundImage :'url('+faviconURL(scope.row.url)+')'}"></div>
             </template>
           </el-table-column>
+          <!--标题-->
           <el-table-column prop="link" label="标题">
             <template #default="scope">
               <div v-if="scope.row.isEditing">
@@ -70,6 +84,34 @@
               </div>
             </template>
           </el-table-column>
+          <!--标签-->
+          <el-table-column label="标签" width="90px">
+            <template #default="scope">
+              <div v-if="!scope.row.isFolder">
+                <el-tag :key="tag" v-for="tag in scope.row.tags" size="small" closable
+                        @close="tagRemove(scope.row,tag)">
+                  {{ tag }}
+                </el-tag>
+                <!--添加标签-->
+                <div v-if="scope.row.tags.length < 2">
+                  <el-input
+                      class="input-new-tag"
+                      v-if="inputVisible"
+                      v-model="inputValue"
+                      size="small"
+                      maxlength="3"
+                      @keyup.enter="handleInputConfirm(scope.row)"
+                      @blur="handleInputConfirm(scope.row)"
+                  >
+                  </el-input>
+                  <el-button v-else class="button-new-tag" size="small"
+                             @click.stop="inputVisible = true;inputValue = '';">+
+                  </el-button>
+                </div>
+              </div>
+            </template>
+          </el-table-column>
+          <!--操作-->
           <el-table-column label="操作" width="105px">
             <template #default="scope">
               <div v-if="scope.row.isEditing">
@@ -111,20 +153,60 @@
 </template>
 
 <script setup>
-import {bookmark, sendMessage} from "@/script/helper";
+import {bookmark, CONFIG_STORE_TAG_KEY, sendMessage, store} from "@/script/helper";
 import {ref, onMounted} from 'vue'
 import {ElMessageBox} from "element-plus";
 
 const searchKey = ref("");
 const bookmarkList = ref([]);
+
+const searchTag = ref([]);
+const tagList = ref([]);
+
 const openSeparatorDialog = ref(false);
 const separatorName = ref("");
+
 //处于编辑状态的数量，编辑时不能拖拽
 const editStatusNumber = ref(0)
+
+//////
+const inputVisible = ref(false);
+const inputValue = ref('');
+const handleInputConfirm = (row) => {
+  if (inputValue.value) {
+    let tag = inputValue.value;
+    row.tags.push(tag);
+    //保存数据
+    store.getSyncData(CONFIG_STORE_TAG_KEY).then(tagData => {
+      tagData[row.id] = (tagData[row.id] || []).concat(tag);
+      store.setSyncData(CONFIG_STORE_TAG_KEY, tagData);
+    });
+  }
+  inputVisible.value = false;
+  inputValue.value = '';
+};
+const tagRemove = (row, tag) => {
+  row.tags.splice(row.tags.indexOf(tag), 1);
+  //移除数据
+  store.getSyncData(CONFIG_STORE_TAG_KEY).then(tagData => {
+    delete tagData[row.id];
+    store.setSyncData(CONFIG_STORE_TAG_KEY, tagData);
+  });
+};
+//////
 
 onMounted(() => {
   refreshBookmark();
 })
+
+const getTagData = () => {
+  return new Promise(function (resolve) {
+    store.getSyncData(CONFIG_STORE_TAG_KEY).then(tagData => {
+      console.log("tagData", tagData)
+      resolve(tagData);
+    });
+  });
+};
 
 /**
  * 允许拖放范围：文件夹可以拖放，非文件夹不能嵌套
@@ -184,39 +266,81 @@ const onDraggableEnd = (currentNode, targetNode, position) => {
  * 读取书签记录
  */
 const refreshBookmark = () => {
-  bookmark.getBookmarks().then(function (bookmarks) {
-    //console.log("bookmarks", bookmarks)
-    bookmark.setBadgeText();
-    for (let i = 0; i < bookmarks.length; i++) {
-      bookmarks[i].isFolder = bookmarks[i].url === undefined
-      bookmarks[i].isEditing = false;
+  getTagData().then(tagData => {
+    bookmark.getBookmarks().then(function (bookmarks) {
+      bookmark.setBadgeText();
+      let index = 1;
+      for (let i = 0; i < bookmarks.length; i++) {
+        let bookmark = bookmarks[i];
 
-      //搜索
-      if (searchKey.value !== "") {
-        //如果是文件夹
-        if (bookmarks[i].isFolder) {
-          //如果匹配到了文件夹名称，直接显示整个文件夹；匹配不到，再判断子节点的内容
-          if (!bookmarks[i].title.includes(searchKey.value)) {
+        bookmarks[i].isFolder = bookmark.url === undefined
+        bookmarks[i].isEditing = false;
+        bookmarks[i].$index = index++;
+
+        //标签处理
+        if (!bookmarks[i].isFolder) {
+          let tags = tagData[bookmark.id] || [];
+          bookmarks[i].tags = tags;
+          //去重
+          tagList.value = [...new Set(tagList.value.concat(tags))];
+        } else {
+          //文件夹内部
+          for (let j = 0; j < bookmark.children.length; j++) {
+            let bookmarkTreeNode = bookmark.children[j];
+            let tags = tagData[bookmarkTreeNode.id] || [];
+            bookmarks[i].children[j].tags = tags;
+            bookmarks[i].children[j].$index = index++;
+            //去重
+            tagList.value = [...new Set(tagList.value.concat(tags))];
+          }
+        }
+
+        //搜索
+        if (searchKey.value !== "") {
+          //如果是文件夹
+          if (bookmarks[i].isFolder) {
             //匹配子节点：子节点匹配不到，直接删除整个文件夹；匹配到了，将匹配到的替换子节点（只显示匹配到的）
-            let filter = bookmarks[i].children.filter(b => b.title.includes(searchKey.value));
+            let filter = bookmark.children.filter(b => b.title.includes(searchKey.value));
             if (filter.length === 0) {
               bookmarks.splice(i, 1);
               i--;
             } else {
               bookmarks[i].children = filter;
             }
+          } else {
+            //如果不是文件夹，直接匹配书签标题即可
+            if (!bookmark.title.includes(searchKey.value)) {
+              bookmarks.splice(i, 1);
+              i--;
+            }
           }
-        } else {
-          //如果不是文件夹，直接匹配书签标题即可
-          if (!bookmarks[i].title.includes(searchKey.value)) {
-            bookmarks.splice(i, 1);
-            i--;
+        }
+
+        //筛选标签
+        if (searchTag.value.length !== 0) {
+          console.log("searchTag", searchTag.value)
+          //如果是文件夹
+          if (bookmarks[i].isFolder) {
+            //匹配子节点：子节点匹配不到，直接删除整个文件夹；匹配到了，将匹配到的替换子节点（只显示匹配到的）
+            let filter = bookmark.children.filter(b => b.tags.filter(tag => searchTag.value.includes(tag)).length > 0);
+            if (filter.length === 0) {
+              bookmarks.splice(i, 1);
+              i--;
+            } else {
+              bookmarks[i].children = filter;
+            }
+          } else {
+            //如果不是文件夹，直接匹配书签标题即可
+            if (!bookmarks[i].tags.filter(tag => searchTag.value.includes(tag)).length > 0) {
+              bookmarks.splice(i, 1);
+              i--;
+            }
           }
         }
       }
-    }
-    bookmarkList.value = bookmarks;
-  });
+      bookmarkList.value = bookmarks;
+    });
+  })
 }
 
 /**
@@ -252,7 +376,6 @@ const cancelEditBookmark = (row) => {
 const editBookmark = (row) => {
   row.isEditing = true;
   editStatusNumber.value++;
-  event.preventDefault();
 }
 
 /**

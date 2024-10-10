@@ -37,6 +37,10 @@ https://developer.chrome.com/docs/extensions/how-to/ui/favicons?hl=zh-cn
 
 ## changelog
 
+### 1.2.1
+
+> 添加标签功能
+
 ### 1.2.0
 
 > 重构项目，使用vue开发，让界面更美观

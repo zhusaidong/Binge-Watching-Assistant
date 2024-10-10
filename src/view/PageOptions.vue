@@ -36,7 +36,7 @@
 
 <script setup>
 import {ref, onMounted} from "vue";
-import {store} from "@/script/helper";
+import {CONFIG_STORE_TAG_KEY, store} from "@/script/helper";
 
 const tagList = ref([]);
 const titleRegList = ref([]);
@@ -48,7 +48,7 @@ const addTag = () => {
 };
 
 function getTagList() {
-  store.getSyncData("tag.list").then(list => {
+  store.getSyncData(CONFIG_STORE_TAG_KEY).then(list => {
     console.log("list=", list)
     tagList.value = list === null ? [] : list;
   })

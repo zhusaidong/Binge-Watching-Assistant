@@ -139,11 +139,11 @@ class Bookmark {
                 chrome.action.setBadgeText(
                     {
                         text: count.toString()
-                    });
+                    }).then();
                 if (count >= 100) {
                     chrome.action.setBadgeBackgroundColor({
                         color: "#ff0000"
-                    });
+                    }).then();
                 }
             }
         });
@@ -210,7 +210,7 @@ class Store {
         return new Promise(function (resolve) {
             chrome.storage.sync.get(key, function (object) {
                 if (object[key] === undefined) {
-                    resolve(null);
+                    resolve({});
                 } else {
                     resolve(JSON.parse(object[key]));
                 }
@@ -263,6 +263,7 @@ const isDevMode = process.env.NODE_ENV === 'development'
 export var bookmark = new Bookmark(chrome.runtime.getManifest().name + (isDevMode ? "开发版" : ""));
 export var tabs = new Tab();
 export var store = new Store();
+export const CONFIG_STORE_TAG_KEY = "tag.list";
 
 /**
  * 发送消息
@@ -295,3 +296,10 @@ export function initBackground() {
     bookmark.addMainBookmarkFolder();
     bookmark.setBadgeText();
 }
+
+// export interface BookmarkTreeNode {
+//     isFolder: boolean;
+//     isEditing: boolean;
+//     $index: number;
+//     tags: string[];
+// }
