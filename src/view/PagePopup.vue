@@ -41,7 +41,7 @@
     <el-tree
         :data="bookmarkList"
         node-key="id"
-        default-expand-all
+        :default-expand-all="defaultExpand"
         @node-drop="onDraggableEnd"
         :draggable="editStatusNumber === 0"
         empty-text="暂无数据"
@@ -168,6 +168,7 @@ const separatorName = ref("");
 
 //处于编辑状态的数量，编辑时不能拖拽
 const editStatusNumber = ref(0)
+const defaultExpand = ref(true);
 
 //////
 const inputVisible = ref(false);
