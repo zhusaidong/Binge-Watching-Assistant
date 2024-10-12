@@ -39,9 +39,10 @@
     <!-- 书签部分 -->
     <el-divider content-position="left">追剧书签</el-divider>
     <el-tree
+        v-if="settings.showTable"
         :data="bookmarkList"
         node-key="id"
-        :default-expand-all="defaultExpand"
+        :default-expand-all="settings.defaultExpand"
         @node-drop="onDraggableEnd"
         :draggable="editStatusNumber === 0"
         empty-text="暂无数据"
@@ -85,7 +86,7 @@
             </template>
           </el-table-column>
           <!--标签-->
-          <el-table-column label="标签" width="90px">
+          <el-table-column label="标签" width="90px" v-if="settings.tag">
             <template #default="scope">
               <div v-if="!scope.row.isFolder">
                 <el-tag :key="tag" v-for="tag in scope.row.tags" size="small" closable
@@ -153,9 +154,26 @@
 </template>
 
 <script setup>
-import {bookmark, CONFIG_STORE_TAG_KEY, sendMessage, store} from "@/script/helper";
-import {ref, onMounted} from 'vue'
+import {bookmark, CONFIG_STORE_SETTINGS_KEY, CONFIG_STORE_TAG_KEY, sendMessage, store} from "@/script/helper";
+import {ref, onMounted, nextTick} from 'vue'
 import {ElMessageBox} from "element-plus";
+
+// const data = ref({
+//   add: {
+//     openSeparatorDialog: true,
+//     separatorName: ''
+//   },
+//   search: {
+//     searchKey: '',
+//     searchTag: []
+//   },
+//   list: {
+//     bookmarkList: [],
+//     tagList: [],
+//     editStatusNumber: 0,
+//     defaultExpand: true,
+//   }
+// });
 
 const searchKey = ref("");
 const bookmarkList = ref([]);
@@ -168,9 +186,15 @@ const separatorName = ref("");
 
 //处于编辑状态的数量，编辑时不能拖拽
 const editStatusNumber = ref(0)
-const defaultExpand = ref(true);
+const settings = ref({
+  //解决直接更新default-expand-all无法刷新状态的问题。
+  //@see https://blog.csdn.net/m0_63451467/article/details/135898421
+  showTable: true,
+  defaultExpand: true,
+  tag: false,
+});
 
-//////
+//标签
 const inputVisible = ref(false);
 const inputValue = ref('');
 const handleInputConfirm = (row) => {
@@ -194,17 +218,41 @@ const tagRemove = (row, tag) => {
     store.setSyncData(CONFIG_STORE_TAG_KEY, tagData);
   });
 };
-//////
 
 onMounted(() => {
+  getSettings().then(settingsStore => {
+    settings.value.showTable = false;
+    settings.value.defaultExpand = settingsStore["defaultExpand"] !== undefined ? settingsStore["defaultExpand"] : true;
+    settings.value.tag = settingsStore["tag"] !== undefined ? settingsStore["tag"] : true;
+    nextTick(() => {
+      settings.value.showTable = true;
+    })
+  });
   refreshBookmark();
 })
 
+/**
+ * 获取标签数据
+ * @returns {Promise<{}>}
+ */
 const getTagData = () => {
   return new Promise(function (resolve) {
     store.getSyncData(CONFIG_STORE_TAG_KEY).then(tagData => {
       console.log("tagData", tagData)
       resolve(tagData);
+    });
+  });
+};
+
+/**
+ * 获取设置的配置
+ * @returns {Promise<unknown>}
+ */
+const getSettings = () => {
+  return new Promise(function (resolve) {
+    store.getSyncData(CONFIG_STORE_SETTINGS_KEY).then(settings => {
+      console.log("settings", settings)
+      resolve(settings);
     });
   });
 };

@@ -264,6 +264,7 @@ export var bookmark = new Bookmark(chrome.runtime.getManifest().name + (isDevMod
 export var tabs = new Tab();
 export var store = new Store();
 export const CONFIG_STORE_TAG_KEY = "tag.list";
+export const CONFIG_STORE_SETTINGS_KEY = "settings";
 
 /**
  * 发送消息
