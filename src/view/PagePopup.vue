@@ -168,7 +168,13 @@
 </template>
 
 <script setup>
-import {bookmark, CONFIG_STORE_SETTINGS_KEY, CONFIG_STORE_TAG_KEY, sendMessage, store} from "@/script/helper";
+import {
+  bookmark,
+  CONFIG_STORE_TAG_KEY,
+  sendMessage,
+  settingsStore,
+  store, tabs
+} from "@/script/helper";
 import {ref, onMounted, nextTick} from 'vue'
 import {ElMessageBox} from "element-plus";
 
@@ -189,6 +195,7 @@ const settings = ref({
   showTable: true,
   defaultExpand: true,
   tag: false,
+  titleRegList: []
 });
 
 //标签
@@ -219,10 +226,11 @@ const tagRemove = (row, tag) => {
 };
 
 onMounted(() => {
-  getSettings().then(settingsStore => {
+  settingsStore.get().then(settingsStore => {
     settings.value.showTable = false;
     settings.value.defaultExpand = settingsStore["defaultExpand"] !== undefined ? settingsStore["defaultExpand"] : true;
     settings.value.tag = settingsStore["tag"] !== undefined ? settingsStore["tag"] : true;
+    settings.value.titleRegList = settingsStore["titleRegList"] !== undefined ? settingsStore["titleRegList"] : [];
     nextTick(() => {
       settings.value.showTable = true;
     })
@@ -239,19 +247,6 @@ const getTagData = () => {
     store.getSyncData(CONFIG_STORE_TAG_KEY).then(tagData => {
       console.log("tagData", tagData)
       resolve(tagData);
-    });
-  });
-};
-
-/**
- * 获取设置的配置
- * @returns {Promise<unknown>}
- */
-const getSettings = () => {
-  return new Promise(function (resolve) {
-    store.getSyncData(CONFIG_STORE_SETTINGS_KEY).then(settings => {
-      console.log("settings", settings)
-      resolve(settings);
     });
   });
 };
@@ -314,6 +309,7 @@ const onDraggableEnd = (currentNode, targetNode, position) => {
  * 读取书签记录
  */
 const refreshBookmark = () => {
+  //fixme：页面加载有点慢
   getTagData().then(tagData => {
     bookmark.getBookmarks().then(function (bookmarks) {
       bookmark.setBadgeText();
@@ -398,7 +394,8 @@ const refreshBookmark = () => {
  * 添加书签
  */
 const addBookmark = () => {
-  chrome.tabs.query({active: true, currentWindow: true}, function (tab) {
+  tabs.getCurrentTab().then(tab => {
+    //todo 根据标题规则，匹配标题的内容
     bookmark.addBookmarkV2(
         {
           title: tab[0].title,

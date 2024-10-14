@@ -14,7 +14,7 @@
       </el-tab-pane>
 
       <!--标签管理-->
-      <el-tab-pane label="标签管理" name="tags" v-if="settings.tag">
+      <el-tab-pane label="标签列表" name="tags" v-if="settings.tag">
         <el-tag
             v-for="item in tagList"
             :key="item.label"
@@ -23,23 +23,29 @@
         </el-tag>
       </el-tab-pane>
 
-      <!--todo 标题正则-->
-      <el-tab-pane label="标题正则" name="titleRegs">
+      <!--todo 标题美化-->
+      <el-tab-pane label="标题美化" name="titleRegs">
+        <i>删除书签中指定视频网站的标题上的固定多余文字，让书签的标题更简洁明了</i>
         <el-form v-model="titleReg">
           <el-form-item prop="title" label="标题">
-            <el-input v-model="titleReg.title"/>
+            <el-input v-model="titleReg.title" placeholder="需要去除的文字：如“高清完整版视频在线观看_腾讯视频”"/>
           </el-form-item>
           <el-form-item prop="domain" label="域名">
-            <el-input v-model="titleReg.domain"/>
+            <el-input v-model="titleReg.domain" placeholder="网站的域名：如“v.qq.com”"/>
           </el-form-item>
-          <el-button>添加</el-button>
+          <el-button @click="addTitleReg()">添加</el-button>
         </el-form>
 
         <el-divider>列表</el-divider>
 
-        <el-table :data="titleRegList">
+        <el-table :data="settings.titleRegList" row-key="domain">
           <el-table-column prop="title" label="标题"/>
           <el-table-column prop="domain" label="域名"/>
+          <el-table-column>
+            <template #default="scope">
+              <el-button type="danger" @click="deleteTitleReg(scope.$index)">删除</el-button>
+            </template>
+          </el-table-column>
         </el-table>
       </el-tab-pane>
     </el-tabs>
@@ -48,18 +54,20 @@
 
 <script setup>
 import {ref, onMounted} from "vue";
-import {CONFIG_STORE_SETTINGS_KEY, CONFIG_STORE_TAG_KEY, store} from "@/script/helper";
+import {CONFIG_STORE_TAG_KEY, settingsStore, store} from "@/script/helper";
 
 const tagList = ref([]);
-const titleRegList = ref([]);
 const titleReg = ref({});
 const activeTab = ref("settings");
 const settings = ref({
   defaultExpand: true,
   tag: false,
+  titleRegList: []
 });
 
-//获取标签
+/**
+ * 获取标签
+ */
 function getTagList() {
   store.getSyncData(CONFIG_STORE_TAG_KEY).then(tagData => {
     console.log("list=", tagData)
@@ -87,33 +95,38 @@ function getTagList() {
   })
 }
 
-//开关调用
+/**
+ * 开关调用
+ * @param type
+ */
 const changeSwitch = (type) => {
-  console.log("settings." + type + "=", settings.value[type])
   //保存数据
-  store.getSyncData(CONFIG_STORE_SETTINGS_KEY).then(settingsStore => {
-    settingsStore[type] = settings.value[type];
-    store.setSyncData(CONFIG_STORE_SETTINGS_KEY, settingsStore);
-  });
+  settingsStore.set(type, settings.value[type])
 }
 
 /**
- * 获取设置的配置
- * @returns {Promise<unknown>}
+ * 添加标题规则
  */
-const getSettings = () => {
-  return new Promise(function (resolve) {
-    store.getSyncData(CONFIG_STORE_SETTINGS_KEY).then(settings => {
-      console.log("settings", settings)
-      resolve(settings);
-    });
-  });
+const addTitleReg = () => {
+  settings.value.titleRegList.push(titleReg.value);
+  titleReg.value = {};
+  settingsStore.set('titleRegList', settings.value.titleRegList)
+};
+
+/**
+ * 删除标题规则
+ * @param index
+ */
+const deleteTitleReg = (index) => {
+  settings.value.titleRegList.splice(index, 1);
+  settingsStore.set('titleRegList', settings.value.titleRegList)
 };
 
 onMounted(() => {
-  getSettings().then(settingsStore => {
+  settingsStore.get().then(settingsStore => {
     settings.value.defaultExpand = settingsStore["defaultExpand"] !== undefined ? settingsStore["defaultExpand"] : true;
     settings.value.tag = settingsStore["tag"] !== undefined ? settingsStore["tag"] : true;
+    settings.value.titleRegList = settingsStore["titleRegList"] !== undefined ? settingsStore["titleRegList"] : [];
   });
   getTagList();
 })

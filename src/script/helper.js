@@ -257,6 +257,18 @@ class Tab {
     onRemoved(callback) {
         chrome.tabs.onRemoved.addListener(callback);
     }
+
+    /**
+     * 获取当前激活的标签
+     * @returns {Promise<unknown>}
+     */
+    getCurrentTab() {
+        return new Promise(function (resolve) {
+            chrome.tabs.query({active: true, currentWindow: true}, function (tab) {
+                resolve(tab[0]);
+            });
+        })
+    }
 }
 
 const isDevMode = process.env.NODE_ENV === 'development'
@@ -297,6 +309,37 @@ export function initBackground() {
     bookmark.addMainBookmarkFolder();
     bookmark.setBadgeText();
 }
+
+/**
+ * 设置存储类
+ */
+class Settings {
+    settingStore;
+
+    constructor(store) {
+        this.settingStore = store;
+    }
+
+    get() {
+        let that = this;
+        return new Promise(function (resolve) {
+            that.settingStore.getSyncData(CONFIG_STORE_SETTINGS_KEY).then(settings => {
+                resolve(settings);
+            });
+        });
+    }
+
+    set(key, data) {
+        let that = this;
+        that.settingStore.getSyncData(CONFIG_STORE_SETTINGS_KEY).then(settingsStore => {
+            settingsStore[key] = data;
+            that.settingStore.setSyncData(CONFIG_STORE_SETTINGS_KEY, settingsStore);
+        });
+    }
+}
+
+export var settingsStore = new Settings(store);
+
 
 // export interface BookmarkTreeNode {
 //     isFolder: boolean;
