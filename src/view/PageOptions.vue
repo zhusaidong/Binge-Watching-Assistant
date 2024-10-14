@@ -1,6 +1,5 @@
 <template>
   <div class="main_app">
-
     <el-tabs type="border-card" v-model="activeTab">
       <!--设置-->
       <el-tab-pane label="设置" name="settings">
@@ -23,7 +22,8 @@
           {{ item.label }}({{ item.count }})
         </el-tag>
       </el-tab-pane>
-      <!--标题正则-->
+
+      <!--todo 标题正则-->
       <el-tab-pane label="标题正则" name="titleRegs">
         <el-form v-model="titleReg">
           <el-form-item prop="title" label="标题">
@@ -42,7 +42,6 @@
           <el-table-column prop="domain" label="域名"/>
         </el-table>
       </el-tab-pane>
-
     </el-tabs>
   </div>
 </template>
@@ -60,6 +59,7 @@ const settings = ref({
   tag: false,
 });
 
+//获取标签
 function getTagList() {
   store.getSyncData(CONFIG_STORE_TAG_KEY).then(tagData => {
     console.log("list=", tagData)
@@ -87,6 +87,7 @@ function getTagList() {
   })
 }
 
+//开关调用
 const changeSwitch = (type) => {
   console.log("settings." + type + "=", settings.value[type])
   //保存数据

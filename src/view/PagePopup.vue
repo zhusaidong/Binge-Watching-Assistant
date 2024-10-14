@@ -24,8 +24,14 @@
         <el-input v-model="searchKey" @input="refreshBookmark()" clearable placeholder="输入搜索内容"/>
       </el-form-item>
       <el-form-item>
-        <el-select v-model="searchTag" filterable multiple placeholder="请选择标签" @change="refreshBookmark()"
-                   style="width:200px">
+        <el-select
+            v-if="settings.tag"
+            v-model="searchTag"
+            filterable
+            multiple
+            placeholder="请选择标签"
+            @change="refreshBookmark()"
+            style="width:200px">
           <el-option
               v-for="item in tagList"
               :key="item"
@@ -89,24 +95,32 @@
           <el-table-column label="标签" width="90px" v-if="settings.tag">
             <template #default="scope">
               <div v-if="!scope.row.isFolder">
-                <el-tag :key="tag" v-for="tag in scope.row.tags" size="small" closable
-                        @close="tagRemove(scope.row,tag)">
+                <el-tag
+                    v-for="tag in scope.row.tags"
+                    :key="tag"
+                    size="small"
+                    closable
+                    @close="tagRemove(scope.row,tag)">
                   {{ tag }}
                 </el-tag>
                 <!--添加标签-->
                 <div v-if="scope.row.tags.length < 2">
                   <el-input
                       class="input-new-tag"
-                      v-if="inputVisible"
-                      v-model="inputValue"
+                      v-if="scope.row.tagVisible"
+                      v-model="scope.row.tagValue"
                       size="small"
                       maxlength="3"
                       @keyup.enter="handleInputConfirm(scope.row)"
+                      @keyup.esc="handleInputConfirm(scope.row)"
                       @blur="handleInputConfirm(scope.row)"
                   >
                   </el-input>
-                  <el-button v-else class="button-new-tag" size="small"
-                             @click.stop="inputVisible = true;inputValue = '';">+
+                  <el-button
+                      v-else
+                      class="button-new-tag"
+                      size="small"
+                      @click.stop="scope.row.tagVisible = true;scope.row.tagValue = '';">+
                   </el-button>
                 </div>
               </div>
@@ -158,23 +172,6 @@ import {bookmark, CONFIG_STORE_SETTINGS_KEY, CONFIG_STORE_TAG_KEY, sendMessage, 
 import {ref, onMounted, nextTick} from 'vue'
 import {ElMessageBox} from "element-plus";
 
-// const data = ref({
-//   add: {
-//     openSeparatorDialog: true,
-//     separatorName: ''
-//   },
-//   search: {
-//     searchKey: '',
-//     searchTag: []
-//   },
-//   list: {
-//     bookmarkList: [],
-//     tagList: [],
-//     editStatusNumber: 0,
-//     defaultExpand: true,
-//   }
-// });
-
 const searchKey = ref("");
 const bookmarkList = ref([]);
 
@@ -195,11 +192,9 @@ const settings = ref({
 });
 
 //标签
-const inputVisible = ref(false);
-const inputValue = ref('');
 const handleInputConfirm = (row) => {
-  if (inputValue.value) {
-    let tag = inputValue.value;
+  if (row.tagValue) {
+    let tag = row.tagValue;
     row.tags.push(tag);
     //保存数据
     store.getSyncData(CONFIG_STORE_TAG_KEY).then(tagData => {
@@ -207,14 +202,18 @@ const handleInputConfirm = (row) => {
       store.setSyncData(CONFIG_STORE_TAG_KEY, tagData);
     });
   }
-  inputVisible.value = false;
-  inputValue.value = '';
+  row.tagVisible = false;
+  row.tagValue = '';
 };
 const tagRemove = (row, tag) => {
   row.tags.splice(row.tags.indexOf(tag), 1);
   //移除数据
   store.getSyncData(CONFIG_STORE_TAG_KEY).then(tagData => {
-    delete tagData[row.id];
+    tagData[row.id] = row.tags;
+    //数组为空时，清除整个对象，来压缩存储
+    if (tagData[row.id].length === 0) {
+      delete tagData[row.id];
+    }
     store.setSyncData(CONFIG_STORE_TAG_KEY, tagData);
   });
 };
@@ -325,6 +324,9 @@ const refreshBookmark = () => {
         bookmarks[i].isFolder = bookmark.url === undefined
         bookmarks[i].isEditing = false;
         bookmarks[i].$index = index++;
+
+        bookmarks[i].tagVisible = false;
+        bookmarks[i].tagValue = false;
 
         //标签处理
         if (!bookmarks[i].isFolder) {
