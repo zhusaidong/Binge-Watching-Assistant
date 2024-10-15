@@ -1,10 +1,23 @@
-import {tabs, bookmark, listenMessage, initBackground} from '@/script/helper';
+import {tabs, bookmark, listenMessage} from '@/script/helper';
 
-//全局的书签-标签的关联变量
+//有活动期间，保活
+//@see https://blog.csdn.net/qq_35606400/article/details/136327698
+//fixme: 当操作系统进入睡眠时，保活将失效。
+let keepAlive = null;
+
+/**
+ * 全局的书签-标签的关联变量
+ * @type {{}}
+ */
 const bookmarkTabs = {};
 
-//初始化
-initBackground();
+/**
+ * 初始化
+ */
+const initBackground = () => {
+    bookmark.addMainBookmarkFolder();
+    bookmark.setBadgeText();
+}
 
 /**
  * 标签监听器
@@ -41,42 +54,10 @@ const tabListener = () => {
     });
 }
 
-tabListener();
-
-/**
- * 创建监听
- */
-listenMessage((request) => {
-    const bookmarkId = request.bookmark_id;
-    const tabId = request.tab_id;
-
-    //调用时创建监听
-    // if (Object.keys(bookmarkTabs).length === 0) {
-    //     console.log("创建tab监听器")
-    //     tabListener();
-    // }
-
-    if (tabId == null) {
-        bookmark.getBookmark(bookmarkId).then(function (bookmark) {
-            tabs.create(bookmark.url).then(function (tab) {
-                bookmarkTabs[tab.id] = bookmarkId;
-            });
-        });
-    } else {
-        bookmarkTabs[tabId] = bookmarkId;
-    }
-    startWaitWhenListenTab();
-});
-
-//有活动期间，保活
-//@see https://blog.csdn.net/qq_35606400/article/details/136327698
-//fixme: 当操作系统进入睡眠时，保活将失效。
-let keepAlive = null;
-
 /**
  * 监听tab时启动保活
  */
-function startWaitWhenListenTab() {
+const startWaitWhenListenTab = () => {
     if (keepAlive === null) {
         keepAlive = setInterval(waitUntil, 5 * 1000);
         console.log("create keepAlive");
@@ -97,3 +78,31 @@ function waitUntil() {
         keepAlive = null;
     }
 }
+
+initBackground();
+tabListener();
+
+/**
+ * 创建监听
+ */
+listenMessage(request => {
+    const bookmarkId = request.bookmark_id;
+    const tabId = request.tab_id;
+
+    //调用时创建监听
+    // if (Object.keys(bookmarkTabs).length === 0) {
+    //     console.log("创建tab监听器")
+    //     tabListener();
+    // }
+
+    if (tabId == null) {
+        bookmark.getBookmark(bookmarkId).then(function (bookmark) {
+            tabs.create(bookmark.url).then(function (tab) {
+                bookmarkTabs[tab.id] = bookmarkId;
+            });
+        });
+    } else {
+        bookmarkTabs[tabId] = bookmarkId;
+    }
+    startWaitWhenListenTab();
+});

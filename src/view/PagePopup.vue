@@ -45,7 +45,7 @@
     <!-- 书签部分 -->
     <el-divider content-position="left">追剧书签</el-divider>
     <el-tree
-        v-if="settings.showTable"
+        v-if="settings.refreshTable"
         :data="bookmarkList"
         node-key="id"
         :default-expand-all="settings.defaultExpand"
@@ -192,14 +192,17 @@ const editStatusNumber = ref(0)
 const settings = ref({
   //解决直接更新default-expand-all无法刷新状态的问题。
   //@see https://blog.csdn.net/m0_63451467/article/details/135898421
-  showTable: true,
+  refreshTable: true,
   defaultExpand: true,
   tag: false,
   titleRegList: []
 });
 
-//标签
-const handleInputConfirm = (row) => {
+/**
+ * 标签输入
+ * @param row
+ */
+const handleInputConfirm = row => {
   if (row.tagValue) {
     let tag = row.tagValue;
     row.tags.push(tag);
@@ -212,6 +215,12 @@ const handleInputConfirm = (row) => {
   row.tagVisible = false;
   row.tagValue = '';
 };
+
+/**
+ * 标签移除
+ * @param row
+ * @param tag
+ */
 const tagRemove = (row, tag) => {
   row.tags.splice(row.tags.indexOf(tag), 1);
   //移除数据
@@ -225,29 +234,21 @@ const tagRemove = (row, tag) => {
   });
 };
 
-onMounted(() => {
-  settingsStore.get().then(settingsStore => {
-    settings.value.showTable = false;
-    settings.value.defaultExpand = settingsStore["defaultExpand"] !== undefined ? settingsStore["defaultExpand"] : true;
-    settings.value.tag = settingsStore["tag"] !== undefined ? settingsStore["tag"] : true;
-    settings.value.titleRegList = settingsStore["titleRegList"] !== undefined ? settingsStore["titleRegList"] : [];
-    nextTick(() => {
-      settings.value.showTable = true;
-    })
-  });
-  refreshBookmark();
-})
-
 /**
  * 获取标签数据
  * @returns {Promise<{}>}
  */
 const getTagData = () => {
   return new Promise(function (resolve) {
-    store.getSyncData(CONFIG_STORE_TAG_KEY).then(tagData => {
-      console.log("tagData", tagData)
-      resolve(tagData);
-    });
+    // 如果关闭了标签功能，则无需调用获取标签的方法
+    if (!settings.value.tag) {
+      resolve({});
+    } else {
+      store.getSyncData(CONFIG_STORE_TAG_KEY).then(tagData => {
+        console.log("tagData", tagData)
+        resolve(tagData);
+      });
+    }
   });
 };
 
@@ -395,15 +396,18 @@ const refreshBookmark = () => {
  */
 const addBookmark = () => {
   tabs.getCurrentTab().then(tab => {
-    //todo 根据标题规则，匹配标题的内容
+    //根据标题规则，匹配标题的内容
+    let titleReg = settings.value.titleRegList.find(titleReg => tab.url.includes(titleReg.domain));
+    let newTitle = titleReg !== undefined ? tab.title.replace(titleReg.removeTitle, "") : tab.title;
+
     bookmark.addBookmarkV2(
         {
-          title: tab[0].title,
-          url: tab[0].url,
+          title: newTitle,
+          url: tab.url,
         }, function (bookmark) {
           refreshBookmark();
           //添加新页面时立即开启监听
-          sendMessage({bookmark_id: bookmark.id, tab_id: tab[0].id});
+          sendMessage({bookmark_id: bookmark.id, tab_id: tab.id});
         });
   });
 }
@@ -412,7 +416,7 @@ const addBookmark = () => {
  * 取消编辑
  * @param row
  */
-const cancelEditBookmark = (row) => {
+const cancelEditBookmark = row => {
   row.isEditing = false;
   editStatusNumber.value--;
 }
@@ -421,7 +425,7 @@ const cancelEditBookmark = (row) => {
  * 编辑书签
  * @param row
  */
-const editBookmark = (row) => {
+const editBookmark = row => {
   row.isEditing = true;
   editStatusNumber.value++;
 }
@@ -430,7 +434,7 @@ const editBookmark = (row) => {
  * 保存书签
  * @param row
  */
-const saveBookmark = (row) => {
+const saveBookmark = row => {
   bookmark.updateBookmark(row.id, {title: row.title}, function () {
     refreshBookmark();
   });
@@ -440,7 +444,7 @@ const saveBookmark = (row) => {
  *删除书签
  * @param id
  */
-const deleteBookmark = (id) => {
+const deleteBookmark = id => {
   ElMessageBox.confirm('确定要删除吗？', '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
@@ -458,7 +462,7 @@ const deleteBookmark = (id) => {
  * 打开书签
  * @param id
  */
-const openBookmark = (id) => {
+const openBookmark = id => {
   sendMessage({bookmark_id: id, tab_id: null});
 }
 
@@ -467,7 +471,7 @@ const openBookmark = (id) => {
  * @param u
  * @returns {string}
  */
-const faviconURL = (u) => {
+const faviconURL = u => {
   const url = new URL(chrome.runtime.getURL("/_favicon/"));
   url.searchParams.set("pageUrl", u);
   url.searchParams.set("size", "16");
@@ -487,6 +491,26 @@ const addSeparator = () => {
         });
   }
 };
+
+/**
+ * 获取设置的配置
+ */
+const getSettings = () => {
+  settingsStore.get().then(settingsStore => {
+    settings.value.refreshTable = false;
+    settings.value.defaultExpand = settingsStore["defaultExpand"] !== undefined ? settingsStore["defaultExpand"] : true;
+    settings.value.tag = settingsStore["tag"] !== undefined ? settingsStore["tag"] : true;
+    settings.value.titleRegList = settingsStore["titleRegList"] !== undefined ? settingsStore["titleRegList"] : [];
+    nextTick(() => {
+      settings.value.refreshTable = true;
+    })
+  });
+};
+
+getSettings();
+onMounted(() => {
+  refreshBookmark();
+})
 </script>
 
 <style>

@@ -1,3 +1,6 @@
+//是否是开发模式
+const isDevMode = process.env.NODE_ENV === 'development'
+
 /**
  * 书签
  */
@@ -271,45 +274,6 @@ class Tab {
     }
 }
 
-const isDevMode = process.env.NODE_ENV === 'development'
-export var bookmark = new Bookmark(chrome.runtime.getManifest().name + (isDevMode ? "开发版" : ""));
-export var tabs = new Tab();
-export var store = new Store();
-export const CONFIG_STORE_TAG_KEY = "tag.list";
-export const CONFIG_STORE_SETTINGS_KEY = "settings";
-
-/**
- * 发送消息
- * @param msg 消息
- */
-export function sendMessage(msg) {
-    chrome.runtime.sendMessage(msg);
-}
-
-/**
- * 监听消息
- * @param requestCallback 消息回调
- */
-export function listenMessage(requestCallback) {
-    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-        //console.log("get the message[request]", request)
-        //console.log("get the message[sender]", sender)
-        if (!isDevMode && sender.id !== "pbnnheibacpamfaendimogbeaeciglpo") {
-            return;
-        }
-        requestCallback(request);
-        sendResponse({msg: "ok"});
-    });
-}
-
-/**
- * 初始化
- */
-export function initBackground() {
-    bookmark.addMainBookmarkFolder();
-    bookmark.setBadgeText();
-}
-
 /**
  * 设置存储类
  */
@@ -338,12 +302,34 @@ class Settings {
     }
 }
 
+/**
+ * 发送消息
+ * @param msg 消息
+ */
+export function sendMessage(msg) {
+    chrome.runtime.sendMessage(msg).then();
+}
+
+/**
+ * 监听消息
+ * @param requestCallback 消息回调
+ */
+export function listenMessage(requestCallback) {
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        //console.log("get the message[request]", request)
+        //console.log("get the message[sender]", sender)
+        if (!isDevMode && sender.id !== "pbnnheibacpamfaendimogbeaeciglpo") {
+            return;
+        }
+        requestCallback(request);
+        sendResponse({msg: "ok"});
+    });
+}
+
+export var bookmark = new Bookmark(chrome.runtime.getManifest().name + (isDevMode ? "开发版" : ""));
+export var tabs = new Tab();
+export var store = new Store();
 export var settingsStore = new Settings(store);
 
-
-// export interface BookmarkTreeNode {
-//     isFolder: boolean;
-//     isEditing: boolean;
-//     $index: number;
-//     tags: string[];
-// }
+export const CONFIG_STORE_TAG_KEY = "tag.list";
+export const CONFIG_STORE_SETTINGS_KEY = "settings";

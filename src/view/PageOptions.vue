@@ -23,25 +23,32 @@
         </el-tag>
       </el-tab-pane>
 
-      <!--todo 标题美化-->
+      <!--标题美化-->
       <el-tab-pane label="标题美化" name="titleRegs">
         <i>删除书签中指定视频网站的标题上的固定多余文字，让书签的标题更简洁明了</i>
         <el-form v-model="titleReg">
-          <el-form-item prop="title" label="标题">
-            <el-input v-model="titleReg.title" placeholder="需要去除的文字：如“高清完整版视频在线观看_腾讯视频”"/>
-          </el-form-item>
+          <!--          <el-form-item prop="useRegular" label="使用正则匹配">-->
+          <!--            <el-switch v-model="titleReg.useRegular"/>-->
+          <!--          </el-form-item>-->
           <el-form-item prop="domain" label="域名">
             <el-input v-model="titleReg.domain" placeholder="网站的域名：如“v.qq.com”"/>
           </el-form-item>
+          <el-form-item prop="removeTitle" label="删除文字" v-if="!titleReg.useRegular">
+            <el-input v-model="titleReg.removeTitle" placeholder="需要去除的文字：如“高清完整版视频在线观看_腾讯视频”"/>
+          </el-form-item>
+          <!--          <el-form-item prop="regularTitle" label="正则匹配标题" v-if="titleReg.useRegular">-->
+          <!--            <el-input v-model="titleReg.regularTitle" placeholder="规则：旧标题/新标题"/>-->
+          <!--          </el-form-item>-->
           <el-button @click="addTitleReg()">添加</el-button>
         </el-form>
 
         <el-divider>列表</el-divider>
 
         <el-table :data="settings.titleRegList" row-key="domain">
-          <el-table-column prop="title" label="标题"/>
           <el-table-column prop="domain" label="域名"/>
-          <el-table-column>
+          <el-table-column prop="removeTitle" label="删除文字"/>
+          <!--          <el-table-column prop="regularTitle" label="正则匹配标题"/>-->
+          <el-table-column label="操作">
             <template #default="scope">
               <el-button type="danger" @click="deleteTitleReg(scope.$index)">删除</el-button>
             </template>
@@ -57,7 +64,14 @@ import {ref, onMounted} from "vue";
 import {CONFIG_STORE_TAG_KEY, settingsStore, store} from "@/script/helper";
 
 const tagList = ref([]);
-const titleReg = ref({});
+const titleReg = ref({
+  domain: '',
+  removeTitle: '',
+  //todo 下个版本可以升级成正则替换
+  useRegular: false,
+  //规则：<old_string>/<new_string>
+  //regularTitle: '',
+});
 const activeTab = ref("settings");
 const settings = ref({
   defaultExpand: true,
