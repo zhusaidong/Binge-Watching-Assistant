@@ -220,6 +220,28 @@ class Store {
             });
         });
     }
+
+    /**
+     * 保存数据
+     * @param key
+     * @param value
+     * @param callback
+     */
+    setLocalData(key, value, callback) {
+        chrome.storage.local.set({[key]: JSON.stringify(value)}, callback);
+    }
+
+    getLocalData(key) {
+        return new Promise(function (resolve) {
+            chrome.storage.local.get(key, function (object) {
+                if (object[key] === undefined) {
+                    resolve({});
+                } else {
+                    resolve(JSON.parse(object[key]));
+                }
+            });
+        });
+    }
 }
 
 /**
@@ -303,6 +325,23 @@ class Settings {
 }
 
 /**
+ * 提醒类
+ */
+class Notice {
+    once(key, callback) {
+        store.getLocalData("notice").then(data => {
+            console.log("localData.data=", data)
+            if (data[key] === undefined) {
+                callback();
+                let newVar = {};
+                newVar[key] = true;
+                store.setLocalData("notice", newVar);
+            }
+        });
+    }
+}
+
+/**
  * 发送消息
  * @param msg 消息
  */
@@ -333,3 +372,5 @@ export var settingsStore = new Settings(store);
 
 export const CONFIG_STORE_TAG_KEY = "tag.list";
 export const CONFIG_STORE_SETTINGS_KEY = "settings";
+
+export var notice = new Notice();

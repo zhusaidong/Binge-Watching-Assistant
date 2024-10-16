@@ -170,13 +170,14 @@
 <script setup>
 import {
   bookmark,
-  CONFIG_STORE_TAG_KEY,
+  CONFIG_STORE_TAG_KEY, notice,
   sendMessage,
   settingsStore,
   store, tabs
 } from "@/script/helper";
 import {ref, onMounted, nextTick} from 'vue'
 import {ElMessageBox} from "element-plus";
+import versionNotice from "@/FeatureTips.json";
 
 const searchKey = ref("");
 const bookmarkList = ref([]);
@@ -507,10 +508,29 @@ const getSettings = () => {
   });
 };
 
+/**
+ * 从文件里获取新特征，从而进行提示
+ */
+const featureTipsFromFile = () => {
+  const featureTips = require("@/FeatureTips.json");
+  let featureTip = featureTips[featureTips.length - 1];
+  console.log("featureTip=", featureTip)
+
+  //展示新功能的提示
+  notice.once(featureTip.key, () => {
+    ElMessageBox.alert(featureTip.message, "系统提示");
+  });
+}
+
 getSettings();
 onMounted(() => {
   refreshBookmark();
+
+  //debug用
+  //chrome.storage.local.clear();
+  featureTipsFromFile();
 })
+
 </script>
 
 <style>
