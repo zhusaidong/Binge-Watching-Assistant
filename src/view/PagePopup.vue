@@ -517,7 +517,9 @@ const featureTipsFromFile = () => {
 
   //展示新功能的提示
   notice.once(featureTip.key, () => {
-    ElMessageBox.alert(featureTip.message, "系统提示");
+    ElMessageBox.alert(featureTip.message, "系统提示", {
+      dangerouslyUseHTMLString: featureTip.isHtml || false
+    });
   });
 }
 
@@ -527,7 +529,7 @@ onMounted(() => {
 
   //debug用
   //chrome.storage.local.clear();
-  featureTipsFromFile();
+  //featureTipsFromFile();
 })
 
 </script>
