@@ -177,7 +177,6 @@ import {
 } from "@/script/helper";
 import {ref, onMounted, nextTick} from 'vue'
 import {ElMessageBox} from "element-plus";
-import versionNotice from "@/FeatureTips.json";
 
 const searchKey = ref("");
 const bookmarkList = ref([]);
