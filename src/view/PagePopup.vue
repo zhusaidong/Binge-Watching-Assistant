@@ -514,14 +514,21 @@ const getSettings = () => {
  * 从文件里获取新特征，从而进行提示
  */
 const noticeFeatureTip = () => {
-  let featureTips;
-  featureTips = require("@/FeatureTips.json");
-  if (featureTips.length === 0) {
+  /**
+   * @type FeatureTips
+   */
+  const featureTips = require("@/FeatureTips.json");
+  let settings = featureTips.settings || {};
+  if (settings.debug) {
+    chrome.storage.local.clear();
+  }
+  
+  let features = featureTips.features || [];
+  if (features.length === 0) {
     return;
   }
 
-  let featureTip = featureTips[featureTips.length - 1];
-  console.log("featureTip=", featureTip)
+  let featureTip = features[features.length - 1];
 
   //展示新功能的提示
   notice.once(featureTip.key, () => {
@@ -532,8 +539,6 @@ const noticeFeatureTip = () => {
 }
 
 getSettings();
-//debug用
-// chrome.storage.local.clear();
 noticeFeatureTip();
 
 onMounted(() => {

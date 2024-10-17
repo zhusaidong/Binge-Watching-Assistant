@@ -28,3 +28,15 @@ export interface BookmarkTreeNode {
      */
     children: BookmarkTreeNode[];
 }
+
+export interface FeatureTips {
+    settings: {};
+    features: FeatureTip[]
+}
+
+export interface FeatureTip {
+    version: string;
+    key: string;
+    message: string;
+    isHtml: boolean;
+}
