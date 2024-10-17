@@ -45,6 +45,7 @@
     <!-- 书签部分 -->
     <el-divider content-position="left">追剧书签</el-divider>
     <el-tree
+        v-loading="loading"
         v-if="settings.refreshTable"
         :data="bookmarkList"
         node-key="id"
@@ -67,8 +68,7 @@
           <!--图标-->
           <el-table-column prop="url" label="图标" width="30px">
             <template #default="scope">
-              <div v-if="!scope.row.isFolder" id="icon" class="website-icon"
-                   :style="{backgroundImage :'url('+faviconURL(scope.row.url)+')'}"></div>
+              <el-image lazy v-if="!scope.row.isFolder" class="website-icon" :src="faviconURL(scope.row.url)"/>
             </template>
           </el-table-column>
           <!--标题-->
@@ -178,6 +178,7 @@ import {
 import {ref, onMounted, nextTick} from 'vue'
 import {ElMessageBox} from "element-plus";
 
+const loading = ref(false);
 const searchKey = ref("");
 const bookmarkList = ref([]);
 
@@ -310,7 +311,7 @@ const onDraggableEnd = (currentNode, targetNode, position) => {
  * 读取书签记录
  */
 const refreshBookmark = () => {
-  //fixme：页面加载有点慢
+  loading.value = true;
   getTagData().then(tagData => {
     bookmark.getBookmarks().then(function (bookmarks) {
       bookmark.setBadgeText();
@@ -386,6 +387,8 @@ const refreshBookmark = () => {
           }
         }
       }
+
+      loading.value = false;
       bookmarkList.value = bookmarks;
     });
   })
@@ -510,8 +513,13 @@ const getSettings = () => {
 /**
  * 从文件里获取新特征，从而进行提示
  */
-const featureTipsFromFile = () => {
-  const featureTips = require("@/FeatureTips.json");
+const noticeFeatureTip = () => {
+  let featureTips;
+  featureTips = require("@/FeatureTips.json");
+  if (featureTips.length === 0) {
+    return;
+  }
+
   let featureTip = featureTips[featureTips.length - 1];
   console.log("featureTip=", featureTip)
 
@@ -524,12 +532,12 @@ const featureTipsFromFile = () => {
 }
 
 getSettings();
+//debug用
+// chrome.storage.local.clear();
+noticeFeatureTip();
+
 onMounted(() => {
   refreshBookmark();
-
-  //debug用
-  //chrome.storage.local.clear();
-  //featureTipsFromFile();
 })
 
 </script>

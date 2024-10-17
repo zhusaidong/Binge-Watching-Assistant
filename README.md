@@ -40,6 +40,12 @@ https://developer.chrome.com/docs/extensions/how-to/ui/favicons?hl=zh-cn
 ### 1.2.1
 
 > 添加标签功能
+>
+> 书签图标采用懒加载
+>
+> 添加书签列表默认是否折叠的选项
+>
+> 添加标题文字去除功能
 
 ### 1.2.0
 
