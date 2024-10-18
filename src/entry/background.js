@@ -1,4 +1,4 @@
-import {tabs, bookmark, listenMessage} from '@/script/helper';
+import {bookmark, listenMessage, tabs} from '@/script/helper';
 
 //有活动期间，保活
 //@see https://blog.csdn.net/qq_35606400/article/details/136327698
@@ -28,7 +28,6 @@ const tabListener = () => {
      */
     tabs.onUpdated(function (tabId, changeInfo, tab) {
         let bookmarkIdByTab = bookmarkTabs[tabId];
-        //bookmarkTabs.hasOwnProperty(tabId)
         if (bookmarkIdByTab !== undefined) {
             bookmark.getBookmark(bookmarkIdByTab).then(function () {
                 bookmark.updateBookmark(bookmarkIdByTab, tab);
@@ -40,17 +39,16 @@ const tabListener = () => {
      */
     tabs.onRemoved(function (tabId) {
         let bookmarkIdByTab = bookmarkTabs[tabId];
-        //bookmarkTabs.hasOwnProperty(tabId)
         if (bookmarkIdByTab !== undefined) {
             delete bookmarkTabs[tabId];
         }
 
         //没有需要监听时移除监听器
-        // if (Object.keys(bookmarkTabs).length === 0) {
-        //     console.log("移除tab监听器")
-        //     chrome.tabs.onUpdated.removeListener();
-        //     chrome.tabs.onRemoved.removeListener();
-        // }
+        if (Object.keys(bookmarkTabs).length === 0) {
+            console.log("移除tab监听器")
+            chrome.tabs.onUpdated.removeListener();
+            chrome.tabs.onRemoved.removeListener();
+        }
     });
 }
 
@@ -80,7 +78,7 @@ function waitUntil() {
 }
 
 initBackground();
-tabListener();
+//tabListener();
 
 /**
  * 创建监听
@@ -90,10 +88,10 @@ listenMessage(request => {
     const tabId = request.tab_id;
 
     //调用时创建监听
-    // if (Object.keys(bookmarkTabs).length === 0) {
-    //     console.log("创建tab监听器")
-    //     tabListener();
-    // }
+    if (Object.keys(bookmarkTabs).length === 0) {
+        console.log("创建tab监听器")
+        tabListener();
+    }
 
     if (tabId == null) {
         bookmark.getBookmark(bookmarkId).then(function (bookmark) {
