@@ -195,23 +195,53 @@ class Bookmark {
  */
 class Store {
     /**
-     * 保存数据
+     * 保存同步数据
      * @param key
      * @param value
      * @param callback
      */
     setSyncData(key, value, callback) {
-        chrome.storage.sync.set({[key]: JSON.stringify(value)}, callback);
+        this.#setStorageData(chrome.storage.sync, key, value, callback);
     }
 
     /**
-     * 读取数据
+     * 读取同步数据
      * @param key
      * @returns {Promise<object>}
      */
     getSyncData(key) {
+        return this.#getStorageData(chrome.storage.sync, key);
+    }
+
+    /**
+     * 保存本地数据
+     * @param key
+     * @param value
+     * @param callback
+     */
+    setLocalData(key, value, callback) {
+        this.#setStorageData(chrome.storage.local, key, value, callback);
+    }
+
+    /**
+     * 读取本地数据
+     * @param key
+     * @returns {Promise<object>}
+     */
+    getLocalData(key) {
+        return this.#getStorageData(chrome.storage.local, key);
+    }
+
+    /**
+     * 获取存储数据
+     * @param {chrome.storage.StorageArea} storageArea
+     * @param {string} key
+     * @returns {Promise<object>}
+     */
+    #getStorageData(storageArea, key) {
+        //storageArea.getBytesInUse(used => console.log("used", used, storageArea.QUOTA_BYTES))
         return new Promise(function (resolve) {
-            chrome.storage.sync.get(key, function (object) {
+            storageArea.get(key, function (object) {
                 if (object[key] === undefined) {
                     resolve({});
                 } else {
@@ -223,24 +253,20 @@ class Store {
 
     /**
      * 保存数据
-     * @param key
-     * @param value
-     * @param callback
+     * @param {chrome.storage.StorageArea} storageArea
+     * @param {string} key
+     * @param {object} value
+     * @param {function} callback
      */
-    setLocalData(key, value, callback) {
-        chrome.storage.local.set({[key]: JSON.stringify(value)}, callback);
+    #setStorageData(storageArea, key, value, callback) {
+        storageArea.set({[key]: JSON.stringify(value)}, callback);
     }
 
-    getLocalData(key) {
-        return new Promise(function (resolve) {
-            chrome.storage.local.get(key, function (object) {
-                if (object[key] === undefined) {
-                    resolve({});
-                } else {
-                    resolve(JSON.parse(object[key]));
-                }
-            });
-        });
+    /**
+     * 清除本地数据
+     */
+    clearLocal() {
+        chrome.storage.local.clear().then();
     }
 }
 

@@ -5,7 +5,7 @@
     <el-button @click="addBookmark()">添加追剧</el-button>
     <el-button @click="openSeparatorDialog=true;separatorName='';">添加文件夹</el-button>
     <!--添加分隔的弹窗-->
-    <el-dialog v-model="openSeparatorDialog" title="添加文件夹" :close-on-click-modal="true">
+    <el-dialog v-model="openSeparatorDialog" :close-on-click-modal="true" title="添加文件夹">
       <el-form>
         <el-form-item>
           <el-input v-model="separatorName" clearable placeholder="输入文件夹名称"/>
@@ -21,7 +21,7 @@
     <el-divider content-position="left">搜索</el-divider>
     <el-form :inline="true">
       <el-form-item>
-        <el-input v-model="searchKey" @input="refreshBookmark()" clearable placeholder="输入搜索内容"/>
+        <el-input v-model="searchKey" clearable placeholder="输入搜索内容" @input="refreshBookmark()"/>
       </el-form-item>
       <el-form-item>
         <el-select
@@ -30,8 +30,8 @@
             filterable
             multiple
             placeholder="请选择标签"
-            @change="refreshBookmark()"
-            style="width:200px">
+            style="width:200px"
+            @change="refreshBookmark()">
           <el-option
               v-for="item in tagList"
               :key="item"
@@ -45,20 +45,20 @@
     <!-- 书签部分 -->
     <el-divider content-position="left">追剧书签</el-divider>
     <el-tree
-        v-loading="loading"
         v-if="settings.refreshTable"
-        :data="bookmarkList"
-        node-key="id"
-        :default-expand-all="settings.defaultExpand"
-        @node-drop="onDraggableEnd"
-        :draggable="editStatusNumber === 0"
-        empty-text="暂无数据"
-        :props="{children: 'children',label: 'title'}"
+        v-loading="loading"
         :allow-drop="allowDrop"
+        :data="bookmarkList"
+        :default-expand-all="settings.defaultExpand"
+        :draggable="editStatusNumber === 0"
         :indent="30"
+        :props="{children: 'children',label: 'title'}"
+        empty-text="暂无数据"
+        node-key="id"
+        @node-drop="onDraggableEnd"
     >
       <template #default="{ data }">
-        <el-table :data="[data]" row-key="id" :show-header="false" :tree-props="{children:'children1'}">
+        <el-table :data="[data]" :show-header="false" :tree-props="{children:'children1'}" row-key="id">
           <!--序号-->
           <el-table-column label="序号" width="45px">
             <template #default="scope">
@@ -66,23 +66,23 @@
             </template>
           </el-table-column>
           <!--图标-->
-          <el-table-column prop="url" label="图标" width="30px">
+          <el-table-column label="图标" prop="url" width="30px">
             <template #default="scope">
-              <el-image lazy v-if="!scope.row.isFolder" class="website-icon" :src="faviconURL(scope.row.url)"/>
+              <el-image v-if="!scope.row.isFolder" :src="faviconURL(scope.row.url)" class="website-icon" lazy/>
             </template>
           </el-table-column>
           <!--标题-->
-          <el-table-column prop="link" label="标题">
+          <el-table-column label="标题" prop="link">
             <template #default="scope">
               <div v-if="scope.row.isEditing">
-                <el-input type="text" v-model="scope.row.title"/>
+                <el-input v-model="scope.row.title" type="text"/>
               </div>
               <div v-else>
                 <div v-if="scope.row.isFolder">
                   <el-divider content-position="center">{{ scope.row.title }}</el-divider>
                 </div>
                 <div v-else>
-                  <el-tooltip :content="scope.row.url" placement="bottom" :show-after="500">
+                  <el-tooltip :content="scope.row.url" :show-after="500" placement="bottom">
                     <el-link :underline="false" @click="openBookmark(scope.row.id)">
                       {{ scope.row.title }}
                     </el-link>
@@ -92,28 +92,28 @@
             </template>
           </el-table-column>
           <!--标签-->
-          <el-table-column label="标签" width="90px" v-if="settings.tag">
+          <el-table-column v-if="settings.tag" label="标签" width="90px">
             <template #default="scope">
               <div v-if="!scope.row.isFolder">
                 <el-tag
                     v-for="tag in scope.row.tags"
                     :key="tag"
-                    size="small"
                     closable
+                    size="small"
                     @close="tagRemove(scope.row,tag)">
                   {{ tag }}
                 </el-tag>
                 <!--添加标签-->
                 <div v-if="scope.row.tags.length < 2">
                   <el-input
-                      class="input-new-tag"
                       v-if="scope.row.tagVisible"
                       v-model="scope.row.tagValue"
-                      size="small"
+                      class="input-new-tag"
                       maxlength="3"
+                      size="small"
+                      @blur="handleInputConfirm(scope.row)"
                       @keyup.enter="handleInputConfirm(scope.row)"
                       @keyup.esc="handleInputConfirm(scope.row)"
-                      @blur="handleInputConfirm(scope.row)"
                   >
                   </el-input>
                   <el-button
@@ -152,8 +152,8 @@
                 </el-button>
                 <!--文件夹为空时可以删除-->
                 <el-button
-                    link
                     v-if="!scope.row.isFolder || scope.row.children === undefined || scope.row.children.length === 0"
+                    link
                     type="danger"
                     @click.stop="deleteBookmark(scope.row.id)"
                 >删除
@@ -520,14 +520,16 @@ const noticeFeatureTip = () => {
   const featureTips = require("@/FeatureTips.json");
   let settings = featureTips.settings || {};
   if (settings.debug) {
-    chrome.storage.local.clear();
+    store.clearLocal();
   }
-  
+
   let features = featureTips.features || [];
   if (features.length === 0) {
     return;
   }
-
+  /**
+   * @type FeatureTip
+   */
   let featureTip = features[features.length - 1];
 
   //展示新功能的提示
