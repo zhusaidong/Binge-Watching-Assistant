@@ -274,6 +274,9 @@ class Store {
  * 标签页
  */
 class Tab {
+    #updatedListener;
+    #removedListener;
+
     /**
      * 创建tab
      * @param url
@@ -294,11 +297,27 @@ class Tab {
      * @param callback
      */
     onUpdated(callback) {
-        chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+        console.log("添加监听器，监听tab更新")
+        this.#updatedListener = function (tabId, changeInfo) {
             if (callback !== undefined && changeInfo.status === "complete") {
-                callback(tabId, changeInfo, tab);
+                //修复：“触发complete时标题还是老的”的bug
+                setTimeout(function () {
+                    chrome.tabs.get(tabId).then(tab => {
+                        callback(tabId, tab);
+                    });
+                }, 500);
             }
-        });
+        };
+
+        chrome.tabs.onUpdated.addListener(this.#updatedListener);
+    }
+
+    /**
+     * 移除updated监听器
+     */
+    removeUpdatedListener() {
+        chrome.tabs.onUpdated.removeListener(this.#updatedListener);
+        //console.log("onUpdated.hasListeners", chrome.tabs.onUpdated.hasListeners());
     }
 
     /**
@@ -306,7 +325,16 @@ class Tab {
      * @param callback
      */
     onRemoved(callback) {
-        chrome.tabs.onRemoved.addListener(callback);
+        this.#removedListener = callback;
+        chrome.tabs.onRemoved.addListener(this.#removedListener);
+    }
+
+    /**
+     * 移除removed监听器
+     */
+    removeRemovedListener() {
+        chrome.tabs.onUpdated.removeListener(this.#updatedListener);
+        //console.log("onRemoved.hasListeners", chrome.tabs.onRemoved.hasListeners());
     }
 
     /**

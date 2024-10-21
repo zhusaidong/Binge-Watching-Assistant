@@ -1,4 +1,4 @@
-import {bookmark, listenMessage, tabs} from '@/script/helper';
+import {bookmark, listenMessage, settingsStore, tabs} from '@/script/helper';
 
 //有活动期间，保活
 //@see https://blog.csdn.net/qq_35606400/article/details/136327698
@@ -26,11 +26,17 @@ const tabListener = () => {
     /**
      * 创建tab update监听器
      */
-    tabs.onUpdated(function (tabId, changeInfo, tab) {
+    tabs.onUpdated(function (tabId, tab) {
         let bookmarkIdByTab = bookmarkTabs[tabId];
         if (bookmarkIdByTab !== undefined) {
             bookmark.getBookmark(bookmarkIdByTab).then(function () {
-                bookmark.updateBookmark(bookmarkIdByTab, tab);
+                settingsStore.get().then(settingsStore => {
+                    const titleRegList = settingsStore["titleRegList"] !== undefined ? settingsStore["titleRegList"] : [];
+                    let titleReg = titleRegList.find(titleReg => tab.url.includes(titleReg.domain));
+                    const newTitle = titleReg !== undefined ? tab.title.replace(titleReg.removeTitle, "") : tab.title;
+
+                    bookmark.updateBookmark(bookmarkIdByTab, {title: newTitle, url: tab.url});
+                });
             });
         }
     });
@@ -46,8 +52,8 @@ const tabListener = () => {
         //没有需要监听时移除监听器
         if (Object.keys(bookmarkTabs).length === 0) {
             console.log("移除tab监听器")
-            chrome.tabs.onUpdated.removeListener();
-            chrome.tabs.onRemoved.removeListener();
+            tabs.removeUpdatedListener();
+            tabs.removeRemovedListener();
         }
     });
 }
