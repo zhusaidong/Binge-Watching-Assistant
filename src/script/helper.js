@@ -16,7 +16,7 @@ class Bookmark {
 
     /**
      *获取追剧助手书签列表
-     * @returns {Promise<BookmarkTreeNode[]>}
+     * @returns {Promise<chrome.bookmarks.BookmarkTreeNode[]>}
      */
     getBookmarks() {
         let that = this;
@@ -35,7 +35,7 @@ class Bookmark {
     /**
      * 根据书签id获取书签内容
      * @param bookmarkId
-     * @returns {Promise<BookmarkTreeNode>}
+     * @returns {Promise<chrome.bookmarks.BookmarkTreeNode>}
      */
     getBookmark(bookmarkId) {
         return new Promise(function (resolve) {
@@ -75,7 +75,7 @@ class Bookmark {
 
     /**
      * 获取书签文件夹
-     * @returns {Promise<BookmarkTreeNode>}
+     * @returns {Promise<chrome.bookmarks.BookmarkTreeNode>}
      */
     getMainBookmarkFolder() {
         let that = this;
@@ -277,7 +277,7 @@ class Tab {
     /**
      * 创建tab
      * @param url
-     * @returns {Promise<object>}
+     * @returns {Promise<chrome.tabs.Tab>}
      */
     create(url) {
         return new Promise(function (resolve) {
@@ -311,7 +311,7 @@ class Tab {
 
     /**
      * 获取当前激活的标签
-     * @returns {Promise<unknown>}
+     * @returns {Promise<chrome.tabs.Tab>}
      */
     getCurrentTab() {
         return new Promise(function (resolve) {
@@ -391,7 +391,15 @@ export function listenMessage(requestCallback) {
     });
 }
 
-export var bookmark = new Bookmark(chrome.runtime.getManifest().name + (isDevMode ? "开发版" : ""));
+/**
+ * 获取插件配置
+ * @returns {chrome.runtime.Manifest}
+ */
+function getManifest() {
+    return chrome.runtime.getManifest();
+}
+
+export var bookmark = new Bookmark(getManifest().name + (isDevMode ? "开发版" : ""));
 export var tabs = new Tab();
 export var store = new Store();
 export var settingsStore = new Settings(store);
