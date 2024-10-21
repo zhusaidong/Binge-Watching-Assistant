@@ -12,8 +12,7 @@
         "bookmarks",
         "storage",
         "tabs",
-        "favicon",
-        "sidePanel"
+        "favicon"
     ],
     "web_accessible_resources": [
         {
@@ -31,8 +30,5 @@
         "default_icon": "static/icon_128.png",
         "default_popup": "html/popup.html"
     },
-    "options_page": "html/options.html",
-    "side_panel": {
-        "default_path": "html/popup.html"
-    }
+    "options_page": "html/options.html"
 }

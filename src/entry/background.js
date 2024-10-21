@@ -78,7 +78,6 @@ function waitUntil() {
 }
 
 initBackground();
-//tabListener();
 
 /**
  * 创建监听

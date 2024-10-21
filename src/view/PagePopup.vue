@@ -2,9 +2,8 @@
   <div class="main_app">
 
     <!-- 按钮部分 -->
-    <el-button @click="addBookmark()">添加追剧</el-button>
+    <el-button type="primary" @click="addBookmark()">添加追剧</el-button>
     <el-button @click="openSeparatorDialog=true;separatorName='';">添加文件夹</el-button>
-    <el-button @click="openSidePanel()">侧边栏方式打开</el-button>
     <!--添加分隔的弹窗-->
     <el-dialog v-model="openSeparatorDialog" :close-on-click-modal="true" title="添加文件夹">
       <el-form>
@@ -22,7 +21,12 @@
     <el-divider content-position="left">搜索</el-divider>
     <el-form :inline="true">
       <el-form-item>
-        <el-input v-model="searchKey" clearable placeholder="输入搜索内容" @input="refreshBookmark()"/>
+        <el-input
+            v-model="searchKey"
+            :input-style="settings.tag ? 'width:200px' : 'width:400px'"
+            clearable
+            placeholder="输入搜索内容"
+            @input="refreshBookmark()"/>
       </el-form-item>
       <el-form-item>
         <el-select
@@ -547,12 +551,6 @@ noticeFeatureTip();
 onMounted(() => {
   refreshBookmark();
 })
-
-const openSidePanel = () => {
-  tabs.getCurrentTab().then(tab => {
-    chrome.sidePanel.open({tabId: tab.id}).then();
-  });
-};
 </script>
 
 <style>
