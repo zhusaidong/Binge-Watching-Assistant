@@ -2,7 +2,7 @@ import {bookmark, listenMessage, settingsStore, tabs} from '@/script/helper';
 
 //有活动期间，保活
 //@see https://blog.csdn.net/qq_35606400/article/details/136327698
-//fixme: 当操作系统进入睡眠时，保活将失效。
+//fixme: 当操作系统进入睡眠后再唤醒，Service-Worker并没有被激活。保活将失效。
 let keepAlive = null;
 
 /**

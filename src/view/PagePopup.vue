@@ -73,7 +73,12 @@
           <!--图标-->
           <el-table-column label="图标" prop="url" width="30px">
             <template #default="scope">
-              <el-image v-if="!scope.row.isFolder" :src="faviconURL(scope.row.url)" class="website-icon" lazy/>
+              <el-image v-if="!scope.row.isFolder"
+                        :src="faviconURL(scope.row.url)"
+                        class="website-icon"
+                        lazy
+                        scroll-container=".el-tree"
+              />
             </template>
           </el-table-column>
           <!--标题-->
@@ -196,7 +201,7 @@ const separatorName = ref("");
 //处于编辑状态的数量，编辑时不能拖拽
 const editStatusNumber = ref(0)
 const settings = ref({
-  //解决直接更新default-expand-all无法刷新状态的问题。
+  //refreshTable变量解决直接更新default-expand-all无法刷新状态的问题。
   //@see https://blog.csdn.net/m0_63451467/article/details/135898421
   refreshTable: true,
   defaultExpand: true,
@@ -504,15 +509,18 @@ const addSeparator = () => {
  * 获取设置的配置
  */
 const getSettings = () => {
-  settingsStore.get().then(settingsStore => {
-    settings.value.refreshTable = false;
-    settings.value.defaultExpand = settingsStore["defaultExpand"] !== undefined ? settingsStore["defaultExpand"] : true;
-    settings.value.tag = settingsStore["tag"] !== undefined ? settingsStore["tag"] : true;
-    settings.value.titleRegList = settingsStore["titleRegList"] !== undefined ? settingsStore["titleRegList"] : [];
-    nextTick(() => {
-      settings.value.refreshTable = true;
-    })
-  });
+  return new Promise(resolve => {
+    settingsStore.get().then(settingsStore => {
+      settings.value.refreshTable = false;
+      settings.value.defaultExpand = settingsStore["defaultExpand"] !== undefined ? settingsStore["defaultExpand"] : true;
+      settings.value.tag = settingsStore["tag"] !== undefined ? settingsStore["tag"] : true;
+      settings.value.titleRegList = settingsStore["titleRegList"] !== undefined ? settingsStore["titleRegList"] : [];
+      nextTick(() => {
+        settings.value.refreshTable = true;
+      })
+      resolve();
+    });
+  })
 };
 
 /**
@@ -545,11 +553,13 @@ const noticeFeatureTip = () => {
   });
 }
 
-getSettings();
 noticeFeatureTip();
 
 onMounted(() => {
-  refreshBookmark();
+  //getSettings通过网络，偏慢;refreshBookmark读取本地书签
+  getSettings().then(() => {
+    refreshBookmark();
+  })
 })
 </script>
 
@@ -574,4 +584,9 @@ onMounted(() => {
   background-color: #f5f7fa;
 }
 
+.el-tree {
+  /*扩展的popup页面，最大高度为600，非列表区域占200，故列表页只能400*/
+  height: 400px;
+  overflow: scroll;
+}
 </style>
