@@ -70,31 +70,39 @@ module.exports = defineConfig({
         },
         devtool: isDevMode ? 'inline-source-map' : false,
         optimization: {
+            splitChunks: {
+                minSize: 20000,
+                chunks: 'all',
+            },
             //开发环境不启用压缩，使编译速度加快
             minimize: !isDevMode, // 确保启用了压缩
             minimizer: [
                 new TerserPlugin({
-
-                    // uglifyOptions: {
-                    //     // 在UglifyJs删除没有用到的代码时不输出警告
-                    //     warnings: false,
-                    //     compress: {
-                    //         // 删除所有的 `console` 语句，可以兼容ie浏览器
-                    //         drop_console: true, // console
-                    //         drop_debugger: false,
-                    //         pure_funcs: ["console.log"], // 移除console
-                    //         // 内嵌定义了但是只用到一次的变量
-                    //         // collapse_vars: true,
-                    //         // 提取出出现多次但是没有定义成变量去引用的静态值
-                    //         // reduce_vars: true,
-                    //     },
-                    //     output: {
-                    //         // 最紧凑的输出
-                    //         beautify: false,
-                    //         // 删除所有的注释
-                    //         comments: false,
-                    //     },
-                    // },
+                    test: /\.js(\?.*)?$/i,   //用来匹配需要压缩的文件
+                    include: /\/includes/,   //匹配参与压缩的文件。
+                    exclude: /\/excludes/,   //匹配不需要压缩的文件
+                    cache: true,//降版本后添加
+                    sourceMap: false,//降版本后添加
+                    parallel: true,//使用多进程并发运行以提高构建速度。 并发运行的默认数量： os.cpus().length - 1 。
+                    extractComments: false, //是否将注释剥离到单独的文件中,默认值： true
+                    terserOptions: {
+                        ecma: 2015,
+                        module: true,
+                        warnings: false,
+                        parse: {},
+                        compress: {
+                            drop_console: true,
+                            drop_debugger: false,
+                            pure_funcs: ['console.log'], // 移除console
+                        },
+                        format: {
+                            // 最紧凑的输出
+                            beautify: false,
+                            // 删除所有的注释
+                            comments: false,
+                            ecma: 2015,
+                        },
+                    },
                 }),
             ],
         },
