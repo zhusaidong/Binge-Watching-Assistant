@@ -1,8 +1,8 @@
-import {bookmark, listenMessage, settingsStore, tabs} from '@/script/helper';
+import {bookmark, listenMessage, runtime, settingsStore, tabs} from '@/script/helper';
 
 //有活动期间，保活
 //@see https://blog.csdn.net/qq_35606400/article/details/136327698
-//fixme: 当操作系统进入睡眠后再唤醒，Service-Worker并没有被激活。保活将失效。
+//fixme: 当操作系统进入睡眠后再唤醒，Service-Worker并没有被激活。保活将失效。改成保存local
 let keepAlive = null;
 
 /**
@@ -73,8 +73,7 @@ const startWaitWhenListenTab = () => {
  */
 function waitUntil() {
     console.log("living");
-    chrome.runtime.getPlatformInfo().then(() => {
-    });
+    runtime.getPlatformInfo().then();
     let bookmarkTabSize = Object.keys(bookmarkTabs).length;
     //console.log("bookmarkTabSize", bookmarkTabSize)
     if (bookmarkTabSize === 0) {

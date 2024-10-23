@@ -1,6 +1,6 @@
 <template>
   <div class="main_app">
-    <el-tabs type="border-card" v-model="activeTab">
+    <el-tabs v-model="activeTab" type="border-card">
       <!--设置-->
       <el-tab-pane label="设置" name="settings">
         <el-form v-model="settings">
@@ -14,7 +14,7 @@
       </el-tab-pane>
 
       <!--标签管理-->
-      <el-tab-pane label="标签列表" name="tags" v-if="settings.tag">
+      <el-tab-pane v-if="settings.tag" label="标签列表" name="tags">
         <el-tag
             v-for="item in tagList"
             :key="item.label"
@@ -30,10 +30,10 @@
           <!--          <el-form-item prop="useRegular" label="使用正则匹配">-->
           <!--            <el-switch v-model="titleReg.useRegular"/>-->
           <!--          </el-form-item>-->
-          <el-form-item prop="domain" label="域名">
+          <el-form-item label="域名" prop="domain">
             <el-input v-model="titleReg.domain" placeholder="网站的域名：如“v.qq.com”"/>
           </el-form-item>
-          <el-form-item prop="removeTitle" label="删除文字" v-if="!titleReg.useRegular">
+          <el-form-item v-if="!titleReg.useRegular" label="删除文字" prop="removeTitle">
             <el-input v-model="titleReg.removeTitle" placeholder="需要去除的文字：如“高清完整版视频在线观看_腾讯视频”"/>
           </el-form-item>
           <!--          <el-form-item prop="regularTitle" label="正则匹配标题" v-if="titleReg.useRegular">-->
@@ -45,8 +45,8 @@
         <el-divider>列表</el-divider>
 
         <el-table :data="settings.titleRegList" row-key="domain">
-          <el-table-column prop="domain" label="域名"/>
-          <el-table-column prop="removeTitle" label="删除文字"/>
+          <el-table-column label="域名" prop="domain"/>
+          <el-table-column label="删除文字" prop="removeTitle"/>
           <!--          <el-table-column prop="regularTitle" label="正则匹配标题"/>-->
           <el-table-column label="操作">
             <template #default="scope">
@@ -84,7 +84,7 @@ const settings = ref({
  */
 function getTagList() {
   store.getSyncData(CONFIG_STORE_TAG_KEY).then(tagData => {
-    console.log("list=", tagData)
+    // console.log("list=", tagData)
 
     //标签合并
     let tagArr = [];
@@ -141,8 +141,11 @@ onMounted(() => {
     settings.value.defaultExpand = settingsStore["defaultExpand"] !== undefined ? settingsStore["defaultExpand"] : true;
     settings.value.tag = settingsStore["tag"] !== undefined ? settingsStore["tag"] : true;
     settings.value.titleRegList = settingsStore["titleRegList"] !== undefined ? settingsStore["titleRegList"] : [];
+
+    if (settings.value.tag === true) {
+      getTagList();
+    }
   });
-  getTagList();
 })
 </script>
 

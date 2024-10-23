@@ -334,7 +334,6 @@ class Tab {
      */
     removeRemovedListener() {
         chrome.tabs.onUpdated.removeListener(this.#updatedListener);
-        //console.log("onRemoved.hasListeners", chrome.tabs.onRemoved.hasListeners());
     }
 
     /**
@@ -420,19 +419,40 @@ export function listenMessage(requestCallback) {
 }
 
 /**
- * 获取插件配置
- * @returns {chrome.runtime.Manifest}
+ * 运行时环境
  */
-function getManifest() {
-    return chrome.runtime.getManifest();
-}
+class Runtime {
+    /**
+     * 获取插件配置
+     * @returns {chrome.runtime.Manifest}
+     */
+    getManifest() {
+        return chrome.runtime.getManifest();
+    }
 
-export var bookmark = new Bookmark(getManifest().name + (isDevMode ? "开发版" : ""));
-export var tabs = new Tab();
-export var store = new Store();
-export var settingsStore = new Settings(store);
+    /**
+     * 获取平台信息
+     * @returns {Promise<chrome.runtime.PlatformInfo>}
+     */
+    getPlatformInfo() {
+        return chrome.runtime.getPlatformInfo();
+    }
+
+    /**
+     * 获取扩展的url
+     * @returns {module:url.URL}
+     */
+    getFaviconUrl() {
+        return new URL(chrome.runtime.getURL("/_favicon/"));
+    }
+}
 
 export const CONFIG_STORE_TAG_KEY = "tag.list";
 export const CONFIG_STORE_SETTINGS_KEY = "settings";
 
+export var runtime = new Runtime();
+export var bookmark = new Bookmark(runtime.getManifest().name + (isDevMode ? "开发版" : ""));
+export var tabs = new Tab();
+export var store = new Store();
+export var settingsStore = new Settings(store);
 export var notice = new Notice();

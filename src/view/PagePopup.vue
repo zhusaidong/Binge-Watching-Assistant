@@ -180,7 +180,7 @@
 <script setup>
 import {
   bookmark,
-  CONFIG_STORE_TAG_KEY, notice,
+  CONFIG_STORE_TAG_KEY, notice, runtime,
   sendMessage,
   settingsStore,
   store, tabs
@@ -485,7 +485,7 @@ const openBookmark = id => {
  * @returns {string}
  */
 const faviconURL = u => {
-  const url = new URL(chrome.runtime.getURL("/_favicon/"));
+  const url = runtime.getFaviconUrl();
   url.searchParams.set("pageUrl", u);
   url.searchParams.set("size", "16");
   return url.toString();
@@ -556,7 +556,7 @@ const noticeFeatureTip = () => {
 noticeFeatureTip();
 
 onMounted(() => {
-  //getSettings通过网络，偏慢;refreshBookmark读取本地书签
+  //getSettings通过网络，偏慢。故需要同步执行。
   getSettings().then(() => {
     refreshBookmark();
   })
