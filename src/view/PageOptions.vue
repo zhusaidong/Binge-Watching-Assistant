@@ -1,61 +1,65 @@
 <template>
   <div class="main_app">
-    <el-tabs v-model="activeTab" type="border-card">
-      <!--设置-->
-      <el-tab-pane label="设置" name="settings">
-        <el-form v-model="settings">
-          <el-form-item label="书签文件夹默认展开">
-            <el-switch v-model="settings.defaultExpand" @change="changeSwitch('defaultExpand')"/>
-          </el-form-item>
-          <el-form-item label="开启标签功能">
-            <el-switch v-model="settings.tag" @change="changeSwitch('tag')"/>
-          </el-form-item>
-        </el-form>
-      </el-tab-pane>
+    <div style="display: flex; justify-content: center; align-items: center;">
+      <el-tabs v-model="activeTab" style="width: 600px;" type="border-card">
+        <!--设置-->
+        <el-tab-pane label="设置" name="settings">
+          <el-form v-model="settings">
+            <el-form-item label="书签文件夹默认展开">
+              <el-switch v-model="settings.defaultExpand" @change="changeSwitch('defaultExpand')"/>
+            </el-form-item>
+            <el-form-item label="开启标签功能">
+              <el-switch v-model="settings.tag" @change="changeSwitch('tag')"/>
+            </el-form-item>
+          </el-form>
+        </el-tab-pane>
 
-      <!--标签管理-->
-      <el-tab-pane v-if="settings.tag" label="标签列表" name="tags">
-        <el-tag
-            v-for="item in tagList"
-            :key="item.label"
-            effect="plain">
-          {{ item.label }}({{ item.count }})
-        </el-tag>
-      </el-tab-pane>
+        <!--标签管理-->
+        <el-tab-pane v-if="settings.tag" label="标签统计" name="tags">
+          <el-tag
+              v-for="item in tagList"
+              :key="item.label"
+              effect="plain"
+              size="large">
+            {{ item.label }}({{ item.count }})
+          </el-tag>
+        </el-tab-pane>
 
-      <!--标题美化-->
-      <el-tab-pane label="标题美化" name="titleRegs">
-        <i>删除书签中指定视频网站的标题上的固定多余文字，让书签的标题更简洁明了</i>
-        <el-form v-model="titleReg">
-          <!--          <el-form-item prop="useRegular" label="使用正则匹配">-->
-          <!--            <el-switch v-model="titleReg.useRegular"/>-->
-          <!--          </el-form-item>-->
-          <el-form-item label="域名" prop="domain">
-            <el-input v-model="titleReg.domain" placeholder="网站的域名：如“v.qq.com”"/>
-          </el-form-item>
-          <el-form-item v-if="!titleReg.useRegular" label="删除文字" prop="removeTitle">
-            <el-input v-model="titleReg.removeTitle" placeholder="需要去除的文字：如“高清完整版视频在线观看_腾讯视频”"/>
-          </el-form-item>
-          <!--          <el-form-item prop="regularTitle" label="正则匹配标题" v-if="titleReg.useRegular">-->
-          <!--            <el-input v-model="titleReg.regularTitle" placeholder="规则：旧标题/新标题"/>-->
-          <!--          </el-form-item>-->
-          <el-button @click="addTitleReg()">添加</el-button>
-        </el-form>
+        <!--标题美化-->
+        <el-tab-pane label="标题美化" name="titleRegs">
+          删除书签中指定视频网站的标题上的固定多余文字，让书签的标题更简洁明了
 
-        <el-divider>列表</el-divider>
+          <el-form ref="titleRegForm" :model="titleReg" :rules="titleRegRule" label-width="100px" style="width: 500px">
+            <!--<el-form-item prop="useRegular" label="使用正则匹配">-->
+            <!--  <el-switch v-model="titleReg.useRegular"/>-->
+            <!---</el-form-item>-->
+            <el-form-item label="域名" prop="domain">
+              <el-input v-model="titleReg.domain" placeholder="网站的域名：如“v.qq.com”"/>
+            </el-form-item>
+            <el-form-item v-if="!titleReg.useRegular" label="删除文字" prop="removeTitle">
+              <el-input v-model="titleReg.removeTitle"
+                        placeholder="需要去除的文字：如“高清完整版视频在线观看_腾讯视频”"/>
+            </el-form-item>
+            <!--<el-form-item prop="regularTitle" label="正则匹配标题" v-if="titleReg.useRegular">-->
+            <!--  <el-input v-model="titleReg.regularTitle" placeholder="规则：旧标题/新标题"/>-->
+            <!--</el-form-item>-->
+            <el-button @click="addTitleReg()">添加</el-button>
+          </el-form>
 
-        <el-table :data="settings.titleRegList" row-key="domain">
-          <el-table-column label="域名" prop="domain"/>
-          <el-table-column label="删除文字" prop="removeTitle"/>
-          <!--          <el-table-column prop="regularTitle" label="正则匹配标题"/>-->
-          <el-table-column label="操作">
-            <template #default="scope">
-              <el-button type="danger" @click="deleteTitleReg(scope.$index)">删除</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-      </el-tab-pane>
-    </el-tabs>
+          <el-table :data="settings.titleRegList" row-key="domain" style="width: 500px">
+            <el-table-column label="域名" prop="domain" width="100"/>
+            <el-table-column label="删除文字" prop="removeTitle" width="300"/>
+            <!--<el-table-column prop="regularTitle" label="正则匹配标题"/>-->
+            <el-table-column label="操作" width="100">
+              <template #default="scope">
+                <el-button type="danger" @click="deleteTitleReg(scope.$index)">删除</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+
+        </el-tab-pane>
+      </el-tabs>
+    </div>
   </div>
 </template>
 
@@ -78,6 +82,15 @@ const settings = ref({
   tag: false,
   titleRegList: []
 });
+const titleRegRule = {
+  domain: [
+    {required: true, message: '请输入域名', trigger: 'blur'},
+  ],
+  removeTitle: [
+    {required: true, message: '请输入需要删除的文字', trigger: 'blur'}
+  ],
+};
+const titleRegForm = ref();
 
 /**
  * 获取标签
@@ -122,9 +135,11 @@ const changeSwitch = (type) => {
  * 添加标题规则
  */
 const addTitleReg = () => {
-  settings.value.titleRegList.push(titleReg.value);
-  titleReg.value = {};
-  settingsStore.set('titleRegList', settings.value.titleRegList)
+  titleRegForm.value.validate().then(() => {
+    settings.value.titleRegList.push(titleReg.value);
+    titleReg.value = {};
+    settingsStore.set('titleRegList', settings.value.titleRegList)
+  });
 };
 
 /**
@@ -141,7 +156,6 @@ onMounted(() => {
     settings.value.defaultExpand = settingsStore["defaultExpand"] !== undefined ? settingsStore["defaultExpand"] : true;
     settings.value.tag = settingsStore["tag"] !== undefined ? settingsStore["tag"] : true;
     settings.value.titleRegList = settingsStore["titleRegList"] !== undefined ? settingsStore["titleRegList"] : [];
-
     if (settings.value.tag === true) {
       getTagList();
     }
@@ -160,6 +174,9 @@ onMounted(() => {
 }
 
 .el-tag {
-  padding: 0 10px;
+  margin-right: 5px;
+  height: 37px;
+  line-height: 34px;
+  font-size: 16px;
 }
 </style>
