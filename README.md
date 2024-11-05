@@ -37,7 +37,7 @@ https://developer.chrome.com/docs/extensions/how-to/ui/favicons?hl=zh-cn
 
 ## changelog
 
-### 1.2.1
+### 1.2.3
 
 > 添加标签功能
 >

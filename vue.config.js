@@ -70,10 +70,11 @@ module.exports = defineConfig({
         },
         devtool: isDevMode ? 'inline-source-map' : false,
         optimization: {
-            splitChunks: {
-                minSize: 20000,
-                chunks: 'all',
-            },
+            //开启会导致background.js无法运行
+            // splitChunks: {
+            //     minSize: 20000,
+            //     chunks: 'all',
+            // },
             //开发环境不启用压缩，使编译速度加快
             minimize: !isDevMode, // 确保启用了压缩
             minimizer: [
