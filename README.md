@@ -37,6 +37,10 @@ https://developer.chrome.com/docs/extensions/how-to/ui/favicons?hl=zh-cn
 
 ## changelog
 
+### 1.2.4
+
+> 完善书签和标签的关联关系，使用本地存储来保存关系，修复因为系统进入睡眠模式，service_worker停摆，导致关联失效（唤醒后无法正常更新追剧）的问题。
+
 ### 1.2.3
 
 > 添加标签功能

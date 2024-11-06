@@ -30,26 +30,19 @@
           删除书签中指定视频网站的标题上的固定多余文字，让书签的标题更简洁明了
 
           <el-form ref="titleRegForm" :model="titleReg" :rules="titleRegRule" label-width="100px" style="width: 500px">
-            <!--<el-form-item prop="useRegular" label="使用正则匹配">-->
-            <!--  <el-switch v-model="titleReg.useRegular"/>-->
-            <!---</el-form-item>-->
             <el-form-item label="域名" prop="domain">
               <el-input v-model="titleReg.domain" placeholder="网站的域名：如“v.qq.com”"/>
             </el-form-item>
-            <el-form-item v-if="!titleReg.useRegular" label="删除文字" prop="removeTitle">
+            <el-form-item label="删除文字" prop="removeTitle">
               <el-input v-model="titleReg.removeTitle"
                         placeholder="需要去除的文字：如“高清完整版视频在线观看_腾讯视频”"/>
             </el-form-item>
-            <!--<el-form-item prop="regularTitle" label="正则匹配标题" v-if="titleReg.useRegular">-->
-            <!--  <el-input v-model="titleReg.regularTitle" placeholder="规则：旧标题/新标题"/>-->
-            <!--</el-form-item>-->
             <el-button @click="addTitleReg()">添加</el-button>
           </el-form>
 
           <el-table :data="settings.titleRegList" row-key="domain" style="width: 500px">
             <el-table-column label="域名" prop="domain" width="100"/>
             <el-table-column label="删除文字" prop="removeTitle" width="300"/>
-            <!--<el-table-column prop="regularTitle" label="正则匹配标题"/>-->
             <el-table-column label="操作" width="100">
               <template #default="scope">
                 <el-button type="danger" @click="deleteTitleReg(scope.$index)">删除</el-button>
@@ -70,11 +63,7 @@ import {CONFIG_STORE_TAG_KEY, settingsStore, store} from "@/script/helper";
 const tagList = ref([]);
 const titleReg = ref({
   domain: '',
-  removeTitle: '',
-  //todo 下个版本可以升级成正则替换
-  useRegular: false,
-  //规则：<old_string>/<new_string>
-  //regularTitle: '',
+  removeTitle: ''
 });
 const activeTab = ref("settings");
 const settings = ref({

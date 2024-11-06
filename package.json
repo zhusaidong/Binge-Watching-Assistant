@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "test": "vue-cli-service --env.NODE_ENV=development build-watch --mode development",
+    "uat": "vue-cli-service --env.NODE_ENV=uat build-watch --mode uat",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },

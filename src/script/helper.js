@@ -383,14 +383,79 @@ class Settings {
 class Notice {
     once(key, callback) {
         store.getLocalData("notice").then(data => {
-            console.log("localData.data=", data)
             if (data[key] === undefined) {
                 callback();
-                let newVar = {};
-                newVar[key] = true;
-                store.setLocalData("notice", newVar);
+                data[key] = true;
+                store.setLocalData("notice", data);
             }
         });
+    }
+}
+
+/**
+ * 书签和tab关系类：用于存储监听关联关系
+ */
+class BookmarkTabRef {
+    localStore;
+
+    constructor(store) {
+        this.localStore = store;
+    }
+
+    /**
+     * 添加关联关系
+     * @param tabId
+     * @param bookmarkId
+     */
+    add(tabId, bookmarkId) {
+        this.localStore.getLocalData("bookmarkTabRef").then(data => {
+            data[tabId] = bookmarkId;
+            this.localStore.setLocalData("bookmarkTabRef", data);
+        });
+    }
+
+    /**
+     * 移除关联关系
+     * @param tabId
+     */
+    remove(tabId) {
+        let that = this;
+        return new Promise(function (resolve) {
+            that.localStore.getLocalData("bookmarkTabRef").then(data => {
+                delete data[tabId];
+                that.localStore.setLocalData("bookmarkTabRef", data);
+                resolve()
+            });
+        })
+    }
+
+    /**
+     * 获取关联关系
+     * @param tabId
+     * @returns {Promise<string>}
+     */
+    get(tabId) {
+        let that = this;
+        return new Promise(function (resolve) {
+            that.localStore.getLocalData("bookmarkTabRef").then(data => {
+                if (data[tabId] !== undefined) {
+                    resolve(data[tabId]);
+                }
+            });
+        })
+    }
+
+    /**
+     * 关联关系的数量
+     * @returns {Promise<number>}
+     */
+    size() {
+        let that = this;
+        return new Promise(function (resolve) {
+            that.localStore.getLocalData("bookmarkTabRef").then(data => {
+                resolve(Object.keys(data).length);
+            });
+        })
     }
 }
 
@@ -456,3 +521,4 @@ export var tabs = new Tab();
 export var store = new Store();
 export var settingsStore = new Settings(store);
 export var notice = new Notice();
+export var bookmarkTabRef = new BookmarkTabRef(store);

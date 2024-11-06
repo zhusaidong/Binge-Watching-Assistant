@@ -222,9 +222,14 @@ const handleInputConfirm = row => {
       tagData[row.id] = (tagData[row.id] || []).concat(tag);
       store.setSyncData(CONFIG_STORE_TAG_KEY, tagData);
     });
+
+    //去重
+    tagList.value.push(tag);
+    tagList.value = [...new Set(tagList.value)];
   }
   row.tagVisible = false;
   row.tagValue = '';
+
 };
 
 /**
@@ -256,7 +261,6 @@ const getTagData = () => {
       resolve({});
     } else {
       store.getSyncData(CONFIG_STORE_TAG_KEY).then(tagData => {
-        console.log("tagData", tagData)
         resolve(tagData);
       });
     }
@@ -323,6 +327,8 @@ const onDraggableEnd = (currentNode, targetNode, position) => {
 const refreshBookmark = () => {
   loading.value = true;
   getTagData().then(tagData => {
+    //fixme: 多设备同步的书签标签关系会对不上??
+    console.log("tagData", tagData)
     bookmark.getBookmarks().then(function (bookmarks) {
       bookmark.setBadgeText();
       let index = 1;
