@@ -23,7 +23,6 @@ chromeName.forEach((name) => {
         filename: `html/${fileName}.html`
     }
 })
-const UglifyPlugin = require("terser-webpack-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
 module.exports = defineConfig({
     transpileDependencies: true,
@@ -32,6 +31,13 @@ module.exports = defineConfig({
     filenameHashing: false,
     productionSourceMap: false,
     chainWebpack: (config) => {
+        // 移除 prefetch 插件
+        config.plugins.delete('prefetch')
+        //代码分析报告
+        // console.log("process.env.NODE_ENV=", process.env.NODE_ENV)
+        // if (process.env.NODE_ENV === 'analyzer') {
+        //     config.plugin('webpack-bundle-analyzer').use(require('webpack-bundle-analyzer').BundleAnalyzerPlugin)
+        // }
         config.plugin('copy').use(require('copy-webpack-plugin'), [
             {
                 patterns: [

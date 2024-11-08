@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "test": "vue-cli-service --env.NODE_ENV=development build-watch --mode development",
+    "dev": "vue-cli-service --env.NODE_ENV=development build-watch --mode development",
     "uat": "vue-cli-service --env.NODE_ENV=uat build-watch --mode uat",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
@@ -25,7 +25,8 @@
     "eslint-plugin-vue": "^8.0.3",
     "terser-webpack-plugin": "^2.3.8",
     "vue-cli-plugin-chrome-extension-cli": "~1.1.4",
-    "webpack": "^5.0.0"
+    "webpack": "^5.0.0",
+    "webpack-bundle-analyzer": "^4.10.2"
   },
   "eslintConfig": {
     "root": true,
