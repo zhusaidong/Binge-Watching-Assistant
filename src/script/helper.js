@@ -133,7 +133,9 @@ class Bookmark {
             let count = 0;
             for (let i = 0; i < bookmarks.length; i++) {
                 if (bookmarks[i].children !== undefined) {
-                    count += bookmarks[i].children.length
+                    count += bookmarks[i].children.length;
+                    //统计上文件夹自身
+                    count += 1;
                 } else {
                     count += 1;
                 }
