@@ -234,6 +234,14 @@ class Store {
         return this.#getStorageData(chrome.storage.local, key);
     }
 
+    removeLocalData(key) {
+        return this.#removeStorageData(chrome.storage.local, key);
+    }
+
+    removeSyncData(key) {
+        return this.#removeStorageData(chrome.storage.sync, key);
+    }
+
     /**
      * 获取存储数据
      * @param {chrome.storage.StorageArea} storageArea
@@ -262,6 +270,10 @@ class Store {
      */
     #setStorageData(storageArea, key, value, callback) {
         storageArea.set({[key]: JSON.stringify(value)}, callback);
+    }
+
+    #removeStorageData(storageArea, key, callback) {
+        storageArea.remove(key, callback);
     }
 
     /**
