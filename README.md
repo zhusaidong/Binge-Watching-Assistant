@@ -17,11 +17,19 @@ https://chrome.google.com/webstore/detail/%E8%BF%BD%E5%89%A7%E5%8A%A9%E6%89%8B/p
     方法1（推荐） 
         File->Settings->Languages & Frameworks->JavaScript->Libraries->Download->输入chrome->Download and Install
     方法2
-        npm install --save @types/chrome
+        npm install --save-dev @types/chrome
 
 ## 关于书签图标
 
 https://developer.chrome.com/docs/extensions/how-to/ui/favicons?hl=zh-cn
+
+## 关于标签同步问题
+
+多设备同步的书签标签关系会对不上?
+
+经研究[chrome源码](https://source.chromium.org/chromium/chromium/src/+/main:components/sync_bookmarks/bookmark_data_type_processor.cc;l=765)
+，发现chrome内部的ID是全局统一的，但是`chrome.bookmarks`这个api获取的id实际上是`LOCAL_EXTERNAL_ID`
+，哪怕是相同账号同步书签，不同设备之间生成的id也不同。
 
 ## todo
 
@@ -36,6 +44,7 @@ https://developer.chrome.com/docs/extensions/how-to/ui/favicons?hl=zh-cn
 - [x] 打开eslint校验，优化构建的文件:将manifest.*.json合并使用一个,去掉background.html/helper.html。最好能优化构建出来的目录结构
 - [ ] 优化依赖，减少打包后的文件大小，webpack打包后不压缩竟然有16M
 - [ ] 书签删除时需要同步删除对应的标签
+- [ ] [右键菜单快捷方式，删除按钮是否开启二次确认的选项](issues/2)
 
 ## changelog
 
