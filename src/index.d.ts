@@ -60,6 +60,7 @@ declare module 'FeatureTips.json' {
         version: string;
         /**
          * 新特性key
+         * @deprecated 已弃用，提醒标识已用version代替
          */
         key: string;
         /**

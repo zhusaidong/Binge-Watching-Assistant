@@ -40,10 +40,10 @@
             <el-button @click="addTitleReg()">添加</el-button>
           </el-form>
 
-          <el-table :data="settings.titleRegList" row-key="domain" style="width: 500px">
-            <el-table-column label="域名" prop="domain" width="100"/>
-            <el-table-column label="删除文字" prop="removeTitle" width="300"/>
-            <el-table-column label="操作" width="100">
+          <el-table :data="settings.titleRegList" row-key="domain" style="width: 590px">
+            <el-table-column label="域名" prop="domain" width="190"/>
+            <el-table-column label="删除文字" prop="removeTitle" width="290"/>
+            <el-table-column label="操作" width="70">
               <template #default="scope">
                 <el-button type="danger" @click="deleteTitleReg(scope.$index)">删除</el-button>
               </template>

@@ -551,8 +551,12 @@ const noticeFeatureTip = () => {
    */
   let featureTip = features[features.length - 1];
 
+  if (featureTip.version !== runtime.getManifest().version) {
+    return;
+  }
+
   //展示新功能的提示
-  notice.once(featureTip.key, () => {
+  notice.once("feature_" + featureTip.version, () => {
     ElMessageBox.alert(featureTip.message, "系统提示", {
       dangerouslyUseHTMLString: featureTip.isHtml || false
     });

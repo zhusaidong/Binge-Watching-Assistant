@@ -72,3 +72,27 @@ const tabListener = () => {
 }
 
 initBackground();
+
+/**
+ * 更新插件时将sync的标签转换成local的标签，下个版本移除
+ */
+const moveTagDataToLocalStorage = () => {
+    chrome.runtime.onInstalled.addListener(details => {
+        if (details.reason === chrome.runtime.OnInstalledReason.UPDATE && details.previousVersion === '1.2.4') {
+            store.getLocalData(CONFIG_STORE_TAG_KEY).then(tags => {
+                if (Object.keys(tags).length === 0) {
+                    //需要转移数据
+                    store.getSyncData(CONFIG_STORE_TAG_KEY).then(tagData => {
+                        console.log("sync_data", tagData)
+                        if (Object.keys(tagData).length !== 0) {
+                            store.setLocalData(CONFIG_STORE_TAG_KEY, tagData);
+                            store.removeSyncData(CONFIG_STORE_TAG_KEY);
+                        }
+                    });
+                }
+            })
+        }
+    });
+}
+
+//moveTagDataToLocalStorage();
