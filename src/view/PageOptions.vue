@@ -11,6 +11,13 @@
             <el-form-item label="开启标签功能">
               <el-switch v-model="settings.tag" @change="changeSwitch('tag')"/>
             </el-form-item>
+            <el-form-item label="开启删除二次确认功能">
+              <el-switch v-model="settings.deleteDoubleConfirmation"
+                         @change="changeSwitch('deleteDoubleConfirmation')"/>
+            </el-form-item>
+            <el-form-item label="开启右键菜单功能">
+              <el-switch v-model="settings.enableContextMenu" @change="changeSwitch('enableContextMenu')"/>
+            </el-form-item>
           </el-form>
         </el-tab-pane>
 
@@ -58,7 +65,12 @@
 
 <script setup>
 import {ref, onMounted} from "vue";
-import {CONFIG_STORE_TAG_KEY, settingsStore, store} from "@/script/helper";
+import {
+  CONFIG_BOOKMARK_MENU_KEY,
+  CONFIG_STORE_TAG_KEY, message,
+  settingsStore,
+  store
+} from "@/script/helper";
 
 const tagList = ref([]);
 const titleReg = ref({
@@ -69,7 +81,9 @@ const activeTab = ref("settings");
 const settings = ref({
   defaultExpand: true,
   tag: false,
-  titleRegList: []
+  titleRegList: [],
+  deleteDoubleConfirmation: true,
+  enableContextMenu: false
 });
 const titleRegRule = {
   domain: [
@@ -117,7 +131,15 @@ function getTagList() {
  */
 const changeSwitch = (type) => {
   //保存数据
-  settingsStore.set(type, settings.value[type])
+  let valueElement = settings.value[type];
+  settingsStore.set(type, valueElement)
+  if (type === 'enableContextMenu') {
+    if (valueElement === true) {
+      message.sendMessageByType("createContextMenu", {})
+    } else {
+      message.sendMessageByType("removeContextMenu", CONFIG_BOOKMARK_MENU_KEY)
+    }
+  }
 }
 
 /**
@@ -145,6 +167,8 @@ onMounted(() => {
     settings.value.defaultExpand = settingsStore["defaultExpand"] !== undefined ? settingsStore["defaultExpand"] : true;
     settings.value.tag = settingsStore["tag"] !== undefined ? settingsStore["tag"] : true;
     settings.value.titleRegList = settingsStore["titleRegList"] !== undefined ? settingsStore["titleRegList"] : [];
+    settings.value.deleteDoubleConfirmation = settingsStore["deleteDoubleConfirmation"] !== undefined ? settingsStore["deleteDoubleConfirmation"] : true;
+    settings.value.enableContextMenu = settingsStore["enableContextMenu"] !== undefined ? settingsStore["enableContextMenu"] : false;
     if (settings.value.tag === true) {
       getTagList();
     }
