@@ -1,45 +1,4 @@
-import {bookmark, bookmarkTabRef, contextMenu, message, settingsStore, tabs} from '@/script/helper';
-
-//监听事件的回调
-
-const listenBookmarkTabRef = request => {
-    const bookmarkId = request.bookmark_id;
-    const tabId = request.tab_id;
-
-    //接收到“打开书签”的消息，创建追剧监听器
-
-    bookmarkTabRef.size().then(size => {
-        console.log("bookmarkTabRef.size", size);
-        if (size === 0) {
-            console.log("创建tab监听器")
-            tabListener();
-        }
-    })
-
-    //创建标签页和书签的追剧关联
-    if (tabId == null) {
-        //如果标签为null，先创建标签，再保存关联
-        bookmark.getBookmark(bookmarkId).then(bookmark => {
-            tabs.create(bookmark.url).then(tab => {
-                bookmarkTabRef.add(tab.id, bookmarkId);
-            });
-        });
-    } else {
-        bookmarkTabRef.add(tabId, bookmarkId);
-    }
-};
-
-/**
- * 创建右键菜单
- */
-const createContextMenuIfOpen = () => {
-    //在扩展刷新/重新开启时，需要判断是否开启右键菜单
-    settingsStore.getByKey("enableContextMenu", false).then(enableContextMenu => {
-        if (enableContextMenu === true) {
-            contextMenu.createContextMenu()
-        }
-    });
-}
+import {bookmark, bookmarkTabRef, listenMessage, settingsStore, tabs} from '@/script/helper';
 
 /**
  * 初始化
@@ -48,18 +7,33 @@ const initBackground = () => {
     bookmark.addMainBookmarkFolder();
     bookmark.setBadgeText();
 
-    //创建消息监听
+    /**
+     * 创建“打开书签”的消息监听
+     */
+    listenMessage(request => {
+        const bookmarkId = request.bookmark_id;
+        const tabId = request.tab_id;
 
-    message.setListener("bookmark", listenBookmarkTabRef);
-    message.setListener("createContextMenu", () => {
-        contextMenu.createContextMenu();
-    });
-    message.setListener("removeContextMenu", menuId => {
-        contextMenu.removeContextMenu(menuId);
-    });
-    message.startListening();
+        //接收到“打开书签”的消息，创建追剧监听器
+        bookmarkTabRef.size().then(size => {
+            if (size === 0) {
+                console.log("创建tab监听器")
+                tabListener();
+            }
+        })
 
-    createContextMenuIfOpen();
+        //创建标签页和书签的追剧关联
+        if (tabId == null) {
+            //如果标签为null，先创建标签，再保存关联
+            bookmark.getBookmark(bookmarkId).then(bookmark => {
+                tabs.create(bookmark.url).then(tab => {
+                    bookmarkTabRef.add(tab.id, bookmarkId);
+                });
+            });
+        } else {
+            bookmarkTabRef.add(tabId, bookmarkId);
+        }
+    });
 }
 
 /**
@@ -71,8 +45,8 @@ const tabListener = () => {
      */
     tabs.onUpdated(function (tabId, tab) {
         bookmarkTabRef.get(tabId).then(bookmarkIdByTab => {
-            settingsStore.get().then(settings => {
-                const titleRegList = settings["titleRegList"] !== undefined ? settings["titleRegList"] : [];
+            settingsStore.get().then(settingsStore => {
+                const titleRegList = settingsStore["titleRegList"] !== undefined ? settingsStore["titleRegList"] : [];
                 let titleReg = titleRegList.find(titleReg => tab.url.includes(titleReg.domain));
                 const newTitle = titleReg !== undefined ? tab.title.replace(titleReg.removeTitle, "") : tab.title;
 
@@ -99,9 +73,24 @@ const tabListener = () => {
 
 initBackground();
 
-//扩展重新加载/开启时，清空书签tab的关联关系
-chrome.runtime.onInstalled.addListener(details => {
-    if (details.reason === chrome.runtime.OnInstalledReason.UPDATE) {
-        bookmarkTabRef.clear().then();
-    }
-});
+/**
+ * 更新插件时将sync的标签转换成local的标签，下个版本移除
+ */
+// const moveTagDataToLocalStorage = () => {
+//     chrome.runtime.onInstalled.addListener(details => {
+//         if (details.reason === chrome.runtime.OnInstalledReason.UPDATE && details.previousVersion === '1.2.4') {
+//             store.getLocalData(CONFIG_STORE_TAG_KEY).then(tags => {
+//                 if (Object.keys(tags).length === 0) {
+//                     //需要转移数据
+//                     store.getSyncData(CONFIG_STORE_TAG_KEY).then(tagData => {
+//                         console.log("sync_data", tagData)
+//                         if (Object.keys(tagData).length !== 0) {
+//                             store.setLocalData(CONFIG_STORE_TAG_KEY, tagData);
+//                             store.removeSyncData(CONFIG_STORE_TAG_KEY);
+//                         }
+//                     });
+//                 }
+//             })
+//         }
+//     });
+// }

@@ -382,29 +382,6 @@ class Settings {
         });
     }
 
-
-    getByKey(key, defaultValue) {
-        let that = this;
-        return new Promise(function (resolve) {
-            that.getByKeys([key], [defaultValue]).then(result => {
-                resolve(result[key]);
-            });
-        });
-    }
-
-    getByKeys(keys, defaultValues) {
-        let that = this;
-        return new Promise(function (resolve) {
-            that.get().then(settings => {
-                const arr = {};
-                for (let i = 0; i < keys.length; i++) {
-                    arr[keys[i]] = settings[keys[i]] ?? (defaultValues[i] ?? undefined);
-                }
-                resolve(arr);
-            });
-        });
-    }
-
     set(key, data) {
         let that = this;
         that.settingStore.getSyncData(CONFIG_STORE_SETTINGS_KEY).then(settingsStore => {
@@ -466,13 +443,6 @@ class BookmarkTabRef {
         })
     }
 
-    clear() {
-        let that = this;
-        return new Promise(function () {
-            that.localStore.clearLocal("bookmarkTabRef");
-        })
-    }
-
     /**
      * 获取关联关系
      * @param tabId
@@ -504,50 +474,27 @@ class BookmarkTabRef {
 }
 
 /**
- * 消息
+ * 发送消息
+ * @param msg 消息
  */
-class Message {
-    /**
-     * @type {Promise}
-     * @private
-     */
-    _listeners = {};
+export function sendMessage(msg) {
+    chrome.runtime.sendMessage(msg).then();
+}
 
-    sendMessageByType(type, data) {
-        chrome.runtime.sendMessage({type, data}).then(() => {
-            console.log("send message ok")
-        });
-    }
-
-    setListener(type, requestCallback) {
-        this._listeners[type] = (data) => {
-            return new Promise(() => {
-                requestCallback(data);
-            })
-        };
-    }
-
-    runListener(type, data) {
-        return this._listeners[type](data);
-    }
-
-    startListening() {
-        const that = this;
-        chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-            console.log("get the message[request]", request)
-            console.log("get the message[sender]", sender)
-            if (!isDevMode && sender.id !== "pbnnheibacpamfaendimogbeaeciglpo") {
-                return;
-            }
-
-            let {type, data} = request;
-            if (this._listeners[type] !== undefined) {
-                that.runListener(type, data).then(() => {
-                    sendResponse({msg: "ok"});
-                });
-            }
-        });
-    }
+/**
+ * 监听消息
+ * @param requestCallback 消息回调
+ */
+export function listenMessage(requestCallback) {
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        //console.log("get the message[request]", request)
+        //console.log("get the message[sender]", sender)
+        if (!isDevMode && sender.id !== "pbnnheibacpamfaendimogbeaeciglpo") {
+            return;
+        }
+        requestCallback(request);
+        sendResponse({msg: "ok"});
+    });
 }
 
 /**
@@ -579,77 +526,8 @@ class Runtime {
     }
 }
 
-/**
- * 右键菜单
- */
-class ContextMenu {
-    /**
-     * 右键菜单回调
-     * @param info
-     * @param tab
-     */
-    contextMenuCallback = (info, tab) => {
-        console.log("onclick contextMenu!")
-        if (info.menuItemId !== CONFIG_BOOKMARK_MENU_KEY) {
-            return;
-        }
-
-        settingsStore.getByKey("titleRegList", []).then(titleRegList => {
-            let titleReg = titleRegList.find(titleReg => tab.url.includes(titleReg.domain));
-            const newTitle = titleReg !== undefined ? tab.title.replace(titleReg.removeTitle, "") : tab.title;
-
-            bookmark.addBookmarkV2(
-                {
-                    title: newTitle,
-                    url: tab.url,
-                }, function (bookmarkVar) {
-                    bookmark.setBadgeText();
-                    //添加新页面时立即开启监听
-                    //fixme : Uncaught (in promise) Error: Could not establish connection. Receiving end does not exist.
-                    // 这是background调用的，无法发送消息？？
-                    //message.sendMessageByType("bookmark", {bookmark_id: bookmarkVar.id, tab_id: tab.id});
-                    message.runListener("bookmark", {bookmark_id: bookmarkVar.id, tab_id: tab.id});
-                });
-        });
-    };
-
-    createContextMenu = () => {
-        let that = this;
-        chrome.contextMenus.create(
-            {
-                id: CONFIG_BOOKMARK_MENU_KEY,
-                title: "添加追剧",
-                contexts: ["page", "action"],
-                enabled: true,
-                visible: true,
-                type: "normal"
-            },
-            function () {
-                console.log("右键菜单创建成功")
-                chrome.contextMenus.onClicked.addListener((info, tab) => that.contextMenuCallback(info, tab));
-            }
-        )
-    }
-
-    removeContextMenu = menuId => {
-        if (menuId !== undefined) {
-            chrome.contextMenus.remove(menuId, () => {
-                console.log("右键菜单移除成功")
-            });
-        }
-    }
-}
-
 export const CONFIG_STORE_TAG_KEY = "tag.list";
 export const CONFIG_STORE_SETTINGS_KEY = "settings";
-export const CONFIG_BOOKMARK_MENU_KEY = "addWatchBookmark";
-// export const CONST_SETTINGS = {
-//     defaultExpand: "defaultExpand",
-//     tag: "tag",
-//     titleRegList: "titleRegList",
-//     deleteDoubleConfirmation: "deleteDoubleConfirmation",
-//     enableContextMenu: "enableContextMenu"
-// };
 
 export var runtime = new Runtime();
 export var bookmark = new Bookmark(runtime.getManifest().name + (isDevMode ? "开发版" : ""));
@@ -658,5 +536,3 @@ export var store = new Store();
 export var settingsStore = new Settings(store);
 export var notice = new Notice();
 export var bookmarkTabRef = new BookmarkTabRef(store);
-export var message = new Message();
-export var contextMenu = new ContextMenu();
