@@ -6,7 +6,15 @@
 >
 > 在线观看视频时，可以添加新剧，也可以更新当前视频的观看进度
 
-https://chrome.google.com/webstore/detail/%E8%BF%BD%E5%89%A7%E5%8A%A9%E6%89%8B/pbnnheibacpamfaendimogbeaeciglpo
+## 在线安装
+
+[//]: # (- [Chrome]&#40;https://chrome.google.com/webstore/detail/%E8%BF%BD%E5%89%A7%E5%8A%A9%E6%89%8B/pbnnheibacpamfaendimogbeaeciglpo&#41;)
+
+[//]: # (- [Edge]&#40;https://chrome.google.com/webstore/detail/%E8%BF%BD%E5%89%A7%E5%8A%A9%E6%89%8B/pbnnheibacpamfaendimogbeaeciglpo&#41;)
+
+- <a href="https://chrome.google.com/webstore/detail/%E8%BF%BD%E5%89%A7%E5%8A%A9%E6%89%8B/pbnnheibacpamfaendimogbeaeciglpo" title="已在 Chrome Web Store 市场上发布的版本">![](https://img.shields.io/chrome-web-store/v/pbnnheibacpamfaendimogbeaeciglpo.svg?label=Google%20Chrome)</a>
+
+- <a href="https://microsoftedge.microsoft.com/addons/detail/kijikbnlbgddamolcfnlelppffpkkmla" title="已在 Microsoft Edge 上发布的版本">![](https://img.shields.io/badge/dynamic/json?label=Edge%20Addons&prefix=v&query=%24.version&url=https%3A%2F%2Fmicrosoftedge.microsoft.com%2FAddons%2Fgetproductdetailsbycrxid%2Fkijikbnlbgddamolcfnlelppffpkkmla)</a>
 
 ## vue开发
 

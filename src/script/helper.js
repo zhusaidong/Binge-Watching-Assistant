@@ -410,7 +410,11 @@ export function listenMessage(requestCallback) {
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         //console.log("get the message[request]", request)
         //console.log("get the message[sender]", sender)
-        if (!isDevMode && sender.id !== "pbnnheibacpamfaendimogbeaeciglpo") {
+
+        //chrome crx id：pbnnheibacpamfaendimogbeaeciglpo
+        //edge crx id：kijikbnlbgddamolcfnlelppffpkkmla
+        const crxIds = ["pbnnheibacpamfaendimogbeaeciglpo", "kijikbnlbgddamolcfnlelppffpkkmla"];
+        if (!isDevMode && !sender.id.includes(crxIds)) {
             return;
         }
         requestCallback(request);
