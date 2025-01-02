@@ -23,7 +23,6 @@ chromeName.forEach((name) => {
         filename: `html/${fileName}.html`
     }
 })
-const UglifyPlugin = require("terser-webpack-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
 module.exports = defineConfig({
     transpileDependencies: true,

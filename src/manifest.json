@@ -27,7 +27,7 @@
         "type": "module"
     },
     "action": {
-        "default_title": "追剧助手",
+        "default_title": "__MSG_extName__",
         "default_icon": "static/icon_128.png",
         "default_popup": "html/popup.html"
     },

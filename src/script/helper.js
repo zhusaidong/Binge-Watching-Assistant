@@ -451,6 +451,12 @@ class Runtime {
     }
 }
 
+class I18nMessage {
+    message(key, ...p) {
+        return chrome.i18n.getMessage(key.replace(".", "_"), p);
+    }
+}
+
 export const CONFIG_STORE_TAG_KEY = "tag.list";
 export const CONFIG_STORE_SETTINGS_KEY = "settings";
 
@@ -460,3 +466,4 @@ export var tabs = new Tab();
 export var store = new Store();
 export var settingsStore = new Settings(store);
 export var notice = new Notice();
+export var i18n = new I18nMessage();
