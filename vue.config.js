@@ -50,6 +50,10 @@ module.exports = defineConfig({
                     {
                         from: path.resolve(`src/script/`),
                         to: `${path.resolve('dist/js')}/`
+                    },
+                    {
+                        from: path.resolve(`src/_locales/`),
+                        to: `${path.resolve('dist/_locales')}/`
                     }
                 ]
             }

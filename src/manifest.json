@@ -1,9 +1,10 @@
 {
     "manifest_version": 3,
-    "name": "追剧助手",
-    "short_name": "追剧助手",
-    "description": "在互联网发展迅速的今天，在线观看电视剧、综艺剧、番剧已成为一种趋势。保存视频的观看进度已然成为一种需求。",
+    "name": "__MSG_extName__",
+    "short_name": "__MSG_extName__",
+    "description": "__MSG_extDescription__",
     "version": "1.2.3",
+    "default_locale":"zh_CN",
     "icons": {
         "16": "static/icon_16.png",
         "128": "static/icon_128.png"
