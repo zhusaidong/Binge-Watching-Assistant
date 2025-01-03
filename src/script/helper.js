@@ -399,6 +399,7 @@ class Notice {
  * @param msg 消息
  */
 export function sendMessage(msg) {
+    console.log("sendMessage", msg)
     chrome.runtime.sendMessage(msg).then();
 }
 
@@ -408,15 +409,15 @@ export function sendMessage(msg) {
  */
 export function listenMessage(requestCallback) {
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-        //console.log("get the message[request]", request)
-        //console.log("get the message[sender]", sender)
+        console.log("listenMessage[request]", request)
+        console.log("listenMessage[sender]", sender)
 
         //chrome crx id：pbnnheibacpamfaendimogbeaeciglpo
         //edge crx id：kijikbnlbgddamolcfnlelppffpkkmla
-        const crxIds = ["pbnnheibacpamfaendimogbeaeciglpo", "kijikbnlbgddamolcfnlelppffpkkmla"];
-        if (!isDevMode && !sender.id.includes(crxIds)) {
-            return;
-        }
+        // const crxIds = ["pbnnheibacpamfaendimogbeaeciglpo", "kijikbnlbgddamolcfnlelppffpkkmla"];
+        // if (!isDevMode && !sender.id.includes(crxIds)) {
+        //     return;
+        // }
         requestCallback(request);
         sendResponse({msg: "ok"});
     });
