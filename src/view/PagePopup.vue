@@ -181,7 +181,7 @@
 import {
   bookmark,
   CONFIG_STORE_TAG_KEY, i18n, notice, runtime,
-  sendMessage,
+  message,
   settingsStore,
   store, tabs
 } from "@/script/helper";
