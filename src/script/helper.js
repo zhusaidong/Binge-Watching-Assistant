@@ -541,6 +541,7 @@ class Message {
             //edge crx id：kijikbnlbgddamolcfnlelppffpkkmla
             const crxIds = ["pbnnheibacpamfaendimogbeaeciglpo", "kijikbnlbgddamolcfnlelppffpkkmla"];
             if (!isDevMode && !crxIds.includes(sender.id)) {
+                console.log("message is error", sender.id);
                 return;
             }
 
