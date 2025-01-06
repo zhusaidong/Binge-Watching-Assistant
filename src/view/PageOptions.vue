@@ -11,7 +11,7 @@
             <el-form-item label="开启标签功能">
               <el-switch v-model="settings.tag" @change="changeSwitch('tag')"/>
             </el-form-item>
-            <el-form-item label="开启删除二次确认功能">
+            <el-form-item label="开启删除时进行二次确认功能">
               <el-switch v-model="settings.deleteDoubleConfirmation"
                          @change="changeSwitch('deleteDoubleConfirmation')"/>
             </el-form-item>

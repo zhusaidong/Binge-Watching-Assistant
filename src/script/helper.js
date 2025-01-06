@@ -609,9 +609,6 @@ class ContextMenu {
                 }, function (bookmarkVar) {
                     bookmark.setBadgeText();
                     //添加新页面时立即开启监听
-                    //fixme : Uncaught (in promise) Error: Could not establish connection. Receiving end does not exist.
-                    // 这是background调用的，无法发送消息？？
-                    //message.sendMessageByType("bookmark", {bookmark_id: bookmarkVar.id, tab_id: tab.id});
                     message.runListener("bookmark", {bookmark_id: bookmarkVar.id, tab_id: tab.id});
                 });
         });
@@ -653,13 +650,6 @@ class I18nMessage {
 export const CONFIG_STORE_TAG_KEY = "tag.list";
 export const CONFIG_STORE_SETTINGS_KEY = "settings";
 export const CONFIG_BOOKMARK_MENU_KEY = "addWatchBookmark";
-// export const CONST_SETTINGS = {
-//     defaultExpand: "defaultExpand",
-//     tag: "tag",
-//     titleRegList: "titleRegList",
-//     deleteDoubleConfirmation: "deleteDoubleConfirmation",
-//     enableContextMenu: "enableContextMenu"
-// };
 
 export var runtime = new Runtime();
 export var bookmark = new Bookmark(runtime.getManifest().name + (isDevMode ? "开发版" : ""));
