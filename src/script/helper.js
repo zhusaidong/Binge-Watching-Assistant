@@ -487,11 +487,16 @@ export function sendMessage(msg) {
  */
 export function listenMessage(requestCallback) {
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-        //console.log("get the message[request]", request)
-        //console.log("get the message[sender]", sender)
-        if (!isDevMode && sender.id !== "pbnnheibacpamfaendimogbeaeciglpo") {
+        // console.log("listenMessage[request]", request)
+        // console.log("listenMessage[sender]", sender)
+
+        //chrome crx id：pbnnheibacpamfaendimogbeaeciglpo
+        //edge crx id：kijikbnlbgddamolcfnlelppffpkkmla
+        const crxIds = ["pbnnheibacpamfaendimogbeaeciglpo", "kijikbnlbgddamolcfnlelppffpkkmla"];
+        if (!isDevMode && !crxIds.includes(sender.id)) {
             return;
         }
+
         requestCallback(request);
         sendResponse({msg: "ok"});
     });
@@ -526,6 +531,12 @@ class Runtime {
     }
 }
 
+class I18nMessage {
+    message(key, ...p) {
+        return chrome.i18n.getMessage(key.replace(".", "_"), p);
+    }
+}
+
 export const CONFIG_STORE_TAG_KEY = "tag.list";
 export const CONFIG_STORE_SETTINGS_KEY = "settings";
 
@@ -536,3 +547,4 @@ export var store = new Store();
 export var settingsStore = new Settings(store);
 export var notice = new Notice();
 export var bookmarkTabRef = new BookmarkTabRef(store);
+export var i18n = new I18nMessage();

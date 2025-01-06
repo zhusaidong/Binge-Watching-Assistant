@@ -1,0 +1,20 @@
+{
+    "extName": {
+        "message": "追剧助手"
+    },
+    "extDescription": {
+        "message": "在互联网发展迅速的今天，在线观看电视剧、综艺剧、番剧已成为一种趋势。保存视频的观看进度已然成为一种需求。"
+    },
+    "popup_addBookmark":{
+        "message":"添加追剧"
+    },
+    "popup_addSeparator":{
+        "message":"添加文件夹"
+    },
+    "popup_searchText":{
+        "message":"搜索"
+    },
+    "popup_bookmarkListText":{
+        "message":"追剧书签"
+    }
+}

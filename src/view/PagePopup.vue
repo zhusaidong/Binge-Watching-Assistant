@@ -2,10 +2,10 @@
   <div class="main_app">
 
     <!-- 按钮部分 -->
-    <el-button type="primary" @click="addBookmark()">添加追剧</el-button>
-    <el-button @click="openSeparatorDialog=true;separatorName='';">添加文件夹</el-button>
+    <el-button type="primary" @click="addBookmark()">{{ i18n.message("popup.addBookmark") }}</el-button>
+    <el-button @click="openSeparatorDialog=true;separatorName='';">{{ i18n.message("popup.addSeparator") }}</el-button>
     <!--添加分隔的弹窗-->
-    <el-dialog v-model="openSeparatorDialog" :close-on-click-modal="true" title="添加文件夹">
+    <el-dialog v-model="openSeparatorDialog" :close-on-click-modal="true" :title="i18n.message('popup.addSeparator')">
       <el-form>
         <el-form-item>
           <el-input v-model="separatorName" clearable placeholder="输入文件夹名称"/>
@@ -18,7 +18,7 @@
     </el-dialog>
 
     <!-- 搜索部分 -->
-    <el-divider content-position="left">搜索</el-divider>
+    <el-divider content-position="left">{{ i18n.message("popup.searchText") }}</el-divider>
     <el-form :inline="true">
       <el-form-item>
         <el-input
@@ -48,7 +48,7 @@
     </el-form>
 
     <!-- 书签部分 -->
-    <el-divider content-position="left">追剧书签</el-divider>
+    <el-divider content-position="left">{{ i18n.message("popup.bookmarkListText") }}</el-divider>
     <el-tree
         v-if="settings.refreshTable"
         v-loading="loading"
@@ -180,7 +180,7 @@
 <script setup>
 import {
   bookmark,
-  CONFIG_STORE_TAG_KEY, notice, runtime,
+  CONFIG_STORE_TAG_KEY, i18n, notice, runtime,
   sendMessage,
   settingsStore,
   store, tabs
