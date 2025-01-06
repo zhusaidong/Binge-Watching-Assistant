@@ -13,7 +13,8 @@
         "bookmarks",
         "storage",
         "tabs",
-        "favicon"
+        "favicon",
+        "contextMenus"
     ],
     "web_accessible_resources": [
         {

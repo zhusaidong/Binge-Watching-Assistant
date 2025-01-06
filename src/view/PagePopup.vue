@@ -206,7 +206,8 @@ const settings = ref({
   refreshTable: true,
   defaultExpand: true,
   tag: false,
-  titleRegList: []
+  titleRegList: [],
+  deleteDoubleConfirmation: true
 });
 
 /**
@@ -240,15 +241,20 @@ const handleInputConfirm = row => {
 const tagRemove = (row, tag) => {
   row.tags.splice(row.tags.indexOf(tag), 1);
   //移除数据
+  removeTag(row.id);
+};
+
+/**
+ * 删除书签对应的标签
+ * @param bookmarkId 书签id
+ */
+const removeTag = (bookmarkId) => {
   store.getSyncData(CONFIG_STORE_TAG_KEY).then(tagData => {
-    tagData[row.id] = row.tags;
     //数组为空时，清除整个对象，来压缩存储
-    if (tagData[row.id].length === 0) {
-      delete tagData[row.id];
-    }
+    delete tagData[bookmarkId];
     store.setSyncData(CONFIG_STORE_TAG_KEY, tagData);
   });
-};
+}
 
 /**
  * 获取标签数据
@@ -426,7 +432,7 @@ const addBookmark = () => {
         }, function (bookmark) {
           refreshBookmark();
           //添加新页面时立即开启监听
-          sendMessage({bookmark_id: bookmark.id, tab_id: tab.id});
+          message.sendMessageByType("bookmark", {bookmark_id: bookmark.id, tab_id: tab.id});
         });
   });
 }
@@ -464,17 +470,31 @@ const saveBookmark = row => {
  * @param id
  */
 const deleteBookmark = id => {
-  ElMessageBox.confirm('确定要删除吗？', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(() => {
-    bookmark.deleteBookmark(id, function () {
-      bookmark.setBadgeText();
+  if (settings.value.deleteDoubleConfirmation) {
+    ElMessageBox.confirm('确定要删除吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }).then(() => {
+      deleteBookmarkConfirmation(id)
+    }).catch(() => {
     });
-    refreshBookmark();
-  }).catch(() => {
+  } else {
+    deleteBookmarkConfirmation(id)
+  }
+}
+
+/**
+ * 确认删除书签
+ * @param id
+ */
+const deleteBookmarkConfirmation = id => {
+  bookmark.deleteBookmark(id, function () {
+    bookmark.setBadgeText();
+    //删除对应标签数据
+    removeTag(id);
   });
+  refreshBookmark();
 }
 
 /**
@@ -482,7 +502,7 @@ const deleteBookmark = id => {
  * @param id
  */
 const openBookmark = id => {
-  sendMessage({bookmark_id: id, tab_id: null});
+  message.sendMessageByType("bookmark", {bookmark_id: id, tab_id: null});
 }
 
 /**
@@ -521,6 +541,7 @@ const getSettings = () => {
       settings.value.defaultExpand = settingsStore["defaultExpand"] !== undefined ? settingsStore["defaultExpand"] : true;
       settings.value.tag = settingsStore["tag"] !== undefined ? settingsStore["tag"] : true;
       settings.value.titleRegList = settingsStore["titleRegList"] !== undefined ? settingsStore["titleRegList"] : [];
+      settings.value.deleteDoubleConfirmation = settingsStore["deleteDoubleConfirmation"] !== undefined ? settingsStore["deleteDoubleConfirmation"] : true;
       nextTick(() => {
         settings.value.refreshTable = true;
       })

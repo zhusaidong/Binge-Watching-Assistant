@@ -35,6 +35,30 @@ https://developer.chrome.com/docs/extensions/how-to/ui/favicons?hl=zh-cn
 ，发现chrome内部的ID是全局统一的，但是`chrome.bookmarks`这个api获取的id实际上是`LOCAL_EXTERNAL_ID`
 ，哪怕是相同账号同步书签，不同设备之间生成的id也不同。
 
+```javascript
+/**
+ * 更新插件时将sync的标签转换成local的标签，下个版本移除
+ */
+const moveTagDataToLocalStorage = () => {
+        chrome.runtime.onInstalled.addListener(details => {
+            if (details.reason === chrome.runtime.OnInstalledReason.UPDATE && details.previousVersion === '1.2.4') {
+                store.getLocalData(CONFIG_STORE_TAG_KEY).then(tags => {
+                    if (Object.keys(tags).length === 0) {
+                        //需要转移数据
+                        store.getSyncData(CONFIG_STORE_TAG_KEY).then(tagData => {
+                            console.log("sync_data", tagData)
+                            if (Object.keys(tagData).length !== 0) {
+                                store.setLocalData(CONFIG_STORE_TAG_KEY, tagData);
+                                store.removeSyncData(CONFIG_STORE_TAG_KEY);
+                            }
+                        });
+                    }
+                })
+            }
+        });
+    }
+```
+
 ## todo
 
 - [x] 升级manifest_version到v3：监听更新的逻辑需要改动，popup.js无法直接引用background.js了，全局变量的方式（bookmarkTabs）得改
@@ -47,14 +71,26 @@ https://developer.chrome.com/docs/extensions/how-to/ui/favicons?hl=zh-cn
 
 - [x] 打开eslint校验，优化构建的文件:将manifest.*.json合并使用一个,去掉background.html/helper.html。最好能优化构建出来的目录结构
 - [ ] 优化依赖，减少打包后的文件大小，webpack打包后不压缩竟然有16M
-- [ ] 书签删除时需要同步删除对应的标签
+- [ ] tab异常情况处理：如果存在关联关系，也得清除。异常关联关系不删除，就无法创建tab监听器
+  > 浏览器异常关闭
+  >
+  > 直接删除书签
 - [x] [右键菜单快捷方式，删除按钮是否开启二次确认的选项](issues/2)
+- [ ] 书签删除时需要同步删除对应的标签
 
 ## changelog
 
 ### 1.2.4
 
 > 完善书签和标签的关联关系，使用本地存储来保存关系，修复因为系统进入睡眠模式，service_worker停摆，导致关联失效（唤醒后无法正常更新追剧）的问题。
+>
+> 添加“删除二次确认”的选项，默认开启
+>
+> 添加“右键菜单”的功能，选项默认关闭
+>
+> 完善标签管理
+> 
+> 添加edge浏览器的支持
 
 ### 1.2.3
 
@@ -127,6 +163,9 @@ https://developer.chrome.com/docs/extensions/how-to/ui/favicons?hl=zh-cn
 
 ```text
 更新日志：
+V1.2.4: 完善书签和标签的关联关系，使用本地存储来保存关系，修复因为系统进入睡眠模式，service_worker停摆，导致关联失效（唤醒后无法正常更新追剧）的问题。
+        选项页面添加右键菜单快捷方式，删除按钮是否开启二次确认的选项
+        新增对edge浏览器的支持
 V1.2.3: 新增标签功能，可以让书签更好的分类
                新增书签列表是否折叠的选项功能，可以让列表更简洁
                新增书签标题文字去除功能，让书签显示更简洁
