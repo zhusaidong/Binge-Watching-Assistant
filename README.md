@@ -6,28 +6,39 @@
 >
 > 在线观看视频时，可以添加新剧，也可以更新当前视频的观看进度
 
+## 一些截图
+
+<img alt="20250107105201.png" height="200" src="screenshot/20250107105201.png" width="320"/>
+<img alt="20250107105250.png" height="200" src="screenshot/20250107105250.png" width="320"/>
+<img alt="20250107105907.png" height="200" src="screenshot/20250107105907.png" width="320"/>
+<img alt="20250107105935.png" height="200" src="screenshot/20250107105935.png" width="320"/>
+
 ## 在线安装
 
-- <a href="https://chrome.google.com/webstore/detail/%E8%BF%BD%E5%89%A7%E5%8A%A9%E6%89%8B/pbnnheibacpamfaendimogbeaeciglpo" title="已在 Chrome Web Store 市场上发布的版本">![](https://img.shields.io/chrome-web-store/v/pbnnheibacpamfaendimogbeaeciglpo.svg?label=Google%20Chrome)</a>
+- <a href="https://chrome.google.com/webstore/detail/pbnnheibacpamfaendimogbeaeciglpo" title="已在 Chrome Web Store 市场上发布的版本">![](https://img.shields.io/chrome-web-store/v/pbnnheibacpamfaendimogbeaeciglpo.svg?label=Google%20Chrome)</a>
 
-- <a href="https://microsoftedge.microsoft.com/addons/detail/%E8%BF%BD%E5%89%A7%E5%8A%A9%E6%89%8B/kijikbnlbgddamolcfnlelppffpkkmla" title="已在 Microsoft Edge 上发布的版本">![](https://img.shields.io/badge/dynamic/json?label=Edge%20Addons&prefix=v&query=%24.version&url=https%3A%2F%2Fmicrosoftedge.microsoft.com%2FAddons%2Fgetproductdetailsbycrxid%2Fkijikbnlbgddamolcfnlelppffpkkmla)</a>
+- <a href="https://microsoftedge.microsoft.com/addons/detail/kijikbnlbgddamolcfnlelppffpkkmla" title="已在 Microsoft Edge 上发布的版本">![](https://img.shields.io/badge/dynamic/json?label=Edge%20Addons&prefix=v&query=%24.version&url=https%3A%2F%2Fmicrosoftedge.microsoft.com%2FAddons%2Fgetproductdetailsbycrxid%2Fkijikbnlbgddamolcfnlelppffpkkmla)</a>
 
-## vue开发
+- <a href="https://www.crxsoso.com/webstore/detail/pbnnheibacpamfaendimogbeaeciglpo" title="Crx搜搜">![](https://img.shields.io/chrome-web-store/v/pbnnheibacpamfaendimogbeaeciglpo.svg?label=Crx%E6%90%9C%E6%90%9C)</a>
+
+## 开发方面
+
+### vue开发
 
 使用[vue-cli-plugin-chrome-extension-cli](https://github.com/sanyu1225/vue-cli-plugin-chrome-extension-cli)生成架构
 
-## ide提示功能
+### ide提示功能
 
     方法1（推荐） 
         File->Settings->Languages & Frameworks->JavaScript->Libraries->Download->输入chrome->Download and Install
     方法2
         npm install --save-dev @types/chrome
 
-## 关于书签图标
+### 关于书签图标
 
 https://developer.chrome.com/docs/extensions/how-to/ui/favicons?hl=zh-cn
 
-## 关于标签同步问题
+### 关于标签同步问题
 
 多设备同步的书签标签关系会对不上?
 
@@ -61,22 +72,20 @@ const moveTagDataToLocalStorage = () => {
 
 ## todo
 
-- [x] 升级manifest_version到v3：监听更新的逻辑需要改动，popup.js无法直接引用background.js了，全局变量的方式（bookmarkTabs）得改
-- [x] 添加新页面时立即开启监听
 - [ ] 监听tab时会判断页面完全加载才去更新书签，这样会使得页面加载缓慢时（js，图片等）无法正确更新书签。
-- [x] 界面换vue重写
-- [x] service_worker 无法永久运行，意味着“全局的书签-标签的关联变量”无法持久保存，导致一段时间后功能会失效，只能用存储代替。
-
-> 根据定义，Service Worker 由事件驱动，在闲置时终止。这样，Chrome 就可以优化扩展程序的性能和内存消耗。
-
-- [x] 打开eslint校验，优化构建的文件:将manifest.*.json合并使用一个,去掉background.html/helper.html。最好能优化构建出来的目录结构
 - [ ] 优化依赖，减少打包后的文件大小，webpack打包后不压缩竟然有16M
 - [ ] tab异常情况处理：如果存在关联关系，也得清除。异常关联关系不删除，就无法创建tab监听器
-  > 浏览器异常关闭
+  > 1.浏览器异常关闭
   >
-  > 直接删除书签
-- [x] [右键菜单快捷方式，删除按钮是否开启二次确认的选项](issues/2)
+  > 2.直接删除书签
 - [ ] 书签删除时需要同步删除对应的标签
+- [ ] rspack/rsbuild 代替webpack打包
+- [ ] 插件脚本机制？没想好把脚本如何设计（储存，更新）
+  > 类似于修复脚本，修复追剧过程中的一些问题:
+  >
+  > 如用腾讯视频追综艺时，跳转到下一集无法自动全屏(全屏模式跳转到下一集时页面会回到窗口模式)，
+  >
+  > 追电视剧却可以（电视剧下的播放器有选集功能，综艺却没有）。
 
 ## changelog
 
@@ -89,7 +98,7 @@ const moveTagDataToLocalStorage = () => {
 > 添加“右键菜单”的功能，选项默认关闭
 >
 > 完善标签管理
-> 
+>
 > 添加edge浏览器的支持
 
 ### 1.2.3
@@ -187,3 +196,4 @@ v1.0.1：修复书签同步后无列表的bug。
 v1.0.0：更新界面，删除右键操作，更改为界面操作。
 v0.2.0：美化界面。
 ```
+
