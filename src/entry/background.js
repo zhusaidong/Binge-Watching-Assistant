@@ -7,14 +7,14 @@ const listenBookmarkTabRef = request => {
     const tabId = request.tab_id;
 
     //接收到“打开书签”的消息，创建追剧监听器
-
-    bookmarkTabRef.size().then(size => {
-        console.log("bookmarkTabRef.size", size);
-        if (size === 0) {
-            console.log("创建tab监听器")
-            tabListener();
-        }
-    })
+    // bookmarkTabRef.size().then(size => {
+    //     console.log("bookmarkTabRef.size", size);
+    //     if (size === 0) {
+    //         console.log("创建tab监听器")
+    //         tabListener();
+    //     }
+    // })
+    startWait();
 
     //创建标签页和书签的追剧关联
     if (tabId == null) {
@@ -60,6 +60,8 @@ const initBackground = () => {
     message.startListening();
 
     createContextMenuIfOpen();
+
+    tabListener();
 }
 
 /**
@@ -85,23 +87,45 @@ const tabListener = () => {
      */
     tabs.onRemoved(function (tabId) {
         bookmarkTabRef.remove(tabId).then(() => {
-            bookmarkTabRef.size().then(size => {
-                //没有需要监听的追剧时移除追剧监听器
-                if (size === 0) {
-                    console.log("移除tab监听器")
-                    tabs.removeUpdatedListener();
-                    tabs.removeRemovedListener();
-                }
-            })
+            // bookmarkTabRef.size().then(size => {
+            //     //没有需要监听的追剧时移除追剧监听器
+            //     if (size === 0) {
+            //         // console.log("移除tab监听器")
+            //         tabs.removeUpdatedListener();
+            //         tabs.removeRemovedListener();
+            //     }
+            // })
         })
     });
 }
 
+//浏览器重新打开，清空书签tab的关联关系
+chrome.runtime.onStartup.addListener(() => {
+    console.log('浏览器重新打开，清空书签tab的关联关系');
+    bookmarkTabRef.clear().then();
+});
+
+//有活动期间，保活
+//@see https://blog.csdn.net/qq_35606400/article/details/136327698
+let keepAlive = null;
+
 initBackground();
 
-//扩展重新加载/开启时，清空书签tab的关联关系
-chrome.runtime.onInstalled.addListener(details => {
-    if (details.reason === chrome.runtime.OnInstalledReason.UPDATE) {
-        bookmarkTabRef.clear().then();
+function startWait() {
+    if (keepAlive === null) {
+        keepAlive = setInterval(waitUntil, 5 * 1000);
+        console.log("create keepAlive");
     }
-});
+}
+
+function waitUntil() {
+    chrome.runtime.getPlatformInfo().then();
+    console.log("living");
+    bookmarkTabRef.size().then(size => {
+        //没有需要监听的追剧时移除追剧监听器
+        if (size === 0) {
+            clearInterval(keepAlive);
+            keepAlive = null;
+        }
+    })
+}

@@ -469,7 +469,7 @@ class BookmarkTabRef {
     clear() {
         let that = this;
         return new Promise(function () {
-            that.localStore.clearLocal("bookmarkTabRef");
+            that.localStore.removeLocalData("bookmarkTabRef");
         })
     }
 
