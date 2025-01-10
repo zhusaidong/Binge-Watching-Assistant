@@ -470,7 +470,7 @@ class BookmarkTabRef {
     clear() {
         let that = this;
         return new Promise(function () {
-            that.localStore.clearLocal("bookmarkTabRef");
+            that.localStore.removeLocalData("bookmarkTabRef");
         })
     }
 
@@ -540,11 +540,11 @@ class Message {
 
             //chrome crx id：pbnnheibacpamfaendimogbeaeciglpo
             //edge crx id：kijikbnlbgddamolcfnlelppffpkkmla
-            const crxIds = ["pbnnheibacpamfaendimogbeaeciglpo", "kijikbnlbgddamolcfnlelppffpkkmla"];
-            if (!isDevMode && !crxIds.includes(sender.id)) {
-                console.log("message is error", sender.id);
-                return;
-            }
+            // const crxIds = ["pbnnheibacpamfaendimogbeaeciglpo", "kijikbnlbgddamolcfnlelppffpkkmla"];
+            // if (!isDevMode && !crxIds.includes(sender.id)) {
+            //     console.log("message is error", sender.id);
+            //     return;
+            // }
 
             let {type, data} = request;
             if (this._listeners[type] !== undefined) {
