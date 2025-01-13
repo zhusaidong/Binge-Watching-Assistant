@@ -70,6 +70,27 @@ const moveTagDataToLocalStorage = () => {
     }
 ```
 
+### 关于service_worker
+
+没法完美保活，仍需要保活方法。
+
+操作系统休眠时，Chrome 浏览器和扩展的进程会被暂停，因此操作系统唤醒后，扩展的service_worker会失效。
+
+service_worker失效后，tab更新事件监听也会失效。如果休眠前还在追剧，系统唤醒后追剧就会失效。
+
+或许可以试试这个
+
+```javascript
+chrome.alarms.create("checkWakeUp", {periodInMinutes: 1});
+
+chrome.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name === "checkWakeUp") {
+        console.log("Service worker is checking wake-up status.");
+        // 这里执行需要在唤醒后进行的操作
+    }
+});
+```
+
 ## todo
 
 - [ ] 监听tab时会判断页面完全加载才去更新书签，这样会使得页面加载缓慢时（js，图片等）无法正确更新书签。
@@ -92,8 +113,6 @@ const moveTagDataToLocalStorage = () => {
 
 ### 1.2.4
 
-> 完善书签和标签的关联关系，使用本地存储来保存关系，修复因为系统进入睡眠模式，service_worker停摆，导致关联失效（唤醒后无法正常更新追剧）的问题。
->
 > 添加“删除二次确认”的选项，默认开启
 >
 > 添加“右键菜单”的功能，选项默认关闭
@@ -173,7 +192,7 @@ const moveTagDataToLocalStorage = () => {
 
 ```text
 更新日志：
-V1.2.4: 完善书签和标签的关联关系，使用本地存储来保存关系，修复因为系统进入睡眠模式，service_worker停摆，导致关联失效（唤醒后无法正常更新追剧）的问题。
+V1.2.4: 完善书签和标签的关联关系，使用本地存储来保存关系
         选项页面添加右键菜单快捷方式，删除按钮是否开启二次确认的选项
         新增对edge浏览器的支持
 V1.2.3: 新增标签功能，可以让书签更好的分类

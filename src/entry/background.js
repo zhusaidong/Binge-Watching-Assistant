@@ -63,6 +63,7 @@ const initBackground = () => {
     createContextMenuIfOpen();
 
     tabListener();
+    checkAlarmState().then();
 }
 
 /**
@@ -129,3 +130,29 @@ function waitUntil() {
         }
     })
 }
+
+//使用闹钟来唤醒background
+async function checkAlarmState() {
+    const STORAGE_KEY = "user-preference-alarm-enabled";
+    const alarmName = "my-alarm";//"alarm-to-wakeup-background"
+
+    const {alarmEnabled} = await chrome.storage.sync.get(STORAGE_KEY);
+    console.log("alarmEnabled", alarmEnabled)
+    if (alarmEnabled) {
+        const alarm = await chrome.alarms.get(alarmName);
+        if (!alarm) {
+            await chrome.alarms.create(alarmName, {periodInMinutes: 0.5});
+        }
+    } else {
+        const wasCleared = await chrome.alarms.clear(alarmName);
+        console.log("wasCleared", wasCleared)
+    }
+
+    //debug
+    //await chrome.alarms.create(alarmName, {periodInMinutes: 30});
+}
+
+chrome.alarms.onAlarm.addListener(function () {
+    console.log("onAlarmed", new Date().toLocaleString());
+    //initBackground();
+})
