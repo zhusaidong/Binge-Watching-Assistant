@@ -1,8 +1,8 @@
 import {bookmark, bookmarkTabRef, contextMenu, message, settingsStore, tabs} from '@/script/helper';
 import {MESSAGE_TYPE, SETTING_KEY} from "@/script/constant";
 
+const alarmName = "alarm-to-wakeup-background";
 //监听事件的回调
-
 const listenBookmarkTabRef = request => {
     const bookmarkId = request.bookmark_id;
     const tabId = request.tab_id;
@@ -63,7 +63,6 @@ const initBackground = () => {
     createContextMenuIfOpen();
 
     tabListener();
-    checkAlarmState().then();
 }
 
 /**
@@ -106,53 +105,24 @@ chrome.runtime.onStartup.addListener(() => {
     bookmarkTabRef.clear().then();
 });
 
-//有活动期间，保活
-//@see https://blog.csdn.net/qq_35606400/article/details/136327698
-let keepAlive = null;
-
 initBackground();
 
+//使用闹钟来唤醒background
 function startWait() {
-    if (keepAlive === null) {
-        keepAlive = setInterval(waitUntil, 5 * 1000);
-        console.log("create keepAlive");
-    }
-}
-
-function waitUntil() {
-    chrome.runtime.getPlatformInfo().then();
-    console.log("living");
-    bookmarkTabRef.size().then(size => {
-        //没有需要监听的追剧时移除追剧监听器
-        if (size === 0) {
-            clearInterval(keepAlive);
-            keepAlive = null;
+    chrome.alarms.get(alarmName).then(alarm => {
+        if (alarm === undefined) {
+            chrome.alarms.create(alarmName, {periodInMinutes: 0.5}).then();
         }
     })
 }
 
-//使用闹钟来唤醒background
-async function checkAlarmState() {
-    const STORAGE_KEY = "user-preference-alarm-enabled";
-    const alarmName = "my-alarm";//"alarm-to-wakeup-background"
-
-    const {alarmEnabled} = await chrome.storage.sync.get(STORAGE_KEY);
-    console.log("alarmEnabled", alarmEnabled)
-    if (alarmEnabled) {
-        const alarm = await chrome.alarms.get(alarmName);
-        if (!alarm) {
-            await chrome.alarms.create(alarmName, {periodInMinutes: 0.5});
-        }
-    } else {
-        const wasCleared = await chrome.alarms.clear(alarmName);
-        console.log("wasCleared", wasCleared)
-    }
-
-    //debug
-    //await chrome.alarms.create(alarmName, {periodInMinutes: 30});
-}
-
 chrome.alarms.onAlarm.addListener(function () {
-    console.log("onAlarmed", new Date().toLocaleString());
-    //initBackground();
+    console.log("living", new Date().toLocaleString());
+    chrome.runtime.getPlatformInfo().then();
+    bookmarkTabRef.size().then(size => {
+        //没有需要监听的追剧时移除追剧监听器
+        if (size === 0) {
+            chrome.alarms.clear(alarmName).then();
+        }
+    })
 })
