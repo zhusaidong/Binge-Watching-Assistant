@@ -72,6 +72,8 @@ const moveTagDataToLocalStorage = () => {
 
 ### 关于service_worker
 
+https://developer.chrome.google.cn/docs/extensions/develop/concepts/service-workers/lifecycle?hl=zh-cn#idle-shutdown
+
 没法完美保活，仍需要保活方法。
 
 操作系统休眠时，Chrome 浏览器和扩展的进程会被暂停，因此操作系统唤醒后，扩展的service_worker会失效。
