@@ -241,7 +241,14 @@ const handleInputConfirm = row => {
 const tagRemove = (row, tag) => {
   row.tags.splice(row.tags.indexOf(tag), 1);
   //移除数据
-  removeTag(row.id);
+  store.getSyncData(CONFIG_STORE_TAG_KEY).then(tagData => {
+    tagData[row.id] = row.tags;
+    //数组为空时，清除整个对象，来压缩存储
+    if (tagData[row.id].length === 0) {
+      delete tagData[row.id];
+    }
+    store.setSyncData(CONFIG_STORE_TAG_KEY, tagData);
+  });
 };
 
 /**
@@ -250,7 +257,6 @@ const tagRemove = (row, tag) => {
  */
 const removeTag = (bookmarkId) => {
   store.getSyncData(CONFIG_STORE_TAG_KEY).then(tagData => {
-    //数组为空时，清除整个对象，来压缩存储
     delete tagData[bookmarkId];
     store.setSyncData(CONFIG_STORE_TAG_KEY, tagData);
   });
