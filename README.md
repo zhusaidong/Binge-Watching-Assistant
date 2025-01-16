@@ -6,28 +6,37 @@
 >
 > 在线观看视频时，可以添加新剧，也可以更新当前视频的观看进度
 
+## 一些截图
+
+<img alt="20250107105201.png" height="200" src="screenshot/20250107105201.png" width="320"/>
+<img alt="20250107105250.png" height="200" src="screenshot/20250107105250.png" width="320"/>
+<img alt="20250107105907.png" height="200" src="screenshot/20250107105907.png" width="320"/>
+<img alt="20250107105935.png" height="200" src="screenshot/20250107105935.png" width="320"/>
+
 ## 在线安装
 
 - <a href="https://chrome.google.com/webstore/detail/%E8%BF%BD%E5%89%A7%E5%8A%A9%E6%89%8B/pbnnheibacpamfaendimogbeaeciglpo" title="已在 Chrome Web Store 市场上发布的版本">![](https://img.shields.io/chrome-web-store/v/pbnnheibacpamfaendimogbeaeciglpo.svg?label=Google%20Chrome)</a>
 
-- <a href="https://microsoftedge.microsoft.com/addons/detail/%E8%BF%BD%E5%89%A7%E5%8A%A9%E6%89%8B/kijikbnlbgddamolcfnlelppffpkkmla" title="已在 Microsoft Edge 上发布的版本">![](https://img.shields.io/badge/dynamic/json?label=Edge%20Addons&prefix=v&query=%24.version&url=https%3A%2F%2Fmicrosoftedge.microsoft.com%2FAddons%2Fgetproductdetailsbycrxid%2Fkijikbnlbgddamolcfnlelppffpkkmla)</a>
+- <a href="https://www.crxsoso.com/webstore/detail/pbnnheibacpamfaendimogbeaeciglpo" title="Crx搜搜">![](https://img.shields.io/chrome-web-store/v/pbnnheibacpamfaendimogbeaeciglpo.svg?label=Crx%E6%90%9C%E6%90%9C)</a>
 
-## vue开发
+## 开发方面
+
+### vue开发
 
 使用[vue-cli-plugin-chrome-extension-cli](https://github.com/sanyu1225/vue-cli-plugin-chrome-extension-cli)生成架构
 
-## ide提示功能
+### ide提示功能
 
     方法1（推荐） 
         File->Settings->Languages & Frameworks->JavaScript->Libraries->Download->输入chrome->Download and Install
     方法2
         npm install --save-dev @types/chrome
 
-## 关于书签图标
+### 关于书签图标
 
 https://developer.chrome.com/docs/extensions/how-to/ui/favicons?hl=zh-cn
 
-## 关于标签同步问题
+### 关于标签同步问题
 
 多设备同步的书签标签关系会对不上?
 
@@ -59,10 +68,120 @@ const moveTagDataToLocalStorage = () => {
     }
 ```
 
+### 关于service_worker
+
+https://developer.chrome.google.cn/docs/extensions/develop/concepts/service-workers/lifecycle?hl=zh-cn#idle-shutdown
+
+没法完美保活，仍需要保活方法。
+
+操作系统休眠时，Chrome 浏览器和扩展的进程会被暂停，因此操作系统唤醒后，扩展的service_worker会失效。
+
+service_worker失效后，tab更新事件监听也会失效。如果休眠前还在追剧，系统唤醒后追剧就会失效。
+
+或许可以试试这个
+
+```javascript
+chrome.alarms.create("checkWakeUp", {periodInMinutes: 1});
+
+chrome.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name === "checkWakeUp") {
+        console.log("Service worker is checking wake-up status.");
+        // 这里执行需要在唤醒后进行的操作
+    }
+});
+```
+
 ## todo
 
 - [ ] 监听tab时会判断页面完全加载才去更新书签，这样会使得页面加载缓慢时（js，图片等）无法正确更新书签。
 - [ ] 优化依赖，减少打包后的文件大小，webpack打包后不压缩竟然有16M
+- [ ] rspack/rsbuild 代替webpack打包
+- [ ] 插件脚本机制？没想好把脚本如何设计（储存，更新）
+  > 类似于修复脚本，修复追剧过程中的一些问题:
+  >
+  > 如用腾讯视频追综艺时，跳转到下一集无法自动全屏(全屏模式跳转到下一集时页面会回到窗口模式)，
+  >
+  > 追电视剧却可以（电视剧下的播放器有选集功能，综艺却没有）。
+- [ ] 将一些固定字符串设置成常量
+
+## changelog
+
+### 1.2.4
+
+> 添加“删除二次确认”的选项，默认开启
+>
+> 添加“右键菜单”的功能，选项默认关闭
+>
+> 完善标签管理
+>
+> 添加edge浏览器的支持
+
+### 1.2.3
+
+> 添加标签功能
+>
+> 书签图标采用懒加载
+>
+> 添加书签列表默认是否折叠的选项
+>
+> 添加标题文字去除功能
+>
+> 添加新特性弹窗的功能
+
+### 1.2.0
+
+> 重构项目，使用vue开发，让界面更美观
+>
+> 增加搜索模式，用于搜索列表中的追剧书签
+>
+> 增加文件夹分类模式
+
+### 1.1.6
+
+    修复service_worker沉寂，导致功能异常的问题
+
+### 1.1.4
+
+    升级manifest_version到v3
+    在当前页面添加追剧时立即生效，无需重新打开
+
+### 1.1.3
+
+    修复未正确换行顶开操作按钮的bug
+
+### 1.1.2
+
+    修复多窗口时添加追剧不正确的bug
+
+### 1.1.1
+
+    修复v1.0.4编辑链接失效bug
+    优化代码
+
+### 1.0.4
+
+    新增自动更新功能，看完新的一集电视再也无需手动更新追剧了。
+
+### 1.0.3
+
+    添加书签的favicon.ico
+
+### 1.0.2
+
+    增加拖拽排序
+
+### 1.0.1
+
+    修复书签同步后无列表的bug
+
+### 1.0.0
+
+    更新界面
+    删除右键操作，更改为界面操作
+
+### 0.2.0
+
+    美化界面
 
 ## 更新日志
 

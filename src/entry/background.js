@@ -1,7 +1,7 @@
 import {bookmark, bookmarkTabRef, contextMenu, message, settingsStore, tabs} from '@/script/helper';
 
+const alarmName = "alarm-to-wakeup-background";
 //监听事件的回调
-
 const listenBookmarkTabRef = request => {
     const bookmarkId = request.bookmark_id;
     const tabId = request.tab_id;
@@ -105,27 +105,24 @@ chrome.runtime.onStartup.addListener(() => {
     bookmarkTabRef.clear().then();
 });
 
-//有活动期间，保活
-//@see https://blog.csdn.net/qq_35606400/article/details/136327698
-let keepAlive = null;
-
 initBackground();
 
+//使用闹钟来唤醒background
 function startWait() {
-    if (keepAlive === null) {
-        keepAlive = setInterval(waitUntil, 5 * 1000);
-        console.log("create keepAlive");
-    }
-}
-
-function waitUntil() {
-    chrome.runtime.getPlatformInfo().then();
-    console.log("living");
-    bookmarkTabRef.size().then(size => {
-        //没有需要监听的追剧时移除追剧监听器
-        if (size === 0) {
-            clearInterval(keepAlive);
-            keepAlive = null;
+    chrome.alarms.get(alarmName).then(alarm => {
+        if (alarm === undefined) {
+            chrome.alarms.create(alarmName, {periodInMinutes: 0.5}).then();
         }
     })
 }
+
+chrome.alarms.onAlarm.addListener(function () {
+    console.log("living", new Date().toLocaleString());
+    chrome.runtime.getPlatformInfo().then();
+    bookmarkTabRef.size().then(size => {
+        //没有需要监听的追剧时移除追剧监听器
+        if (size === 0) {
+            chrome.alarms.clear(alarmName).then();
+        }
+    })
+})
