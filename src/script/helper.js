@@ -1,3 +1,4 @@
+import {CONFIG, MESSAGE_TYPE, SETTING_KEY} from "@/script/constant";
 //是否是开发模式
 const isDevMode = process.env.NODE_ENV === 'development'
 
@@ -376,7 +377,7 @@ class Settings {
     get() {
         let that = this;
         return new Promise(function (resolve) {
-            that.settingStore.getSyncData(CONFIG_STORE_SETTINGS_KEY).then(settings => {
+            that.settingStore.getSyncData(CONFIG.STORE_SETTINGS_KEY).then(settings => {
                 resolve(settings);
             });
         });
@@ -407,9 +408,9 @@ class Settings {
 
     set(key, data) {
         let that = this;
-        that.settingStore.getSyncData(CONFIG_STORE_SETTINGS_KEY).then(settingsStore => {
+        that.settingStore.getSyncData(CONFIG.STORE_SETTINGS_KEY).then(settingsStore => {
             settingsStore[key] = data;
-            that.settingStore.setSyncData(CONFIG_STORE_SETTINGS_KEY, settingsStore);
+            that.settingStore.setSyncData(CONFIG.STORE_SETTINGS_KEY, settingsStore);
         });
     }
 }
@@ -595,11 +596,11 @@ class ContextMenu {
      */
     contextMenuCallback = (info, tab) => {
         console.log("onclick contextMenu!")
-        if (info.menuItemId !== CONFIG_BOOKMARK_MENU_KEY) {
+        if (info.menuItemId !== CONFIG.BOOKMARK_MENU_KEY) {
             return;
         }
 
-        settingsStore.getByKey("titleRegList", []).then(titleRegList => {
+        settingsStore.getByKey(SETTING_KEY.TITLE_REG_LIST, []).then(titleRegList => {
             let titleReg = titleRegList.find(titleReg => tab.url.includes(titleReg.domain));
             const newTitle = titleReg !== undefined ? tab.title.replace(titleReg.removeTitle, "") : tab.title;
 
@@ -610,7 +611,7 @@ class ContextMenu {
                 }, function (bookmarkVar) {
                     bookmark.setBadgeText();
                     //添加新页面时立即开启监听
-                    message.runListener("bookmark", {bookmark_id: bookmarkVar.id, tab_id: tab.id});
+                    message.runListener(MESSAGE_TYPE.BOOKMARK, {bookmark_id: bookmarkVar.id, tab_id: tab.id});
                 });
         });
     };
@@ -619,7 +620,7 @@ class ContextMenu {
         let that = this;
         chrome.contextMenus.create(
             {
-                id: CONFIG_BOOKMARK_MENU_KEY,
+                id: CONFIG.BOOKMARK_MENU_KEY,
                 title: "添加追剧",
                 contexts: ["page", "action"],
                 enabled: true,
@@ -649,8 +650,6 @@ class I18nMessage {
 }
 
 export const CONFIG_STORE_TAG_KEY = "tag.list";
-export const CONFIG_STORE_SETTINGS_KEY = "settings";
-export const CONFIG_BOOKMARK_MENU_KEY = "addWatchBookmark";
 
 export var runtime = new Runtime();
 export var bookmark = new Bookmark(runtime.getManifest().name + (isDevMode ? "开发版" : ""));

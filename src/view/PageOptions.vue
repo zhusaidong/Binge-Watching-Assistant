@@ -66,11 +66,11 @@
 <script setup>
 import {ref, onMounted} from "vue";
 import {
-  CONFIG_BOOKMARK_MENU_KEY,
   CONFIG_STORE_TAG_KEY, message,
   settingsStore,
   store
 } from "@/script/helper";
+import {CONFIG} from "@/script/constant";
 
 const tagList = ref([]);
 const titleReg = ref({
@@ -137,7 +137,7 @@ const changeSwitch = (type) => {
     if (valueElement === true) {
       message.sendMessageByType("createContextMenu", {})
     } else {
-      message.sendMessageByType("removeContextMenu", CONFIG_BOOKMARK_MENU_KEY)
+      message.sendMessageByType("removeContextMenu", CONFIG.BOOKMARK_MENU_KEY)
     }
   }
 }

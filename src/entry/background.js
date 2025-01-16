@@ -1,4 +1,5 @@
 import {bookmark, bookmarkTabRef, contextMenu, message, settingsStore, tabs} from '@/script/helper';
+import {MESSAGE_TYPE, SETTING_KEY} from "@/script/constant";
 
 const alarmName = "alarm-to-wakeup-background";
 //监听事件的回调
@@ -34,7 +35,7 @@ const listenBookmarkTabRef = request => {
  */
 const createContextMenuIfOpen = () => {
     //在扩展刷新/重新开启时，需要判断是否开启右键菜单
-    settingsStore.getByKey("enableContextMenu", false).then(enableContextMenu => {
+    settingsStore.getByKey(SETTING_KEY.ENABLE_CONTEXT_MENU, false).then(enableContextMenu => {
         if (enableContextMenu === true) {
             contextMenu.createContextMenu()
         }
@@ -50,11 +51,11 @@ const initBackground = () => {
 
     //创建消息监听
 
-    message.setListener("bookmark", listenBookmarkTabRef);
-    message.setListener("createContextMenu", () => {
+    message.setListener(MESSAGE_TYPE.BOOKMARK, listenBookmarkTabRef);
+    message.setListener(MESSAGE_TYPE.CREATE_CONTEXT_MENU, () => {
         contextMenu.createContextMenu();
     });
-    message.setListener("removeContextMenu", menuId => {
+    message.setListener(MESSAGE_TYPE.REMOVE_CONTEXT_MENU, menuId => {
         contextMenu.removeContextMenu(menuId);
     });
     message.startListening();
@@ -73,8 +74,7 @@ const tabListener = () => {
      */
     tabs.onUpdated(function (tabId, tab) {
         bookmarkTabRef.get(tabId).then(bookmarkIdByTab => {
-            settingsStore.get().then(settings => {
-                const titleRegList = settings["titleRegList"] !== undefined ? settings["titleRegList"] : [];
+            settingsStore.getByKey(SETTING_KEY.TITLE_REG_LIST, []).then(titleRegList => {
                 let titleReg = titleRegList.find(titleReg => tab.url.includes(titleReg.domain));
                 const newTitle = titleReg !== undefined ? tab.title.replace(titleReg.removeTitle, "") : tab.title;
 
