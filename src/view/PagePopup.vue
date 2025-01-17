@@ -187,7 +187,7 @@ import {
 } from "@/script/helper";
 import {ref, onMounted, nextTick} from 'vue'
 import {ElMessageBox} from "element-plus";
-import {MESSAGE_TYPE} from "@/script/constant";
+import {CONFIG, MESSAGE_TYPE} from "@/script/constant";
 
 const loading = ref(false);
 const searchKey = ref("");
@@ -201,15 +201,7 @@ const separatorName = ref("");
 
 //处于编辑状态的数量，编辑时不能拖拽
 const editStatusNumber = ref(0)
-const settings = ref({
-  //refreshTable变量解决直接更新default-expand-all无法刷新状态的问题。
-  //@see https://blog.csdn.net/m0_63451467/article/details/135898421
-  refreshTable: true,
-  defaultExpand: true,
-  tag: false,
-  titleRegList: [],
-  deleteDoubleConfirmation: true
-});
+const settings = ref(CONFIG.SETTINGS_ITEMS);
 
 /**
  * 标签输入
@@ -544,11 +536,11 @@ const addSeparator = () => {
 const getSettings = () => {
   return new Promise(resolve => {
     settingsStore.get().then(settingsStore => {
+      Object.keys(CONFIG.SETTINGS_ITEMS).forEach(key => {
+        settings.value[key] = settingsStore[key] ?? CONFIG.SETTINGS_ITEMS[key];
+      })
+      
       settings.value.refreshTable = false;
-      settings.value.defaultExpand = settingsStore["defaultExpand"] ?? true;
-      settings.value.tag = settingsStore["tag"] ?? true;
-      settings.value.titleRegList = settingsStore["titleRegList"] ?? [];
-      settings.value.deleteDoubleConfirmation = settingsStore["deleteDoubleConfirmation"] ?? true;
       nextTick(() => {
         settings.value.refreshTable = true;
       })

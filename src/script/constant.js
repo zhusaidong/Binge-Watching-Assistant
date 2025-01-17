@@ -36,13 +36,14 @@ export const CONFIG = {
     STORE_SETTINGS_KEY: "settings",
     STORE_BOOKMARKTABREF_KEY: "bookmarkTabRef",
     STORE_NOTICE_KEY: "notice",
-
-    //fixme: 关于变量和数组名称的转换
     SETTINGS_ITEMS: {
         defaultExpand: true,
         tag: false,
         titleRegList: [],
         deleteDoubleConfirmation: true,
-        enableContextMenu: false
+        enableContextMenu: false,
+        //refreshTable变量解决直接更新default-expand-all无法刷新状态的问题。
+        //@see https://blog.csdn.net/m0_63451467/article/details/135898421
+        refreshTable: false,
     },
 }

@@ -1,7 +1,7 @@
 <template>
   <div class="main_app">
     <div style="display: flex; justify-content: center; align-items: center;">
-      <el-tabs :v-model="ref('settings')" style="width: 600px;" type="border-card">
+      <el-tabs v-model="activeTab" style="width: 600px;" type="border-card">
         <!--设置-->
         <el-tab-pane label="设置" name="settings">
           <el-form v-model="settings">
@@ -77,7 +77,7 @@ const titleReg = ref({
   domain: '',
   removeTitle: ''
 });
-// const activeTab = ref("settings");
+const activeTab = ref("settings");
 const settings = ref(CONFIG.SETTINGS_ITEMS);
 const titleRegRule = {
   domain: [
@@ -158,11 +158,9 @@ const deleteTitleReg = (index) => {
 
 onMounted(() => {
   settingsStore.get().then(settingsStore => {
-    settings.value.defaultExpand = settingsStore["defaultExpand"] ?? true;
-    settings.value.tag = settingsStore["tag"] ?? true;
-    settings.value.titleRegList = settingsStore["titleRegList"] ?? [];
-    settings.value.deleteDoubleConfirmation = settingsStore["deleteDoubleConfirmation"] ?? true;
-    settings.value.enableContextMenu = settingsStore["enableContextMenu"] ?? false;
+    Object.keys(CONFIG.SETTINGS_ITEMS).forEach(key => {
+      settings.value[key] = settingsStore[key] ?? CONFIG.SETTINGS_ITEMS[key];
+    })
     if (settings.value.tag === true) {
       getTagList();
     }
