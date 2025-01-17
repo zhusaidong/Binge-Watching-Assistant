@@ -31,7 +31,18 @@ export const SETTING_KEY = {
 
 export const CONFIG = {
     BOOKMARK_MENU_KEY: "addWatchBookmark",
+    BOOKMARK_MENU_NAME: "添加追剧",
     STORE_TAG_KEY: "tag.list",
     STORE_SETTINGS_KEY: "settings",
     STORE_BOOKMARKTABREF_KEY: "bookmarkTabRef",
+    STORE_NOTICE_KEY: "notice",
+
+    //fixme: 关于变量和数组名称的转换
+    SETTINGS_ITEMS: {
+        defaultExpand: true,
+        tag: false,
+        titleRegList: [],
+        deleteDoubleConfirmation: true,
+        enableContextMenu: false
+    },
 }

@@ -1,7 +1,7 @@
 <template>
   <div class="main_app">
     <div style="display: flex; justify-content: center; align-items: center;">
-      <el-tabs v-model="activeTab" style="width: 600px;" type="border-card">
+      <el-tabs :v-model="ref('settings')" style="width: 600px;" type="border-card">
         <!--设置-->
         <el-tab-pane label="设置" name="settings">
           <el-form v-model="settings">
@@ -66,25 +66,19 @@
 <script setup>
 import {ref, onMounted} from "vue";
 import {
-  CONFIG_STORE_TAG_KEY, message,
+  message,
   settingsStore,
   store
 } from "@/script/helper";
-import {CONFIG} from "@/script/constant";
+import {CONFIG, MESSAGE_TYPE} from "@/script/constant";
 
 const tagList = ref([]);
 const titleReg = ref({
   domain: '',
   removeTitle: ''
 });
-const activeTab = ref("settings");
-const settings = ref({
-  defaultExpand: true,
-  tag: false,
-  titleRegList: [],
-  deleteDoubleConfirmation: true,
-  enableContextMenu: false
-});
+// const activeTab = ref("settings");
+const settings = ref(CONFIG.SETTINGS_ITEMS);
 const titleRegRule = {
   domain: [
     {required: true, message: '请输入域名', trigger: 'blur'},
@@ -99,7 +93,7 @@ const titleRegForm = ref();
  * 获取标签
  */
 function getTagList() {
-  store.getSyncData(CONFIG_STORE_TAG_KEY).then(tagData => {
+  store.getSyncData(CONFIG.STORE_TAG_KEY).then(tagData => {
     // console.log("list=", tagData)
 
     //标签合并
@@ -135,9 +129,9 @@ const changeSwitch = (type) => {
   settingsStore.set(type, valueElement)
   if (type === 'enableContextMenu') {
     if (valueElement === true) {
-      message.sendMessageByType("createContextMenu", {})
+      message.sendMessageByType(MESSAGE_TYPE.CREATE_CONTEXT_MENU, {})
     } else {
-      message.sendMessageByType("removeContextMenu", CONFIG.BOOKMARK_MENU_KEY)
+      message.sendMessageByType(MESSAGE_TYPE.REMOVE_CONTEXT_MENU, CONFIG.BOOKMARK_MENU_KEY)
     }
   }
 }
@@ -164,11 +158,11 @@ const deleteTitleReg = (index) => {
 
 onMounted(() => {
   settingsStore.get().then(settingsStore => {
-    settings.value.defaultExpand = settingsStore["defaultExpand"] !== undefined ? settingsStore["defaultExpand"] : true;
-    settings.value.tag = settingsStore["tag"] !== undefined ? settingsStore["tag"] : true;
-    settings.value.titleRegList = settingsStore["titleRegList"] !== undefined ? settingsStore["titleRegList"] : [];
-    settings.value.deleteDoubleConfirmation = settingsStore["deleteDoubleConfirmation"] !== undefined ? settingsStore["deleteDoubleConfirmation"] : true;
-    settings.value.enableContextMenu = settingsStore["enableContextMenu"] !== undefined ? settingsStore["enableContextMenu"] : false;
+    settings.value.defaultExpand = settingsStore["defaultExpand"] ?? true;
+    settings.value.tag = settingsStore["tag"] ?? true;
+    settings.value.titleRegList = settingsStore["titleRegList"] ?? [];
+    settings.value.deleteDoubleConfirmation = settingsStore["deleteDoubleConfirmation"] ?? true;
+    settings.value.enableContextMenu = settingsStore["enableContextMenu"] ?? false;
     if (settings.value.tag === true) {
       getTagList();
     }

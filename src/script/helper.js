@@ -420,11 +420,11 @@ class Settings {
  */
 class Notice {
     once(key, callback) {
-        store.getLocalData("notice").then(data => {
+        store.getLocalData(CONFIG.STORE_NOTICE_KEY).then(data => {
             if (data[key] === undefined) {
                 callback();
                 data[key] = true;
-                store.setLocalData("notice", data);
+                store.setLocalData(CONFIG.STORE_NOTICE_KEY, data);
             }
         });
     }
@@ -446,9 +446,9 @@ class BookmarkTabRef {
      * @param bookmarkId
      */
     add(tabId, bookmarkId) {
-        this.localStore.getLocalData("bookmarkTabRef").then(data => {
+        this.localStore.getLocalData(CONFIG.STORE_BOOKMARKTABREF_KEY).then(data => {
             data[tabId] = bookmarkId;
-            this.localStore.setLocalData("bookmarkTabRef", data);
+            this.localStore.setLocalData(CONFIG.STORE_BOOKMARKTABREF_KEY, data);
         });
     }
 
@@ -459,9 +459,9 @@ class BookmarkTabRef {
     remove(tabId) {
         let that = this;
         return new Promise(function (resolve) {
-            that.localStore.getLocalData("bookmarkTabRef").then(data => {
+            that.localStore.getLocalData(CONFIG.STORE_BOOKMARKTABREF_KEY).then(data => {
                 delete data[tabId];
-                that.localStore.setLocalData("bookmarkTabRef", data);
+                that.localStore.setLocalData(CONFIG.STORE_BOOKMARKTABREF_KEY, data);
                 resolve()
             });
         })
@@ -470,7 +470,7 @@ class BookmarkTabRef {
     clear() {
         let that = this;
         return new Promise(function () {
-            that.localStore.removeLocalData("bookmarkTabRef");
+            that.localStore.removeLocalData(CONFIG.STORE_BOOKMARKTABREF_KEY);
         })
     }
 
@@ -482,7 +482,7 @@ class BookmarkTabRef {
     get(tabId) {
         let that = this;
         return new Promise(function (resolve) {
-            that.localStore.getLocalData("bookmarkTabRef").then(data => {
+            that.localStore.getLocalData(CONFIG.STORE_BOOKMARKTABREF_KEY).then(data => {
                 if (data[tabId] !== undefined) {
                     resolve(data[tabId]);
                 }
@@ -497,7 +497,7 @@ class BookmarkTabRef {
     size() {
         let that = this;
         return new Promise(function (resolve) {
-            that.localStore.getLocalData("bookmarkTabRef").then(data => {
+            that.localStore.getLocalData(CONFIG.STORE_BOOKMARKTABREF_KEY).then(data => {
                 resolve(Object.keys(data).length);
             });
         })
@@ -621,7 +621,7 @@ class ContextMenu {
         chrome.contextMenus.create(
             {
                 id: CONFIG.BOOKMARK_MENU_KEY,
-                title: "添加追剧",
+                title: CONFIG.BOOKMARK_MENU_NAME,
                 contexts: ["page", "action"],
                 enabled: true,
                 visible: true,
@@ -648,8 +648,6 @@ class I18nMessage {
         return chrome.i18n.getMessage(key.replace(".", "_"), p);
     }
 }
-
-export const CONFIG_STORE_TAG_KEY = "tag.list";
 
 export var runtime = new Runtime();
 export var bookmark = new Bookmark(runtime.getManifest().name + (isDevMode ? "开发版" : ""));

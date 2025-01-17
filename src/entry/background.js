@@ -1,4 +1,4 @@
-import {bookmark, bookmarkTabRef, contextMenu, message, settingsStore, tabs} from '@/script/helper';
+import {bookmark, bookmarkTabRef, contextMenu, message, runtime, settingsStore, tabs} from '@/script/helper';
 import {MESSAGE_TYPE, SETTING_KEY} from "@/script/constant";
 
 const alarmName = "alarm-to-wakeup-background";
@@ -87,14 +87,6 @@ const tabListener = () => {
      */
     tabs.onRemoved(function (tabId) {
         bookmarkTabRef.remove(tabId).then(() => {
-            // bookmarkTabRef.size().then(size => {
-            //     //没有需要监听的追剧时移除追剧监听器
-            //     if (size === 0) {
-            //         // console.log("移除tab监听器")
-            //         tabs.removeUpdatedListener();
-            //         tabs.removeRemovedListener();
-            //     }
-            // })
         })
     });
 }
@@ -118,7 +110,7 @@ function startWait() {
 
 chrome.alarms.onAlarm.addListener(function () {
     console.log("living", new Date().toLocaleString());
-    chrome.runtime.getPlatformInfo().then();
+    runtime.getPlatformInfo().then();
     bookmarkTabRef.size().then(size => {
         //没有需要监听的追剧时移除追剧监听器
         if (size === 0) {

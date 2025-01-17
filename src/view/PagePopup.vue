@@ -180,13 +180,14 @@
 <script setup>
 import {
   bookmark,
-  CONFIG_STORE_TAG_KEY, i18n, notice, runtime,
+  i18n, notice, runtime,
   message,
   settingsStore,
   store, tabs
 } from "@/script/helper";
 import {ref, onMounted, nextTick} from 'vue'
 import {ElMessageBox} from "element-plus";
+import {MESSAGE_TYPE} from "@/script/constant";
 
 const loading = ref(false);
 const searchKey = ref("");
@@ -219,9 +220,9 @@ const handleInputConfirm = row => {
     let tag = row.tagValue;
     row.tags.push(tag);
     //保存数据
-    store.getSyncData(CONFIG_STORE_TAG_KEY).then(tagData => {
+    store.getSyncData(CONFIG.STORE_TAG_KEY).then(tagData => {
       tagData[row.id] = (tagData[row.id] || []).concat(tag);
-      store.setSyncData(CONFIG_STORE_TAG_KEY, tagData);
+      store.setSyncData(CONFIG.STORE_TAG_KEY, tagData);
     });
 
     //去重
@@ -241,13 +242,13 @@ const handleInputConfirm = row => {
 const tagRemove = (row, tag) => {
   row.tags.splice(row.tags.indexOf(tag), 1);
   //移除数据
-  store.getSyncData(CONFIG_STORE_TAG_KEY).then(tagData => {
+  store.getSyncData(CONFIG.STORE_TAG_KEY).then(tagData => {
     tagData[row.id] = row.tags;
     //数组为空时，清除整个对象，来压缩存储
     if (tagData[row.id].length === 0) {
       delete tagData[row.id];
     }
-    store.setSyncData(CONFIG_STORE_TAG_KEY, tagData);
+    store.setSyncData(CONFIG.STORE_TAG_KEY, tagData);
   });
 };
 
@@ -256,9 +257,9 @@ const tagRemove = (row, tag) => {
  * @param bookmarkId 书签id
  */
 const removeTag = (bookmarkId) => {
-  store.getSyncData(CONFIG_STORE_TAG_KEY).then(tagData => {
+  store.getSyncData(CONFIG.STORE_TAG_KEY).then(tagData => {
     delete tagData[bookmarkId];
-    store.setSyncData(CONFIG_STORE_TAG_KEY, tagData);
+    store.setSyncData(CONFIG.STORE_TAG_KEY, tagData);
   });
 }
 
@@ -272,7 +273,7 @@ const getTagData = () => {
     if (!settings.value.tag) {
       resolve({});
     } else {
-      store.getSyncData(CONFIG_STORE_TAG_KEY).then(tagData => {
+      store.getSyncData(CONFIG.STORE_TAG_KEY).then(tagData => {
         resolve(tagData);
       });
     }
@@ -438,7 +439,7 @@ const addBookmark = () => {
         }, function (bookmark) {
           refreshBookmark();
           //添加新页面时立即开启监听
-          message.sendMessageByType("bookmark", {bookmark_id: bookmark.id, tab_id: tab.id});
+          message.sendMessageByType(MESSAGE_TYPE.BOOKMARK, {bookmark_id: bookmark.id, tab_id: tab.id});
         });
   });
 }
@@ -508,7 +509,7 @@ const deleteBookmarkConfirmation = id => {
  * @param id
  */
 const openBookmark = id => {
-  message.sendMessageByType("bookmark", {bookmark_id: id, tab_id: null});
+  message.sendMessageByType(MESSAGE_TYPE.BOOKMARK, {bookmark_id: id, tab_id: null});
 }
 
 /**
@@ -544,10 +545,10 @@ const getSettings = () => {
   return new Promise(resolve => {
     settingsStore.get().then(settingsStore => {
       settings.value.refreshTable = false;
-      settings.value.defaultExpand = settingsStore["defaultExpand"] !== undefined ? settingsStore["defaultExpand"] : true;
-      settings.value.tag = settingsStore["tag"] !== undefined ? settingsStore["tag"] : true;
-      settings.value.titleRegList = settingsStore["titleRegList"] !== undefined ? settingsStore["titleRegList"] : [];
-      settings.value.deleteDoubleConfirmation = settingsStore["deleteDoubleConfirmation"] !== undefined ? settingsStore["deleteDoubleConfirmation"] : true;
+      settings.value.defaultExpand = settingsStore["defaultExpand"] ?? true;
+      settings.value.tag = settingsStore["tag"] ?? true;
+      settings.value.titleRegList = settingsStore["titleRegList"] ?? [];
+      settings.value.deleteDoubleConfirmation = settingsStore["deleteDoubleConfirmation"] ?? true;
       nextTick(() => {
         settings.value.refreshTable = true;
       })
