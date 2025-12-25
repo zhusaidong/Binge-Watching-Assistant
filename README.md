@@ -1,5 +1,3 @@
-# 追剧助手
-
 <p align="center">
   <img src="public/icon_128.png" alt="追剧助手 Logo" width="128" height="128">
 </p>
@@ -7,9 +5,11 @@
 <p align="center">
   <a href="https://chrome.google.com/webstore/detail/%E8%BF%BD%E5%89%A7%E5%8A%A9%E6%89%8B/pbnnheibacpamfaendimogbeaeciglpo">
     <img src="https://img.shields.io/chrome-web-store/v/pbnnheibacpamfaendimogbeaeciglpo.svg?label=Chrome%20Web%20Store&style=flat-square" alt="Chrome Web Store">
+    <img src="https://img.shields.io/chrome-web-store/users/pbnnheibacpamfaendimogbeaeciglpo?label=Chrome%E7%94%A8%E6%88%B7%E6%95%B0&style=social" alt="Chrome Web Store">
   </a>
   <a href="https://microsoftedge.microsoft.com/addons/detail/%E8%BF%BD%E5%89%A7%E5%8A%A9%E6%89%8B/kijikbnlbgddamolcfnlelppffpkkmla">
     <img src="https://img.shields.io/badge/dynamic/json?label=Edge%20Add-ons&prefix=v&query=%24.version&url=https%3A%2F%2Fmicrosoftedge.microsoft.com%2Faddons%2Fgetproductdetailsbycrxid%2Fkijikbnlbgddamolcfnlelppffpkkmla&style=flat-square" alt="Microsoft Edge Add-ons">
+    <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fmicrosoftedge.microsoft.com%2Faddons%2Fgetproductdetailsbycrxid%2Fkijikbnlbgddamolcfnlelppffpkkmla%3Fhl%3Dzh-CN%26gl%3DCN&query=%24.activeInstallCount&label=edge%E7%94%A8%E6%88%B7%E6%95%B0&style=social" alt="Microsoft Edge Add-ons">
   </a>
 </p>
 
